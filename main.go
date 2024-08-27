@@ -8,9 +8,12 @@ import (
 const (
 	LEFT_PAREN  rune = '('
 	RIGHT_PAREN rune = ')'
+	LEFT_BRACE  rune = '{'
+	RIGHT_BRACE rune = '}'
 )
 
 func main() {
+	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
 
 	if len(os.Args) < 3 {
@@ -39,6 +42,10 @@ func main() {
 			fmt.Println("LEFT_PAREN ( null")
 		case RIGHT_PAREN:
 			fmt.Println("RIGHT_PAREN ) null")
+		case LEFT_BRACE:
+			fmt.Println("LEFT_BRACE { null")
+		case RIGHT_BRACE:
+			fmt.Println("RIGHT_BRACE } null")
 		}
 	}
 	fmt.Println("EOF  null")
