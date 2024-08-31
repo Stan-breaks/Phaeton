@@ -70,6 +70,7 @@ func main() {
 			fmt.Println("SEMICOLON ; null")
 		case EQUAL:
 			if skipCount == 1 {
+				skipCount = 0
 				continue
 			} else {
 				if index == fileLenght {
