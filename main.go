@@ -20,6 +20,7 @@ const (
 	BANG        rune = '!'
 	LESS        rune = '<'
 	GREATER     rune = '>'
+	SLASH       rune = '/'
 )
 
 func main() {
@@ -140,6 +141,22 @@ func main() {
 				}
 			}
 
+		case SLASH:
+			if skipCount == 1 {
+				skipCount = 0
+				continue
+			} else {
+				if index == fileLenght {
+					fmt.Println("SLASH / null")
+				} else {
+					switch fileContents[index+1] {
+					case byte(SLASH):
+						goto outerLoop
+					default:
+						fmt.Println("EQUAL = null")
+					}
+				}
+			}
 		case '\n':
 			line += 1
 		default:
@@ -147,6 +164,7 @@ func main() {
 			errnum = 1
 		}
 	}
+outerLoop:
 	if errnum == 1 {
 		fmt.Println("EOF  null")
 		os.Exit(65)
