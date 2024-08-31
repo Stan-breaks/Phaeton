@@ -17,6 +17,7 @@ const (
 	MINUS       rune = '-'
 	SEMICOLON   rune = ';'
 	EQUAL       rune = '='
+	BANG        rune = '!'
 )
 
 func main() {
@@ -68,6 +69,23 @@ func main() {
 			fmt.Println("MINUS - null")
 		case SEMICOLON:
 			fmt.Println("SEMICOLON ; null")
+		case BANG:
+			if skipCount == 1 {
+				skipCount = 0
+				continue
+			} else {
+				if index == fileLenght {
+					fmt.Println("BANG ! null")
+				} else {
+					switch fileContents[index+1] {
+					case byte(EQUAL):
+						fmt.Println("BANG_EQUAL != null")
+						skipCount = 1
+					default:
+						fmt.Println("BANG ! null")
+					}
+				}
+			}
 		case EQUAL:
 			if skipCount == 1 {
 				skipCount = 0
