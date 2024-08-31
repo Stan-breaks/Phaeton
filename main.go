@@ -16,6 +16,7 @@ const (
 	PLUS        rune = '+'
 	MINUS       rune = '-'
 	SEMICOLON   rune = ';'
+	EQUAL       rune = '='
 )
 
 func main() {
@@ -43,7 +44,9 @@ func main() {
 	line := 1
 	errnum := 0
 	fileContents := string(rawFileContents)
-	for _, item := range fileContents {
+	fileLenght := len(fileContents) - 1
+	skipCount := 0
+	for index, item := range fileContents {
 		switch item {
 		case LEFT_PAREN:
 			fmt.Println("LEFT_PAREN ( null")
@@ -65,6 +68,23 @@ func main() {
 			fmt.Println("MINUS - null")
 		case SEMICOLON:
 			fmt.Println("SEMICOLON ; null")
+		case EQUAL:
+			if skipCount == 1 {
+				continue
+			} else {
+				if index == fileLenght {
+					fmt.Println("EQUAL = null")
+				} else {
+					switch fileContents[index+1] {
+					case byte(EQUAL):
+						fmt.Println("EQUAL_EQUAL == null")
+						skipCount = 1
+					default:
+						fmt.Println("EQUAL = null")
+					}
+				}
+			}
+
 		case '\n':
 			line += 1
 		default:
