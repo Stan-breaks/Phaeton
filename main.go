@@ -40,7 +40,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
 		os.Exit(1)
 	}
-
+	line := 1
+	errnum := 0
 	fileContents := string(rawFileContents)
 	for _, item := range fileContents {
 		switch item {
@@ -64,7 +65,17 @@ func main() {
 			fmt.Println("MINUS - null")
 		case SEMICOLON:
 			fmt.Println("SEMICOLON ; null")
+		case '\n':
+			line += 1
+		default:
+			fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", line, item)
+			errnum = 1
 		}
 	}
-	fmt.Println("EOF  null")
+	if errnum == 1 {
+		fmt.Println("EOF  null")
+		os.Exit(65)
+	} else {
+		fmt.Println("EOF  null")
+	}
 }
