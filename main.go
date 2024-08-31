@@ -18,6 +18,8 @@ const (
 	SEMICOLON   rune = ';'
 	EQUAL       rune = '='
 	BANG        rune = '!'
+	LESS        rune = '<'
+	GREATER     rune = '>'
 )
 
 func main() {
@@ -69,6 +71,40 @@ func main() {
 			fmt.Println("MINUS - null")
 		case SEMICOLON:
 			fmt.Println("SEMICOLON ; null")
+		case LESS:
+			if skipCount == 1 {
+				skipCount = 0
+				continue
+			} else {
+				if index == fileLenght {
+					fmt.Println("LESS < null")
+				} else {
+					switch fileContents[index+1] {
+					case byte(EQUAL):
+						fmt.Println("LESS_EQUAL <= null")
+						skipCount = 1
+					default:
+						fmt.Println("LESS < null")
+					}
+				}
+			}
+		case GREATER:
+			if skipCount == 1 {
+				skipCount = 0
+				continue
+			} else {
+				if index == fileLenght {
+					fmt.Println("GREATER > null")
+				} else {
+					switch fileContents[index+1] {
+					case byte(EQUAL):
+						fmt.Println("GREATER_EQUAL >= null")
+						skipCount = 1
+					default:
+						fmt.Println("GREATER > null")
+					}
+				}
+			}
 		case BANG:
 			if skipCount == 1 {
 				skipCount = 0
