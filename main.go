@@ -21,10 +21,10 @@ const (
 	LESS        rune = '<'
 	GREATER     rune = '>'
 	SLASH       rune = '/'
+	QUOTE       rune = '"'
 )
 
 func main() {
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
 
 	if len(os.Args) < 3 {
@@ -50,7 +50,13 @@ func main() {
 	fileContents := string(rawFileContents)
 	fileLenght := len(fileContents) - 1
 	skipCount := 0
+	stringCount := 0
+	stringVariable := ""
+	comment := 0
 	for index, item := range fileContents {
+		if comment > 0 && item != '\n' {
+			continue
+		}
 		switch item {
 		case LEFT_PAREN:
 			fmt.Println("LEFT_PAREN ( null")
@@ -73,99 +79,139 @@ func main() {
 		case SEMICOLON:
 			fmt.Println("SEMICOLON ; null")
 		case LESS:
-			if skipCount == 1 {
-				skipCount = 0
-				continue
+			if stringCount == 1 {
+				stringVariable += string(item)
 			} else {
-				if index == fileLenght {
-					fmt.Println("LESS < null")
+				if skipCount == 1 {
+					skipCount = 0
 				} else {
-					switch fileContents[index+1] {
-					case byte(EQUAL):
-						fmt.Println("LESS_EQUAL <= null")
-						skipCount = 1
-					default:
+					if index == fileLenght {
 						fmt.Println("LESS < null")
+					} else {
+						switch fileContents[index+1] {
+						case byte(EQUAL):
+							fmt.Println("LESS_EQUAL <= null")
+							skipCount = 1
+						default:
+							fmt.Println("LESS < null")
+						}
 					}
 				}
 			}
+
 		case GREATER:
-			if skipCount == 1 {
-				skipCount = 0
-				continue
+			if stringCount == 1 {
+				stringVariable += string(item)
 			} else {
-				if index == fileLenght {
-					fmt.Println("GREATER > null")
+				if skipCount == 1 {
+					skipCount = 0
 				} else {
-					switch fileContents[index+1] {
-					case byte(EQUAL):
-						fmt.Println("GREATER_EQUAL >= null")
-						skipCount = 1
-					default:
+					if index == fileLenght {
 						fmt.Println("GREATER > null")
+					} else {
+						switch fileContents[index+1] {
+						case byte(EQUAL):
+							fmt.Println("GREATER_EQUAL >= null")
+							skipCount = 1
+						default:
+							fmt.Println("GREATER > null")
+						}
 					}
 				}
 			}
+
 		case BANG:
-			if skipCount == 1 {
-				skipCount = 0
-				continue
+			if stringCount == 1 {
+				stringVariable += string(item)
 			} else {
-				if index == fileLenght {
-					fmt.Println("BANG ! null")
+				if skipCount == 1 {
+					skipCount = 0
 				} else {
-					switch fileContents[index+1] {
-					case byte(EQUAL):
-						fmt.Println("BANG_EQUAL != null")
-						skipCount = 1
-					default:
+					if index == fileLenght {
 						fmt.Println("BANG ! null")
+					} else {
+						switch fileContents[index+1] {
+						case byte(EQUAL):
+							fmt.Println("BANG_EQUAL != null")
+							skipCount = 1
+						default:
+							fmt.Println("BANG ! null")
+						}
 					}
 				}
 			}
+
 		case EQUAL:
-			if skipCount == 1 {
-				skipCount = 0
-				continue
+			if stringCount == 1 {
+				stringVariable += string(item)
 			} else {
-				if index == fileLenght {
-					fmt.Println("EQUAL = null")
+				if skipCount == 1 {
+					skipCount = 0
 				} else {
-					switch fileContents[index+1] {
-					case byte(EQUAL):
-						fmt.Println("EQUAL_EQUAL == null")
-						skipCount = 1
-					default:
+					if index == fileLenght {
 						fmt.Println("EQUAL = null")
+					} else {
+						switch fileContents[index+1] {
+						case byte(EQUAL):
+							fmt.Println("EQUAL_EQUAL == null")
+							skipCount = 1
+						default:
+							fmt.Println("EQUAL = null")
+						}
 					}
 				}
 			}
 
 		case SLASH:
-			if skipCount == 1 {
-				skipCount = 0
-				continue
+			if stringCount == 1 {
+				stringVariable += string(item)
 			} else {
-				if index == fileLenght {
-					fmt.Println("SLASH / null")
+				if skipCount == 1 {
+					skipCount = 0
 				} else {
-					switch fileContents[index+1] {
-					case byte(SLASH):
-						goto outerLoop
-					default:
-						fmt.Println("EQUAL = null")
+					if index == fileLenght {
+						fmt.Println("SLASH / null")
+					} else {
+						switch fileContents[index+1] {
+						case byte(SLASH):
+							if stringCount == 0 {
+								comment = 1
+							}
+						default:
+							continue
+						}
 					}
 				}
 			}
+
 		case '\n':
 			line += 1
+			comment = 0
+		case '\t', '\b', ' ':
+			if stringCount == 1 {
+				stringVariable += string(item)
+			}
+		case QUOTE:
+			if stringCount == 1 {
+				stringCount = 0
+				fmt.Println("STRING \"" + stringVariable + "\" " + stringVariable)
+			} else {
+				stringCount = 1
+				stringVariable = ""
+			}
 		default:
-			fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", line, item)
-			errnum = 1
+			if stringCount == 1 {
+				stringVariable += string(item)
+			} else {
+				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", line, item)
+				errnum = 1
+			}
 		}
 	}
-outerLoop:
-	if errnum == 1 {
+	if stringCount == 1 {
+		fmt.Fprintf(os.Stderr, "[line %d] Error: Unterminated string.\n", line)
+	}
+	if errnum == 1 || stringCount == 1 {
 		fmt.Println("EOF  null")
 		os.Exit(65)
 	} else {
