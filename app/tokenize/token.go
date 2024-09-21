@@ -19,11 +19,13 @@ func Tokenize(fileContents string, fileLenght int) {
 	numberCount := 0
 	numberString := ""
 	comment := 0
-	for index, item := range fileContents {
-		if comment > 0 && item != '\n' {
+	identifier := ""
+	identifierCount := 0
+	for i := 0; i < len(fileContents); i++ {
+		if comment > 0 && rune(fileContents[i]) != '\n' {
 			continue
 		}
-		if !unicode.IsDigit(item) && numberCount == 1 && item != utils.DOT {
+		if !unicode.IsDigit(rune(fileContents[i])) && numberCount == 1 && rune(fileContents[i]) != utils.DOT {
 			if numberCount == 1 {
 				number, err := strconv.Atoi(numberString)
 				if err != nil {
@@ -45,54 +47,93 @@ func Tokenize(fileContents string, fileLenght int) {
 				}
 			}
 		}
-		switch item {
+		switch rune(fileContents[i]) {
 		case utils.LEFT_PAREN:
 			numberCount = 0
-			fmt.Println("LEFT_PAREN ( null")
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+				fmt.Println("LEFT_PAREN ( null")
+			}
 		case utils.RIGHT_PAREN:
 			numberCount = 0
-			fmt.Println("RIGHT_PAREN ) null")
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+				fmt.Println("RIGHT_PAREN ) null")
+			}
 		case utils.LEFT_BRACE:
 			numberCount = 0
-			fmt.Println("LEFT_BRACE { null")
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+				fmt.Println("LEFT_BRACE { null")
+			}
 		case utils.RIGHT_BRACE:
 			numberCount = 0
-			fmt.Println("RIGHT_BRACE } null")
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+				fmt.Println("RIGHT_BRACE } null")
+			}
 		case utils.STAR:
 			numberCount = 0
-			fmt.Println("STAR * null")
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+
+				fmt.Println("STAR * null")
+			}
 		case utils.DOT:
 			if numberCount == 1 {
 				numberString += "."
 			} else {
 				if stringCount == 0 {
 					fmt.Println("DOT . null")
+				} else {
+					stringVariable += string(rune(fileContents[i]))
 				}
 			}
 		case utils.COMMA:
 			numberCount = 0
-			fmt.Println("COMMA , null")
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+				fmt.Println("COMMA , null")
+			}
 		case utils.PLUS:
 			numberCount = 0
-			fmt.Println("PLUS + null")
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+				fmt.Println("PLUS + null")
+			}
 		case utils.MINUS:
 			numberCount = 0
-			fmt.Println("MINUS - null")
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+				fmt.Println("MINUS - null")
+			}
 		case utils.SEMICOLON:
 			numberCount = 0
-			fmt.Println("SEMICOLON ; null")
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+				fmt.Println("SEMICOLON ; null")
+			}
 		case utils.LESS:
 			numberCount = 0
 			if stringCount == 1 {
-				stringVariable += string(item)
+				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if skipCount == 1 {
 					skipCount = 0
 				} else {
-					if index == fileLenght {
+					if i == fileLenght {
 						fmt.Println("LESS < null")
 					} else {
-						switch fileContents[index+1] {
+						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
 							fmt.Println("LESS_EQUAL <= null")
 							skipCount = 1
@@ -106,15 +147,15 @@ func Tokenize(fileContents string, fileLenght int) {
 		case utils.GREATER:
 			numberCount = 0
 			if stringCount == 1 {
-				stringVariable += string(item)
+				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if skipCount == 1 {
 					skipCount = 0
 				} else {
-					if index == fileLenght {
+					if i == fileLenght {
 						fmt.Println("GREATER > null")
 					} else {
-						switch fileContents[index+1] {
+						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
 							fmt.Println("GREATER_EQUAL >= null")
 							skipCount = 1
@@ -128,15 +169,15 @@ func Tokenize(fileContents string, fileLenght int) {
 		case utils.BANG:
 			numberCount = 0
 			if stringCount == 1 {
-				stringVariable += string(item)
+				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if skipCount == 1 {
 					skipCount = 0
 				} else {
-					if index == fileLenght {
+					if i == fileLenght {
 						fmt.Println("BANG ! null")
 					} else {
-						switch fileContents[index+1] {
+						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
 							fmt.Println("BANG_EQUAL != null")
 							skipCount = 1
@@ -150,15 +191,15 @@ func Tokenize(fileContents string, fileLenght int) {
 		case utils.EQUAL:
 			numberCount = 0
 			if stringCount == 1 {
-				stringVariable += string(item)
+				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if skipCount == 1 {
 					skipCount = 0
 				} else {
-					if index == fileLenght {
+					if i == fileLenght {
 						fmt.Println("EQUAL = null")
 					} else {
-						switch fileContents[index+1] {
+						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
 							fmt.Println("EQUAL_EQUAL == null")
 							skipCount = 1
@@ -172,15 +213,15 @@ func Tokenize(fileContents string, fileLenght int) {
 		case utils.SLASH:
 			numberCount = 0
 			if stringCount == 1 {
-				stringVariable += string(item)
+				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if skipCount == 1 {
 					skipCount = 0
 				} else {
-					if index == fileLenght {
+					if i == fileLenght {
 						fmt.Println("SLASH / null")
 					} else {
-						switch fileContents[index+1] {
+						switch fileContents[i+1] {
 						case byte(utils.SLASH):
 							if stringCount == 0 {
 								comment = 1
@@ -196,10 +237,26 @@ func Tokenize(fileContents string, fileLenght int) {
 			numberCount = 0
 			line += 1
 			comment = 0
-		case '\t', '\b', ' ':
+			if identifierCount == 1 {
+				fmt.Fprintf(os.Stdout, "IDENTIFIER %s null\n", identifier)
+				identifier = ""
+				identifierCount = 0
+			}
+		case ' ':
 			numberCount = 0
 			if stringCount == 1 {
-				stringVariable += string(item)
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+				if identifierCount == 1 {
+					fmt.Fprintf(os.Stdout, "IDENTIFIER %s null\n", identifier)
+					identifier = ""
+					identifierCount = 0
+				}
+			}
+		case '\t', '\b':
+			numberCount = 0
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
 			}
 		case utils.QUOTE:
 			numberCount = 0
@@ -212,21 +269,39 @@ func Tokenize(fileContents string, fileLenght int) {
 			}
 		default:
 			if stringCount == 1 {
-				stringVariable += string(item)
+				stringVariable += string(rune(fileContents[i]))
 			} else {
-				if unicode.IsDigit(item) {
+				if unicode.IsDigit(rune(fileContents[i])) && identifierCount == 0 {
 					if numberCount == 0 {
 						numberString = ""
 						numberCount = 1
-						numberString += strconv.Itoa(int(item - '0'))
+						numberString += strconv.Itoa(int(rune(fileContents[i]) - '0'))
 					} else {
-						numberString += strconv.Itoa(int(item - '0'))
+						numberString += strconv.Itoa(int(rune(fileContents[i]) - '0'))
 					}
 				} else {
-
-					fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", line, item)
-					errnum = 1
-					numberCount = 0
+					if numberCount == 1 {
+						number, err := strconv.Atoi(numberString)
+						if err != nil {
+							float, err := strconv.ParseFloat(numberString, 64)
+							if err != nil {
+								fmt.Println("Error parsing float:", err)
+							}
+							if math.Mod(float, 1.0) == 0 {
+								fmt.Fprintf(os.Stdout, "NUMBER %s %.1f\n", numberString, float)
+								numberCount = 0
+							} else {
+								fmt.Fprintf(os.Stdout, "NUMBER %s %g\n", numberString, float)
+								numberCount = 0
+							}
+						} else {
+							fmt.Fprintf(os.Stdout, "NUMBER %s %d.0\n", numberString, number)
+							numberCount = 0
+						}
+					} else {
+						identifier += string(rune(fileContents[i]))
+						identifierCount = 1
+					}
 				}
 			}
 		}
@@ -255,6 +330,9 @@ func Tokenize(fileContents string, fileLenght int) {
 		fmt.Println("EOF  null")
 		os.Exit(65)
 	} else {
+		if identifierCount == 1 {
+			fmt.Fprintf(os.Stdout, "IDENTIFIER %s null\n", identifier)
+		}
 		fmt.Println("EOF  null")
 	}
 
