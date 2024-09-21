@@ -60,6 +60,11 @@ func Tokenize(fileContents string, fileLenght int) {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
+				if identifierCount == 1 {
+					fmt.Fprintf(os.Stdout, "IDENTIFIER %s null\n", identifier)
+					identifier = ""
+					identifierCount = 0
+				}
 				fmt.Println("RIGHT_PAREN ) null")
 			}
 		case utils.LEFT_BRACE:
@@ -74,6 +79,11 @@ func Tokenize(fileContents string, fileLenght int) {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
+				if identifierCount == 1 {
+					fmt.Fprintf(os.Stdout, "IDENTIFIER %s null\n", identifier)
+					identifier = ""
+					identifierCount = 0
+				}
 				fmt.Println("RIGHT_BRACE } null")
 			}
 		case utils.STAR:
@@ -266,6 +276,14 @@ func Tokenize(fileContents string, fileLenght int) {
 			} else {
 				stringCount = 1
 				stringVariable = ""
+			}
+		case '@', '#', '%', '^', '&', '$':
+			if stringCount == 1 {
+				stringVariable += string(rune(fileContents[i]))
+			} else {
+				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", line, rune(fileContents[i]))
+				errnum = 1
+				numberCount = 0
 			}
 		default:
 			if stringCount == 1 {
