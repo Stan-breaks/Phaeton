@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"strings"
 	"unicode"
 
 	"github.com/Stan-breaks/app/utils"
@@ -317,8 +318,185 @@ func Tokenize(fileContents string, fileLenght int) {
 							numberCount = 0
 						}
 					} else {
+						if identifierCount == 0 {
+							switch fileContents[i] {
+							case 'a':
+								if fileLenght-2 > i {
+									if strings.Contains(fileContents[i:i+3], "and") {
+										fmt.Println("AND and null")
+										if fileLenght-2 == i {
+											break
+										}
+										i += 2
+										continue
+									}
+								}
+							case 'c':
+								if fileLenght-4 > i {
+									if strings.Contains(fileContents[i:i+5], "class") {
+										fmt.Println("CLASS class null")
+										if fileLenght-4 == i {
+											break
+										}
+										i += 4
+										continue
+
+									}
+								}
+							case 'e':
+								if fileLenght-3 > i {
+									if strings.Contains(fileContents[i:i+4], "else") {
+										fmt.Println("ELSE else null")
+										if fileLenght-3 == i {
+											break
+										}
+										i += 3
+										continue
+									}
+								}
+							case 'f':
+								if fileLenght-2 > i {
+									if strings.Contains(fileContents[i:i+3], "for") {
+										fmt.Println("FOR for null")
+										if fileLenght-2 == i {
+											break
+										}
+										i += 2
+										continue
+									}
+									if strings.Contains(fileContents[i:i+3], "fun") {
+										fmt.Println("FUN fun null")
+										if fileLenght-2 == i {
+											break
+										}
+										i += 2
+										continue
+									}
+								}
+
+								if fileLenght-4 > i {
+									if strings.Contains(fileContents[i:i+5], "false") {
+										fmt.Println("FALSE false null")
+										if fileLenght-4 == i {
+											break
+										}
+										i += 4
+										continue
+									}
+								}
+							case 'i':
+								if fileLenght-1 > i {
+									if strings.Contains(fileContents[i:i+2], "if") {
+										fmt.Println("IF if null")
+										if fileLenght-1 == i {
+											break
+										}
+										i += 1
+										continue
+									}
+								}
+							case 'n':
+								if fileLenght-2 > i {
+									if strings.Contains(fileContents[i:i+3], "nil") {
+										fmt.Println("NIL nil null")
+										if fileLenght-2 == i {
+											break
+										}
+										i += 2
+										continue
+									}
+								}
+							case 'o':
+								if fileLenght-1 > i {
+									if strings.Contains(fileContents[i:i+2], "or") {
+										fmt.Println("OR or null")
+										if fileLenght-1 == i {
+											break
+										}
+										i += 1
+										continue
+									}
+								}
+							case 'p':
+								if fileLenght-4 > i {
+									if strings.Contains(fileContents[i:i+5], "print") {
+										fmt.Println("PRINT print null")
+										if fileLenght-4 == i {
+											break
+										}
+										i += 4
+										continue
+									}
+								}
+							case 'r':
+								if fileLenght-5 > i {
+									if strings.Contains(fileContents[i:i+6], "return") {
+										fmt.Println("RETURN return null")
+										if fileLenght-5 == i {
+											break
+										}
+										i += 5
+										continue
+									}
+								}
+							case 's':
+								if fileLenght-4 > i {
+									if strings.Contains(fileContents[i:i+5], "super") {
+										fmt.Println("SUPER super null")
+										if fileLenght-4 == i {
+											break
+										}
+										i += 4
+										continue
+									}
+								}
+							case 't':
+								if fileLenght-3 > i {
+									if strings.Contains(fileContents[i:i+4], "true") {
+										fmt.Println("TRUE true null")
+										if fileLenght-3 == i {
+											break
+										}
+										i += 3
+										continue
+									}
+									if strings.Contains(fileContents[i:i+4], "this") {
+										fmt.Println("THIS this null")
+										if fileLenght-3 == i {
+											break
+										}
+										i += 3
+										continue
+									}
+								}
+							case 'v':
+								if fileLenght-2 > i {
+									if strings.Contains(fileContents[i:i+3], "var") {
+										fmt.Println("VAR var null")
+										if fileLenght-2 == i {
+											break
+										}
+										i += 2
+										continue
+									}
+								}
+							case 'w':
+								if fileLenght-4 > i {
+									if strings.Contains(fileContents[i:i+5], "while") {
+										fmt.Println("WHILE while null")
+										if fileLenght-4 == i {
+											break
+										}
+										i += 4
+										continue
+									}
+								}
+
+							}
+						}
 						identifier += string(rune(fileContents[i]))
 						identifierCount = 1
+
 					}
 				}
 			}
