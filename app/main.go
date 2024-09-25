@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/Stan-breaks/app/tokenize"
 	"os"
+
+	"github.com/Stan-breaks/app/tokenize"
 )
 
 func main() {
@@ -16,11 +17,6 @@ func main() {
 
 	command := os.Args[1]
 
-	if command != "tokenize" {
-		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
-		os.Exit(1)
-	}
-
 	filename := os.Args[2]
 	rawFileContents, err := os.ReadFile(filename)
 	if err != nil {
@@ -29,5 +25,12 @@ func main() {
 	}
 	fileContents := string(rawFileContents)
 	fileLenght := len(fileContents) - 1
-	tokenize.Tokenize(fileContents, fileLenght)
+
+	switch os.Args[1] {
+	case "tokenize":
+		tokenize.Tokenize(fileContents, fileLenght)
+	default:
+		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
+		os.Exit(1)
+	}
 }
