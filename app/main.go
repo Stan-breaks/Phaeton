@@ -26,7 +26,7 @@ func main() {
 	fileContents := string(rawFileContents)
 	fileLenght := len(fileContents) - 1
 
-	switch os.Args[1] {
+	switch command {
 	case "tokenize":
 		tokenize.Tokenize(fileContents, fileLenght)
 	default:

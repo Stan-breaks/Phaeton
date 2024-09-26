@@ -17,4 +17,8 @@ const (
 	GREATER     rune = '>'
 	SLASH       rune = '/'
 	QUOTE       rune = '"'
+	NEWLINE     rune = '\n'
+	TAB         rune = '\t'
+	WHITESPACE  rune = ' '
+	BACKSPACE   rune = '\b'
 )

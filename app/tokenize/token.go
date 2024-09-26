@@ -244,7 +244,7 @@ func Tokenize(fileContents string, fileLenght int) {
 				}
 			}
 
-		case '\n':
+		case utils.NEWLINE:
 			numberCount = 0
 			line += 1
 			comment = 0
@@ -253,7 +253,7 @@ func Tokenize(fileContents string, fileLenght int) {
 				identifier = ""
 				identifierCount = 0
 			}
-		case ' ':
+		case utils.WHITESPACE:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -264,7 +264,7 @@ func Tokenize(fileContents string, fileLenght int) {
 					identifierCount = 0
 				}
 			}
-		case '\t', '\b':
+		case utils.TAB, utils.BACKSPACE:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
