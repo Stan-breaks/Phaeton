@@ -3,15 +3,16 @@ package tokenize
 import (
 	"fmt"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 	"unicode"
 
+	"github.com/Stan-breaks/app/models"
 	"github.com/Stan-breaks/app/utils"
 )
 
-func Tokenize(fileContents string, fileLenght int) {
+func Tokenize(fileContents string, fileLenght int) models.Tokens {
+	tokens := models.Tokens{}
 	line := 1
 	errnum := 0
 	skipCount := 0
@@ -35,15 +36,14 @@ func Tokenize(fileContents string, fileLenght int) {
 						fmt.Println("Error parsing float:", err)
 					}
 					if math.Mod(float, 1.0) == 0 {
-						fmt.Fprintf(os.Stdout, "NUMBER %s %.1f\n", numberString, float)
+						tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %.1f", numberString, float))
 						numberCount = 0
 					} else {
-						fmt.Fprintf(os.Stdout, "NUMBER %s %g\n", numberString, float)
+						tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %g", numberString, float))
 						numberCount = 0
-
 					}
 				} else {
-					fmt.Fprintf(os.Stdout, "NUMBER %s %d.0\n", numberString, number)
+					tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %d.0", numberString, number))
 					numberCount = 0
 				}
 			}
@@ -54,7 +54,7 @@ func Tokenize(fileContents string, fileLenght int) {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				fmt.Println("LEFT_PAREN ( null")
+				tokens.Success = append(tokens.Success, "LEFT_PAREN ( null")
 			}
 		case utils.RIGHT_PAREN:
 			numberCount = 0
@@ -62,18 +62,19 @@ func Tokenize(fileContents string, fileLenght int) {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if identifierCount == 1 {
-					fmt.Fprintf(os.Stdout, "IDENTIFIER %s null\n", identifier)
+					tokens.Success = append(tokens.Success, fmt.Sprintf("IDENTIFIER %s null", identifier))
 					identifier = ""
 					identifierCount = 0
 				}
 				fmt.Println("RIGHT_PAREN ) null")
+				tokens.Success = append(tokens.Success, "RIGHT_PAREN ) null")
 			}
 		case utils.LEFT_BRACE:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				fmt.Println("LEFT_BRACE { null")
+				tokens.Success = append(tokens.Success, "LEFT_BRACE { null")
 			}
 		case utils.RIGHT_BRACE:
 			numberCount = 0
@@ -81,26 +82,25 @@ func Tokenize(fileContents string, fileLenght int) {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if identifierCount == 1 {
-					fmt.Fprintf(os.Stdout, "IDENTIFIER %s null\n", identifier)
+					tokens.Success = append(tokens.Success, fmt.Sprintf("IDENTIFIER %s null", identifier))
 					identifier = ""
 					identifierCount = 0
 				}
-				fmt.Println("RIGHT_BRACE } null")
+				tokens.Success = append(tokens.Success, "RIGHT_BRACE } null")
 			}
 		case utils.STAR:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-
-				fmt.Println("STAR * null")
+				tokens.Success = append(tokens.Success, "STAR * null")
 			}
 		case utils.DOT:
 			if numberCount == 1 {
 				numberString += "."
 			} else {
 				if stringCount == 0 {
-					fmt.Println("DOT . null")
+					tokens.Success = append(tokens.Success, "DOT . null")
 				} else {
 					stringVariable += string(rune(fileContents[i]))
 				}
@@ -110,21 +110,21 @@ func Tokenize(fileContents string, fileLenght int) {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				fmt.Println("COMMA , null")
+				tokens.Success = append(tokens.Success, "COMMA , null")
 			}
 		case utils.PLUS:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				fmt.Println("PLUS + null")
+				tokens.Success = append(tokens.Success, "PLUS + null")
 			}
 		case utils.MINUS:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				fmt.Println("MINUS - null")
+				tokens.Success = append(tokens.Success, "MINUS - null")
 			}
 		case utils.SEMICOLON:
 			numberCount = 0
@@ -132,6 +132,7 @@ func Tokenize(fileContents string, fileLenght int) {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
 				fmt.Println("SEMICOLON ; null")
+				tokens.Success = append(tokens.Success, "SEMICOLON ; null")
 			}
 		case utils.LESS:
 			numberCount = 0
@@ -142,14 +143,14 @@ func Tokenize(fileContents string, fileLenght int) {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						fmt.Println("LESS < null")
+						tokens.Success = append(tokens.Success, "LESS < null")
 					} else {
 						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
-							fmt.Println("LESS_EQUAL <= null")
+							tokens.Success = append(tokens.Success, "LESS_EQUAL <= null")
 							skipCount = 1
 						default:
-							fmt.Println("LESS < null")
+							tokens.Success = append(tokens.Success, "LESS < null")
 						}
 					}
 				}
@@ -164,14 +165,14 @@ func Tokenize(fileContents string, fileLenght int) {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						fmt.Println("GREATER > null")
+						tokens.Success = append(tokens.Success, "GREATER > null")
 					} else {
 						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
-							fmt.Println("GREATER_EQUAL >= null")
+							tokens.Success = append(tokens.Success, "GREATER_EQUAL >= null")
 							skipCount = 1
 						default:
-							fmt.Println("GREATER > null")
+							tokens.Success = append(tokens.Success, "GREATER > null")
 						}
 					}
 				}
@@ -186,14 +187,14 @@ func Tokenize(fileContents string, fileLenght int) {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						fmt.Println("BANG ! null")
+						tokens.Success = append(tokens.Success, "BANG ! null")
 					} else {
 						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
-							fmt.Println("BANG_EQUAL != null")
+							tokens.Success = append(tokens.Success, "BANG_EQUAL != null")
 							skipCount = 1
 						default:
-							fmt.Println("BANG ! null")
+							tokens.Success = append(tokens.Success, "BANG ! null")
 						}
 					}
 				}
@@ -208,14 +209,14 @@ func Tokenize(fileContents string, fileLenght int) {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						fmt.Println("EQUAL = null")
+						tokens.Success = append(tokens.Success, "EQUAL = null")
 					} else {
 						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
-							fmt.Println("EQUAL_EQUAL == null")
+							tokens.Success = append(tokens.Success, "EQUAL_EQUAL == null")
 							skipCount = 1
 						default:
-							fmt.Println("EQUAL = null")
+							tokens.Success = append(tokens.Success, "EQUAL = null")
 						}
 					}
 				}
@@ -230,7 +231,7 @@ func Tokenize(fileContents string, fileLenght int) {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						fmt.Println("SLASH / null")
+						tokens.Success = append(tokens.Success, "SLASH / null")
 					} else {
 						switch fileContents[i+1] {
 						case byte(utils.SLASH):
@@ -249,7 +250,7 @@ func Tokenize(fileContents string, fileLenght int) {
 			line += 1
 			comment = 0
 			if identifierCount == 1 {
-				fmt.Fprintf(os.Stdout, "IDENTIFIER %s null\n", identifier)
+				tokens.Success = append(tokens.Success, fmt.Sprintf("IDENTIFIER %s null", identifier))
 				identifier = ""
 				identifierCount = 0
 			}
@@ -259,7 +260,7 @@ func Tokenize(fileContents string, fileLenght int) {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if identifierCount == 1 {
-					fmt.Fprintf(os.Stdout, "IDENTIFIER %s null\n", identifier)
+					tokens.Success = append(tokens.Success, fmt.Sprintf("IDENTIFIER %s null", identifier))
 					identifier = ""
 					identifierCount = 0
 				}
@@ -273,7 +274,7 @@ func Tokenize(fileContents string, fileLenght int) {
 			numberCount = 0
 			if stringCount == 1 {
 				stringCount = 0
-				fmt.Println("STRING \"" + stringVariable + "\" " + stringVariable)
+				tokens.Success = append(tokens.Success, "STRING \""+stringVariable+"\" "+stringVariable)
 			} else {
 				stringCount = 1
 				stringVariable = ""
@@ -282,7 +283,7 @@ func Tokenize(fileContents string, fileLenght int) {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %c\n", line, rune(fileContents[i]))
+				tokens.Errors = append(tokens.Errors, fmt.Sprintf("[line %d] Error: Unexpected character: %c\n", line, rune(fileContents[i])))
 				errnum = 1
 				numberCount = 0
 			}
@@ -307,14 +308,14 @@ func Tokenize(fileContents string, fileLenght int) {
 								fmt.Println("Error parsing float:", err)
 							}
 							if math.Mod(float, 1.0) == 0 {
-								fmt.Fprintf(os.Stdout, "NUMBER %s %.1f\n", numberString, float)
+								tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %.1f", numberString, float))
 								numberCount = 0
 							} else {
-								fmt.Fprintf(os.Stdout, "NUMBER %s %g\n", numberString, float)
+								tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %g", numberString, float))
 								numberCount = 0
 							}
 						} else {
-							fmt.Fprintf(os.Stdout, "NUMBER %s %d.0\n", numberString, number)
+							tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %d.0", numberString, number))
 							numberCount = 0
 						}
 					} else {
@@ -323,7 +324,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'a':
 								if fileLenght-2 > i {
 									if strings.Contains(fileContents[i:i+3], "and") {
-										fmt.Println("AND and null")
+										tokens.Success = append(tokens.Success, "AND and null")
 										if fileLenght-2 == i {
 											break
 										}
@@ -334,7 +335,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'c':
 								if fileLenght-4 > i {
 									if strings.Contains(fileContents[i:i+5], "class") {
-										fmt.Println("CLASS class null")
+										tokens.Success = append(tokens.Success, "CLASS class null")
 										if fileLenght-4 == i {
 											break
 										}
@@ -346,7 +347,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'e':
 								if fileLenght-3 > i {
 									if strings.Contains(fileContents[i:i+4], "else") {
-										fmt.Println("ELSE else null")
+										tokens.Success = append(tokens.Success, "ELSE else null")
 										if fileLenght-3 == i {
 											break
 										}
@@ -357,7 +358,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'f':
 								if fileLenght-2 > i {
 									if strings.Contains(fileContents[i:i+3], "for") {
-										fmt.Println("FOR for null")
+										tokens.Success = append(tokens.Success, "FOR for null")
 										if fileLenght-2 == i {
 											break
 										}
@@ -365,7 +366,7 @@ func Tokenize(fileContents string, fileLenght int) {
 										continue
 									}
 									if strings.Contains(fileContents[i:i+3], "fun") {
-										fmt.Println("FUN fun null")
+										tokens.Success = append(tokens.Success, "FUN fun null")
 										if fileLenght-2 == i {
 											break
 										}
@@ -376,7 +377,7 @@ func Tokenize(fileContents string, fileLenght int) {
 
 								if fileLenght-4 > i {
 									if strings.Contains(fileContents[i:i+5], "false") {
-										fmt.Println("FALSE false null")
+										tokens.Success = append(tokens.Success, "FALSE false null")
 										if fileLenght-4 == i {
 											break
 										}
@@ -387,7 +388,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'i':
 								if fileLenght-1 > i {
 									if strings.Contains(fileContents[i:i+2], "if") {
-										fmt.Println("IF if null")
+										tokens.Success = append(tokens.Success, "IF if null")
 										if fileLenght-1 == i {
 											break
 										}
@@ -398,7 +399,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'n':
 								if fileLenght-2 > i {
 									if strings.Contains(fileContents[i:i+3], "nil") {
-										fmt.Println("NIL nil null")
+										tokens.Success = append(tokens.Success, "NIL nil null")
 										if fileLenght-2 == i {
 											break
 										}
@@ -409,7 +410,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'o':
 								if fileLenght-1 > i {
 									if strings.Contains(fileContents[i:i+2], "or") {
-										fmt.Println("OR or null")
+										tokens.Success = append(tokens.Success, "OR or null")
 										if fileLenght-1 == i {
 											break
 										}
@@ -420,7 +421,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'p':
 								if fileLenght-4 > i {
 									if strings.Contains(fileContents[i:i+5], "print") {
-										fmt.Println("PRINT print null")
+										tokens.Success = append(tokens.Success, "PRINT print null")
 										if fileLenght-4 == i {
 											break
 										}
@@ -431,7 +432,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'r':
 								if fileLenght-5 > i {
 									if strings.Contains(fileContents[i:i+6], "return") {
-										fmt.Println("RETURN return null")
+										tokens.Success = append(tokens.Success, "RETURN return null")
 										if fileLenght-5 == i {
 											break
 										}
@@ -442,7 +443,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 's':
 								if fileLenght-4 > i {
 									if strings.Contains(fileContents[i:i+5], "super") {
-										fmt.Println("SUPER super null")
+										tokens.Success = append(tokens.Success, "SUPER super null")
 										if fileLenght-4 == i {
 											break
 										}
@@ -453,7 +454,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 't':
 								if fileLenght-3 > i {
 									if strings.Contains(fileContents[i:i+4], "true") {
-										fmt.Println("TRUE true null")
+										tokens.Success = append(tokens.Success, "TRUE true null")
 										if fileLenght-3 == i {
 											break
 										}
@@ -461,7 +462,7 @@ func Tokenize(fileContents string, fileLenght int) {
 										continue
 									}
 									if strings.Contains(fileContents[i:i+4], "this") {
-										fmt.Println("THIS this null")
+										tokens.Success = append(tokens.Success, "THIS this null")
 										if fileLenght-3 == i {
 											break
 										}
@@ -472,7 +473,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'v':
 								if fileLenght-2 > i {
 									if strings.Contains(fileContents[i:i+3], "var") {
-										fmt.Println("VAR var null")
+										tokens.Success = append(tokens.Success, "VAR var null")
 										if fileLenght-2 == i {
 											break
 										}
@@ -483,7 +484,7 @@ func Tokenize(fileContents string, fileLenght int) {
 							case 'w':
 								if fileLenght-4 > i {
 									if strings.Contains(fileContents[i:i+5], "while") {
-										fmt.Println("WHILE while null")
+										tokens.Success = append(tokens.Success, "WHILE while null")
 										if fileLenght-4 == i {
 											break
 										}
@@ -503,7 +504,7 @@ func Tokenize(fileContents string, fileLenght int) {
 		}
 	}
 	if stringCount == 1 {
-		fmt.Fprintf(os.Stderr, "[line %d] Error: Unterminated string.\n", line)
+		tokens.Errors = append(tokens.Errors, fmt.Sprintf("[line %d] Error: Unterminated string.", line))
 	}
 	if numberCount == 1 {
 		number, err := strconv.Atoi(numberString)
@@ -513,23 +514,18 @@ func Tokenize(fileContents string, fileLenght int) {
 				fmt.Println("Error parsing float:", err)
 			}
 			if math.Mod(float, 1.0) == 0 {
-				fmt.Fprintf(os.Stdout, "NUMBER %s %.1f\n", numberString, float)
+				tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %.1f", numberString, float))
 			} else {
-				fmt.Fprintf(os.Stdout, "NUMBER %s %g\n", numberString, float)
-
+				tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %g", numberString, float))
 			}
 		} else {
-			fmt.Fprintf(os.Stdout, "NUMBER %s %d.0\n", numberString, number)
+			tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %d.0", numberString, number))
 		}
 	}
-	if errnum == 1 || stringCount == 1 {
-		fmt.Println("EOF  null")
-		os.Exit(65)
-	} else {
+	if errnum != 1 || stringCount != 1 {
 		if identifierCount == 1 {
-			fmt.Fprintf(os.Stdout, "IDENTIFIER %s null\n", identifier)
+			tokens.Success = append(tokens.Success, fmt.Sprintf("IDENTIFIER %s null", identifier))
 		}
-		fmt.Println("EOF  null")
 	}
-
+	return tokens
 }

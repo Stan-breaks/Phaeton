@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/Stan-breaks/app/tokenize"
+	"os"
 )
 
 func main() {
@@ -25,10 +24,21 @@ func main() {
 	}
 	fileContents := string(rawFileContents)
 	fileLenght := len(fileContents) - 1
-
+	tokens := tokenize.Tokenize(fileContents, fileLenght)
 	switch command {
 	case "tokenize":
-		tokenize.Tokenize(fileContents, fileLenght)
+		for _, token := range tokens.Success {
+			fmt.Println(token)
+		}
+		fmt.Println("EOF null")
+		if len(tokens.Errors) != 0 {
+			for _, err := range tokens.Errors {
+				fmt.Println(err)
+			}
+			os.Exit(65)
+		}
+	case "evalute":
+
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
