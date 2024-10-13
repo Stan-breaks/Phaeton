@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/Stan-breaks/app/parse"
 	"github.com/Stan-breaks/app/tokenize"
+	"os"
 )
 
 func main() {
