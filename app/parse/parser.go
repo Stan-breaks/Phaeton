@@ -8,23 +8,55 @@ import (
 )
 
 func Parse(tokens models.Tokens) models.Node {
-	left := 0
-	right := 0
-	if len(tokens.Success) == 3 {
+	var left, right models.Node
+	op := ""
+	numToken := len(tokens.Success)
+	if numToken == 3 {
 		for index, item := range tokens.Success {
 			splitToken := strings.Split(item, " ")
-			if index == 0 && splitToken[0] == "NUMBER" {
-				left, _ = strconv.Atoi(splitToken[1])
-			} else if index == 2 && splitToken[0] == "NUMBER" {
-				right, _ = strconv.Atoi(splitToken[1])
+			switch index {
+			case 0:
+				left = parsevalue(splitToken)
+			case 1:
+				op = parseOperator(splitToken)
+			case 2:
+				right = parsevalue(splitToken)
 			}
 		}
 		return models.BinaryNode{
-			Left:  models.NumberNode{Value: left},
-			Op:    "+",
-			Right: models.NumberNode{Value: right},
+			Left:  left,
+			Op:    op,
+			Right: right,
 		}
 
 	}
+	if numToken == 1 {
+		splitToken := strings.Split(tokens.Success[0], " ")
+		return parsevalue(splitToken)
+	}
+
 	return nil
+}
+
+func parseOperator(splitToken []string) string {
+	switch splitToken[0] {
+	case "PLUS", "MINUS", "STAR", "SLASH", "EQUAL", "LESS", "AND", "OR":
+		return splitToken[1]
+	default:
+		return ""
+	}
+}
+
+func parsevalue(splitToken []string) models.Node {
+	switch splitToken[0] {
+	case "NUMBER":
+		num, _ := strconv.Atoi(splitToken[1])
+		return models.NumberNode{Value: num}
+	case "TRUE":
+		return models.BooleanNode{Value: true}
+	case "FALSE":
+		return models.BooleanNode{Value: false}
+	default:
+		return nil
+	}
 }

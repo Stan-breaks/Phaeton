@@ -239,7 +239,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 								comment = 1
 							}
 						default:
-							continue
+							tokens.Success = append(tokens.Success, "SLASH / null")
 						}
 					}
 				}

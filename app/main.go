@@ -40,8 +40,7 @@ func main() {
 		}
 	case "parse":
 		value := parse.Parse(tokens)
-		fmt.Println(value)
-
+		fmt.Println(value.Evaluate())
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
