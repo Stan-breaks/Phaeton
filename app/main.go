@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/Stan-breaks/app/tokenize"
 	"os"
+
+	"github.com/Stan-breaks/app/parse"
+	"github.com/Stan-breaks/app/tokenize"
 )
 
 func main() {
@@ -37,7 +39,9 @@ func main() {
 			}
 			os.Exit(65)
 		}
-	case "evalute":
+	case "parse":
+		value := parse.Parse(tokens)
+		fmt.Println(value)
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
