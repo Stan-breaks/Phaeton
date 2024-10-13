@@ -31,10 +31,10 @@ func main() {
 		for _, token := range tokens.Success {
 			fmt.Println(token)
 		}
-		fmt.Println("EOF null")
+		fmt.Println("EOF  null")
 		if len(tokens.Errors) != 0 {
 			for _, err := range tokens.Errors {
-				fmt.Println(err)
+				fmt.Fprintf(os.Stderr, "%s\n", err)
 			}
 			os.Exit(65)
 		}

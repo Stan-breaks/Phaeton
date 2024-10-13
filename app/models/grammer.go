@@ -36,6 +36,18 @@ func (n BooleanNode) Evaluate() interface{} {
 	return n.Value
 }
 
+type NilNode struct {
+	Value string
+}
+
+func (n NilNode) String() string {
+	return n.Value
+}
+
+func (n NilNode) Evaluate() interface{} {
+	return n.Value
+}
+
 type BinaryNode struct {
 	Left  Node
 	Op    string

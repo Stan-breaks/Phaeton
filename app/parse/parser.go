@@ -56,6 +56,8 @@ func parsevalue(splitToken []string) models.Node {
 		return models.BooleanNode{Value: true}
 	case "FALSE":
 		return models.BooleanNode{Value: false}
+	case "NIL":
+		return models.NilNode{Value: "nil"}
 	default:
 		return nil
 	}
