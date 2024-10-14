@@ -40,7 +40,7 @@ func Parse(tokens models.Tokens) models.Node {
 
 func parseOperator(splitToken []string) string {
 	switch splitToken[0] {
-	case "PLUS", "MINUS", "STAR", "SLASH", "EQUAL", "LESS", "AND", "OR":
+	case "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "LESS", "AND", "OR":
 		return splitToken[1]
 	default:
 		return ""
@@ -50,8 +50,9 @@ func parseOperator(splitToken []string) string {
 func parsevalue(splitToken []string) models.Node {
 	switch splitToken[0] {
 	case "NUMBER":
-		num, _ := strconv.Atoi(splitToken[1])
-		return models.NumberNode{Value: num}
+		num, _ := strconv.ParseFloat(splitToken[1], 32)
+		floatnum := float32(num)
+		return models.NumberNode{Value: floatnum}
 	case "TRUE":
 		return models.BooleanNode{Value: true}
 	case "FALSE":

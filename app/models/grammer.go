@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/Stan-breaks/app/utils"
 )
@@ -13,11 +12,11 @@ type Node interface {
 }
 
 type NumberNode struct {
-	Value int
+	Value float32
 }
 
 func (n NumberNode) String() string {
-	return strconv.Itoa(n.Value)
+	return fmt.Sprintf("%f", n.Value)
 }
 
 func (n NumberNode) Evaluate() interface{} {
@@ -63,13 +62,15 @@ func (n BinaryNode) Evaluate() interface{} {
 	right := n.Right.Evaluate()
 	switch n.Op {
 	case string(utils.PLUS):
-		return left.(int) + right.(int)
+		return left.(float32) + right.(float32)
 	case string(utils.MINUS):
-		return left.(int) - right.(int)
+		return left.(float32) - right.(float32)
 	case string(utils.STAR):
-		return left.(int) * right.(int)
+		return left.(float32) * right.(float32)
 	case string(utils.SLASH):
-		return left.(int) / right.(int)
+		return left.(float32) / right.(float32)
+	case "==":
+		return left.(float32) == right.(float32)
 	case "and":
 		return left.(bool) && right.(bool)
 	case "or":
