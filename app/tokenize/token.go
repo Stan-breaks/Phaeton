@@ -66,7 +66,6 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 					identifier = ""
 					identifierCount = 0
 				}
-				fmt.Println("RIGHT_PAREN ) null")
 				tokens.Success = append(tokens.Success, "RIGHT_PAREN ) null")
 			}
 		case utils.LEFT_BRACE:
@@ -131,7 +130,6 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				fmt.Println("SEMICOLON ; null")
 				tokens.Success = append(tokens.Success, "SEMICOLON ; null")
 			}
 		case utils.LESS:
