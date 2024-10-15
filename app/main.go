@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/Stan-breaks/app/parse"
 	"github.com/Stan-breaks/app/tokenize"
-	"os"
+	"github.com/Stan-breaks/app/utils"
 )
 
 func main() {
@@ -40,7 +42,13 @@ func main() {
 		}
 	case "parse":
 		value := parse.Parse(tokens)
-		fmt.Println(value.Evaluate())
+		result := value.Evaluate()
+		switch v := result.(type) {
+		case float32:
+			fmt.Println(utils.FormatFloat(v))
+		default:
+			fmt.Println(result)
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
