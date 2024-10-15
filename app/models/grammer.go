@@ -23,6 +23,18 @@ func (n NumberNode) Evaluate() interface{} {
 	return n.Value
 }
 
+type StringNode struct {
+	Value string
+}
+
+func (n StringNode) String() string {
+	return n.Value
+}
+
+func (n StringNode) Evaluate() interface{} {
+	return n.Value
+}
+
 type BooleanNode struct {
 	Value bool
 }

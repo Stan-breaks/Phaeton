@@ -59,6 +59,9 @@ func parsevalue(splitToken []string) models.Node {
 		return models.BooleanNode{Value: false}
 	case "NIL":
 		return models.NilNode{Value: "nil"}
+	case "STRING":
+		joinedString := strings.Join(splitToken, " ")
+		return models.StringNode{Value: strings.Split(joinedString, "\"")[1]}
 	default:
 		return nil
 	}

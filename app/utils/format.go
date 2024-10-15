@@ -6,7 +6,7 @@ import (
 )
 
 func FormatFloat(v float32) string {
-	s := fmt.Sprintf("%.6f", v)
+	s := fmt.Sprintf("%.5f", v)
 	s = strings.Trim(s, "0")
 	if string(s[len(s)-1]) == "." {
 		s += "0"
