@@ -11,5 +11,8 @@ func FormatFloat(v float32) string {
 	if string(s[len(s)-1]) == "." {
 		s += "0"
 	}
+	if string(s[0]) == "." {
+		s = "0" + s
+	}
 	return s
 }
