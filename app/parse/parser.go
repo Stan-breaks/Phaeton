@@ -8,37 +8,45 @@ import (
 )
 
 func Parse(tokens models.Tokens) models.Node {
+	if len(tokens.Success) == 1 {
+		splitToken := strings.Split(tokens.Success[0], " ")
+		return parsevalue(splitToken)
+	}
+	if isBinaryExpression(tokens.Success) {
+		return parseBinaryExpr(tokens.Success)
+	}
+
+	if node := parseUraryExpr(tokens.Success); node.Evaluate() != nil {
+		return node
+	}
+	return parseParrenthesisExpr(tokens.Success)
+}
+
+func isBinaryExpression(tokens []string) bool {
+	return len(tokens) == 3 && strings.HasPrefix(tokens[0], "NUMBER")
+}
+
+func parseBinaryExpr(tokens []string) models.Node {
 	var left, right models.Node
 	op := ""
-	numToken := len(tokens.Success)
-	if numToken == 3 && strings.Split(tokens.Success[0], " ")[0] == "NUMBER" {
-		for index, item := range tokens.Success {
-			splitToken := strings.Split(item, " ")
-			switch index {
-			case 0:
-				left = parsevalue(splitToken)
-			case 1:
-				op = parseOperator(splitToken)
-			case 2:
-				right = parsevalue(splitToken)
-			}
+	for index, item := range tokens {
+		splitToken := strings.Split(item, " ")
+		switch index {
+		case 0:
+			left = parsevalue(splitToken)
+		case 1:
+			op = parseOperator(splitToken)
+		case 2:
+			right = parsevalue(splitToken)
 		}
-		return models.BinaryNode{
-			Left:  left,
-			Op:    op,
-			Right: right,
-		}
-	} else {
-		if numToken == 1 {
-			splitToken := strings.Split(tokens.Success[0], " ")
-			return parsevalue(splitToken)
-		}
-		if numToken == 2 {
-			return parseUrary(tokens.Success)
-		}
-		return parseParrenthesisExpr(tokens.Success)
+	}
+	return models.BinaryNode{
+		Left:  left,
+		Op:    op,
+		Right: right,
 	}
 }
+
 func parseOperator(splitToken []string) string {
 	switch splitToken[0] {
 	case "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "LESS", "AND", "OR":
@@ -100,6 +108,22 @@ func parseParrenthesisExpr(tokens []string) models.Node {
 
 }
 
-func parseUrary(tokens []string) models.Node {
-	return models.NilNode{}
+func parseUraryExpr(tokens []string) models.Node {
+	result := ""
+	switch len(tokens) {
+	case 2:
+		splitToken0 := strings.Split(tokens[0], " ")
+		splitToken1 := strings.Split(tokens[1], " ")
+		value := parsevalue(splitToken1)
+		result = "(" + splitToken0[1] + " " + value.String() + ")"
+	case 3:
+		splitToken0 := strings.Split(tokens[0], " ")
+		splitToken1 := strings.Split(tokens[1], " ")
+		splitToken2 := strings.Split(tokens[2], " ")
+		value := parsevalue(splitToken2)
+		result = "(" + splitToken0[1] + " (" + splitToken1[1] + " " + value.String() + "))"
+	default:
+		return models.NilNode{}
+	}
+	return models.StringNode{Value: result}
 }

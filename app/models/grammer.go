@@ -52,11 +52,11 @@ type NilNode struct {
 }
 
 func (n NilNode) String() string {
-	return n.Value
+	return "nil"
 }
 
 func (n NilNode) Evaluate() interface{} {
-	return n.Value
+	return nil
 }
 
 type BinaryNode struct {
