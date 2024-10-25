@@ -33,6 +33,9 @@ func Parse(tokens models.Tokens) models.Node {
 			splitToken := strings.Split(tokens.Success[0], " ")
 			return parsevalue(splitToken)
 		}
+		if numToken == 2 {
+			return parseUrary(tokens.Success)
+		}
 		return parseParrenthesisExpr(tokens.Success)
 	}
 }
@@ -95,4 +98,8 @@ func parseParrenthesisExpr(tokens []string) models.Node {
 		Value: result,
 	}
 
+}
+
+func parseUrary(tokens []string) models.Node {
+	return models.NilNode{}
 }
