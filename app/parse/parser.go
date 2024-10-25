@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -73,7 +72,7 @@ func parseParrenthesisExpr(tokens []string) models.Node {
 		splitToken := strings.Split(item, " ")
 		switch splitToken[0] {
 		case "LEFT_PAREN":
-			paren = 1
+			paren += 1
 		case "RIGHT_PAREN":
 			if paren == 0 {
 				return models.NilNode{}
@@ -84,8 +83,16 @@ func parseParrenthesisExpr(tokens []string) models.Node {
 			return models.NilNode{}
 		}
 	}
+	result := ""
+	for i := 0; i < paren-1; i++ {
+		result += "(group "
+	}
+	result += ("(group " + value.String() + ")")
+	for i := 0; i < paren-1; i++ {
+		result += ")"
+	}
 	return models.StringNode{
-		Value: "(group " + value.String() + ")",
+		Value: result,
 	}
 
 }
