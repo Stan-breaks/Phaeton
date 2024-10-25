@@ -77,7 +77,7 @@ func parseParrenthesisExpr(tokens []string) models.Node {
 			if paren == 0 {
 				return models.NilNode{}
 			}
-		case "STRING", "NUMBER", "TRUE", "FALSE":
+		case "STRING", "NUMBER", "TRUE", "FALSE", "NIL":
 			value = parsevalue(splitToken)
 		default:
 			return models.NilNode{}

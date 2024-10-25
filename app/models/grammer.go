@@ -16,7 +16,7 @@ type NumberNode struct {
 }
 
 func (n NumberNode) String() string {
-	return fmt.Sprintf("%f", n.Value)
+	return utils.FormatFloat(n.Value)
 }
 
 func (n NumberNode) Evaluate() interface{} {
