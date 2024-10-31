@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/Stan-breaks/app/models"
+	"github.com/Stan-breaks/app/utils"
 )
 
 func Parse(tokens models.Tokens) models.Node {
@@ -12,18 +13,16 @@ func Parse(tokens models.Tokens) models.Node {
 		splitToken := strings.Split(tokens.Success[0], " ")
 		return parsevalue(splitToken)
 	}
-	if isBinaryExpression(tokens.Success) {
+	if utils.IsParethesizedExpr(tokens.Success) {
+		return parseParrenthesisExpr(tokens.Success)
+	}
+	if utils.IsBinaryExpression(tokens.Success) {
 		return parseBinaryExpr(tokens.Success)
 	}
-
-	if node := parseUraryExpr(tokens.Success); node.Evaluate() != nil {
-		return node
+	if utils.IsUraryExpr(tokens.Success) {
+		return parseUraryExpr(tokens.Success)
 	}
-	return parseParrenthesisExpr(tokens.Success)
-}
-
-func isBinaryExpression(tokens []string) bool {
-	return len(tokens) == 3 && strings.HasPrefix(tokens[0], "NUMBER")
+	return models.NilNode{}
 }
 
 func parseBinaryExpr(tokens []string) models.Node {
@@ -67,7 +66,7 @@ func parsevalue(splitToken []string) models.Node {
 	case "FALSE":
 		return models.BooleanNode{Value: false}
 	case "NIL":
-		return models.NilNode{Value: "nil"}
+		return models.NilNode{}
 	case "STRING":
 		joinedString := strings.Join(splitToken, " ")
 		return models.StringNode{Value: strings.Split(joinedString, "\"")[1]}
@@ -77,53 +76,48 @@ func parsevalue(splitToken []string) models.Node {
 }
 
 func parseParrenthesisExpr(tokens []string) models.Node {
-	var value models.Node
-	paren := 0
-	for _, item := range tokens {
-		splitToken := strings.Split(item, " ")
-		switch splitToken[0] {
-		case "LEFT_PAREN":
-			paren += 1
-		case "RIGHT_PAREN":
-			if paren == 0 {
-				return models.NilNode{}
-			}
-		case "STRING", "NUMBER", "TRUE", "FALSE", "NIL":
-			value = parsevalue(splitToken)
-		default:
-			return models.NilNode{}
-		}
+	innerTokens := tokens[1 : len(tokens)-1]
+	var innerNode models.Node
+	if len(innerTokens) == 1 {
+		splitToken := strings.Split(innerTokens[0], " ")
+		innerNode = parsevalue(splitToken)
+	} else if utils.IsUraryExpr(innerTokens) {
+		innerNode = parseUraryExpr(innerTokens)
+	} else if utils.IsBinaryExpression(innerTokens) {
+		innerNode = parseBinaryExpr(innerTokens)
+	} else if utils.IsParethesizedExpr(innerTokens) {
+		innerNode = parseParrenthesisExpr(innerTokens)
+	} else {
+		innerNode = models.NilNode{}
 	}
-	result := ""
-	for i := 0; i < paren-1; i++ {
-		result += "(group "
-	}
-	result += ("(group " + value.String() + ")")
-	for i := 0; i < paren-1; i++ {
-		result += ")"
-	}
+
+	result := "(group " + innerNode.String() + ")"
 	return models.StringNode{
 		Value: result,
 	}
-
 }
 
 func parseUraryExpr(tokens []string) models.Node {
-	result := ""
-	switch len(tokens) {
-	case 2:
-		splitToken0 := strings.Split(tokens[0], " ")
-		splitToken1 := strings.Split(tokens[1], " ")
-		value := parsevalue(splitToken1)
-		result = "(" + splitToken0[1] + " " + value.String() + ")"
-	case 3:
-		splitToken0 := strings.Split(tokens[0], " ")
-		splitToken1 := strings.Split(tokens[1], " ")
-		splitToken2 := strings.Split(tokens[2], " ")
-		value := parsevalue(splitToken2)
-		result = "(" + splitToken0[1] + " (" + splitToken1[1] + " " + value.String() + "))"
-	default:
+	splitToken := strings.Split(tokens[0], " ")
+	operator := splitToken[1]
+
+	var operand models.Node
+	remainingTokens := tokens[1:]
+	if utils.IsUraryExpr(remainingTokens) {
+		operand = parseUraryExpr(remainingTokens)
+	} else if utils.IsParethesizedExpr(remainingTokens) {
+		operand = parseParrenthesisExpr(remainingTokens)
+	} else if len(remainingTokens) == 1 {
+		splitRemain0 := strings.Split(remainingTokens[0], " ")
+		operand = parsevalue(splitRemain0)
+	} else {
 		return models.NilNode{}
 	}
-	return models.StringNode{Value: result}
+	if operand.Evaluate() == nil || operand.String() == "<nil>" {
+		return models.NilNode{}
+	}
+	result := "(" + operator + " " + operand.String() + ")"
+	return models.StringNode{
+		Value: result,
+	}
 }

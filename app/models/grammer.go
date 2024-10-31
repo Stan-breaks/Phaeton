@@ -48,7 +48,6 @@ func (n BooleanNode) Evaluate() interface{} {
 }
 
 type NilNode struct {
-	Value string
 }
 
 func (n NilNode) String() string {
@@ -56,7 +55,7 @@ func (n NilNode) String() string {
 }
 
 func (n NilNode) Evaluate() interface{} {
-	return nil
+	return "nil"
 }
 
 type BinaryNode struct {
