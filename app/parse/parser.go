@@ -26,6 +26,13 @@ func Parse(tokens models.Tokens) models.Node {
 }
 
 func parseBinaryExpr(tokens []string) models.Node {
+	if len(tokens) <= 3 {
+		return parseSingleBinaryExpr(tokens)
+	}
+	return models.NilNode{}
+}
+
+func parseSingleBinaryExpr(tokens []string) models.Node {
 	var left, right models.Node
 	op := ""
 	for index, item := range tokens {
