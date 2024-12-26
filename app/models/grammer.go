@@ -65,7 +65,7 @@ type BinaryNode struct {
 }
 
 func (n BinaryNode) String() string {
-	return fmt.Sprintf("%v %s %v", n.Left, n.Op, n.Right)
+	return fmt.Sprintf("(%s %v %v)", n.Op, n.Left, n.Right)
 }
 
 func (n BinaryNode) Evaluate() interface{} {
