@@ -17,7 +17,7 @@ func IsUraryExpr(tokens []string) bool {
 }
 
 func IsBinaryExpression(tokens []string) bool {
-	if len(tokens)%2 == 0 {
+	if len(tokens) < 3 || len(tokens)%2 == 0 {
 		return false
 	}
 	if !strings.HasPrefix(tokens[0], "NUMBER") {
