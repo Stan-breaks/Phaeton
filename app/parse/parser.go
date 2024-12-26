@@ -55,25 +55,21 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 }
 
 func parseMultipleBinaryExpr(tokens []string) models.Node {
-	var left, right models.Node
-	firstBinary := tokens[0:3]
-	left = parseSingleBinaryExpr(firstBinary)
-	splitToken := strings.Split(tokens[3], " ")
-	op := parseOperator(splitToken)
-	remainingTokens := tokens[4:]
-	if len(remainingTokens) == 1 {
+	var current = parseSingleBinaryExpr(tokens[0:3])
+	for i := 3; i < len(tokens); i += 2 {
+		var right models.Node
+		splitToken := strings.Split(tokens[i], " ")
+		op := parseOperator(splitToken)
+		remainingTokens := tokens[i+1:]
 		right = parsevalue(strings.Split(remainingTokens[0], " "))
-	} else {
-		right = parseBinaryExpr(remainingTokens)
+		current = models.BinaryNode{
+			Left:  current,
+			Op:    op,
+			Right: right,
+		}
 	}
-	binary := models.BinaryNode{
-		Left:  left,
-		Op:    op,
-		Right: right,
-	}
-
 	return models.StringNode{
-		Value: binary.String(),
+		Value: current.String(),
 	}
 }
 
