@@ -33,20 +33,6 @@ func parseBinaryExpr(tokens []string) models.Node {
 	}
 }
 
-// Helper function to check if a token is an operator
-func isOperator(token string) bool {
-	operators := map[string]bool{
-		"PLUS":        true,
-		"MINUS":       true,
-		"STAR":        true,
-		"SLASH":       true,
-		"LESS":        true,
-		"EQUAL_EQUAL": true,
-		"AND":         true,
-		"OR":          true,
-	}
-	return operators[token]
-}
 func parseSingleBinaryExpr(tokens []string) models.Node {
 	var left, right models.Node
 	op := ""
@@ -69,7 +55,26 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 }
 
 func parseMultipleBinaryExpr(tokens []string) models.Node {
-	return models.NilNode{}
+	var left, right models.Node
+	firstBinary := tokens[0:3]
+	left = parseSingleBinaryExpr(firstBinary)
+	splitToken := strings.Split(tokens[3], " ")
+	op := parseOperator(splitToken)
+	remainingTokens := tokens[4:]
+	if len(remainingTokens) == 1 {
+		right = parsevalue(strings.Split(remainingTokens[0], " "))
+	} else {
+		right = parseBinaryExpr(remainingTokens)
+	}
+	binary := models.BinaryNode{
+		Left:  left,
+		Op:    op,
+		Right: right,
+	}
+
+	return models.StringNode{
+		Value: binary.String(),
+	}
 }
 
 func parseOperator(splitToken []string) string {
