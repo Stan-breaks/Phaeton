@@ -23,21 +23,51 @@ func IsUnaryExpr(tokens []string) bool {
 
 func IsBinaryExpression(tokens []string) bool {
 	lenght := len(tokens)
-	if lenght < 3 || lenght > 5 {
+	if lenght < 3 {
 		return false
 	}
 
 	operator := -1
-	for i := 1; i < len(tokens); i++ {
+	for i := 1; i < lenght; i++ {
 		if isOperator(tokens[i]) {
 			operator = i
 			break
 		}
+		if isInvalidToken(tokens[i]) {
+			return false
+		}
 	}
-	leftOperand := tokens[:operator]
-	rightOperand := tokens[operator+1:]
-	return isValidOperand(leftOperand) && isValidOperand(rightOperand)
+	return operator == -1
 }
+
+func isInvalidToken(token string) bool {
+	invalidPrefixes := []string{
+		"STRING",
+		"BANG",
+		"TRUE",
+		"FALSE",
+		"IDENTIFIER",
+		"LEFT_BRACE",
+		"RIGHT_BRACE",
+	}
+
+	for _, prefix := range invalidPrefixes {
+		if strings.HasPrefix(token, prefix) {
+			return true
+		}
+	}
+	return false
+}
+func IsSingleBinary(tokens []string) bool {
+	numCount := 0
+	for _, token := range tokens {
+		if strings.HasPrefix(token, "NUMBER") {
+			numCount++
+		}
+	}
+	return numCount < 3
+}
+
 func isValidOperand(tokens []string) bool {
 	if len(tokens) == 0 {
 		return false

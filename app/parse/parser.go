@@ -19,14 +19,14 @@ func Parse(tokens models.Tokens) models.Node {
 	if utils.IsBinaryExpression(tokens.Success) {
 		return parseBinaryExpr(tokens.Success)
 	}
-	if utils.IsUraryExpr(tokens.Success) {
+	if utils.IsUnaryExpr(tokens.Success) {
 		return parseUraryExpr(tokens.Success)
 	}
 	return models.NilNode{}
 }
 
 func parseBinaryExpr(tokens []string) models.Node {
-	if len(tokens) <= 3 {
+	if utils.IsSingleBinary(tokens) {
 		return parseSingleBinaryExpr(tokens)
 	} else {
 		return parseMultipleBinaryExpr(tokens)
@@ -113,7 +113,7 @@ func parseParrenthesisExpr(tokens []string) models.Node {
 	if len(innerTokens) == 1 {
 		splitToken := strings.Split(innerTokens[0], " ")
 		innerNode = parsevalue(splitToken)
-	} else if utils.IsUraryExpr(innerTokens) {
+	} else if utils.IsUnaryExpr(innerTokens) {
 		innerNode = parseUraryExpr(innerTokens)
 	} else if utils.IsBinaryExpression(innerTokens) {
 		innerNode = parseBinaryExpr(innerTokens)
@@ -135,7 +135,7 @@ func parseUraryExpr(tokens []string) models.Node {
 
 	var operand models.Node
 	remainingTokens := tokens[1:]
-	if utils.IsUraryExpr(remainingTokens) {
+	if utils.IsUnaryExpr(remainingTokens) {
 		operand = parseUraryExpr(remainingTokens)
 	} else if utils.IsParethesizedExpr(remainingTokens) {
 		operand = parseParrenthesisExpr(remainingTokens)
