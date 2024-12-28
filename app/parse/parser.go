@@ -64,7 +64,6 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 		if utils.IsParethesizedExpr(remainingTokens) {
 			right = parseParrenthesisExpr(remainingTokens)
 		} else {
-
 			right = parsevalue(strings.Split(remainingTokens[0], " "))
 		}
 		current = models.BinaryNode{
