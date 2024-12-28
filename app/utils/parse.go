@@ -1,6 +1,8 @@
 package utils
 
-import "strings"
+import (
+	"strings"
+)
 
 func IsParethesizedExpr(tokens []string) bool {
 	if len(tokens) < 2 {
@@ -11,25 +13,47 @@ func IsParethesizedExpr(tokens []string) bool {
 	return firstToken[0] == "LEFT_PAREN" && lastToken[0] == "RIGHT_PAREN"
 }
 
-func IsUraryExpr(tokens []string) bool {
+func IsUnaryExpr(tokens []string) bool {
+	if len(tokens) < 2 {
+		return false
+	}
 	firstToken := strings.Split(tokens[0], " ")
-	return (firstToken[0] == "BANG" || firstToken[0] == "MINUS") && len(tokens) > 1
+	return (firstToken[0] == "BANG" || firstToken[0] == "MINUS" || firstToken[0] == "PLUS")
 }
 
 func IsBinaryExpression(tokens []string) bool {
-	if len(tokens) < 3 || len(tokens)%2 == 0 {
-		return false
-	}
-	if !strings.HasPrefix(tokens[0], "NUMBER") {
+	lenght := len(tokens)
+	if lenght < 3 || lenght > 5 {
 		return false
 	}
 
-	for i := 0; i < len(tokens); i++ {
-		if i%2 == 0 {
-			if !strings.HasPrefix(tokens[i], "NUMBER") {
-				return false
-			}
+	operator := -1
+	for i := 1; i < len(tokens); i++ {
+		if isOperator(tokens[i]) {
+			operator = i
+			break
 		}
 	}
-	return true
+	leftOperand := tokens[:operator]
+	rightOperand := tokens[operator+1:]
+	return isValidOperand(leftOperand) && isValidOperand(rightOperand)
+}
+func isValidOperand(tokens []string) bool {
+	if len(tokens) == 0 {
+		return false
+	}
+	if len(tokens) == 1 {
+		return strings.HasPrefix(tokens[0], "NUMBER")
+	}
+	return IsUnaryExpr(tokens)
+}
+
+func isOperator(token string) bool {
+	operators := []string{"PLUS", "MINUS", "STAR", "SLASH"}
+	for _, op := range operators {
+		if strings.HasPrefix(token, op) {
+			return true
+		}
+	}
+	return false
 }
