@@ -20,7 +20,7 @@ func Parse(tokens models.Tokens) models.Node {
 		return parseBinaryExpr(tokens.Success)
 	}
 	if utils.IsUnaryExpr(tokens.Success) {
-		return parseUraryExpr(tokens.Success)
+		return parseUnaryExpr(tokens.Success)
 	}
 	return models.NilNode{}
 }
@@ -37,14 +37,14 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 	var left, right models.Node
 	op := ""
 	if utils.Isoperator(tokens[0]) {
-		left = parseUraryExpr(tokens[:2])
+		left = parseUnaryExpr(tokens[:2])
 		splitOperator := strings.Split(tokens[2], " ")
 		op = parseOperator(splitOperator)
 		if len(tokens[3:]) == 1 {
 			splitValue := strings.Split(tokens[3], " ")
 			right = parsevalue(splitValue)
 		} else {
-			right = parseUraryExpr(tokens[3:])
+			right = parseUnaryExpr(tokens[3:])
 		}
 	} else {
 		splitValue := strings.Split(tokens[0], " ")
@@ -55,7 +55,7 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 			splitValue = strings.Split(tokens[2], " ")
 			right = parsevalue(splitValue)
 		} else {
-			right = parseUraryExpr(tokens[2:])
+			right = parseUnaryExpr(tokens[2:])
 		}
 	}
 	result := models.BinaryNode{
@@ -68,26 +68,11 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 }
 
 func parseMultipleBinaryExpr(tokens []string) models.Node {
-	var current = parseSingleBinaryExpr(tokens[0:3])
-	for i := 3; i < len(tokens); i += 2 {
-		var right models.Node
-		splitToken := strings.Split(tokens[i], " ")
-		op := parseOperator(splitToken)
-		remainingTokens := tokens[i+1:]
-		if utils.IsParethesizedExpr(remainingTokens) {
-			right = parseParrenthesisExpr(remainingTokens)
-		} else {
-			right = parsevalue(strings.Split(remainingTokens[0], " "))
-		}
-		current = models.BinaryNode{
-			Left:  current,
-			Op:    op,
-			Right: right,
-		}
+	left
+	if utils.Isoperator(tokens[0]) {
+
 	}
-	return models.StringNode{
-		Value: current.String(),
-	}
+	return models.NilNode{}
 }
 
 func parseOperator(splitToken []string) string {
@@ -126,7 +111,7 @@ func parseParrenthesisExpr(tokens []string) models.Node {
 		splitToken := strings.Split(innerTokens[0], " ")
 		innerNode = parsevalue(splitToken)
 	} else if utils.IsUnaryExpr(innerTokens) {
-		innerNode = parseUraryExpr(innerTokens)
+		innerNode = parseUnaryExpr(innerTokens)
 	} else if utils.IsBinaryExpression(innerTokens) {
 		innerNode = parseBinaryExpr(innerTokens)
 	} else if utils.IsParethesizedExpr(innerTokens) {
@@ -141,14 +126,14 @@ func parseParrenthesisExpr(tokens []string) models.Node {
 	}
 }
 
-func parseUraryExpr(tokens []string) models.Node {
+func parseUnaryExpr(tokens []string) models.Node {
 	splitToken := strings.Split(tokens[0], " ")
 	operator := splitToken[1]
 
 	var operand models.Node
 	remainingTokens := tokens[1:]
 	if utils.IsUnaryExpr(remainingTokens) {
-		operand = parseUraryExpr(remainingTokens)
+		operand = parseUnaryExpr(remainingTokens)
 	} else if utils.IsParethesizedExpr(remainingTokens) {
 		operand = parseParrenthesisExpr(remainingTokens)
 	} else if len(remainingTokens) == 1 {
