@@ -6,7 +6,6 @@ import (
 
 	"github.com/Stan-breaks/app/parse"
 	"github.com/Stan-breaks/app/tokenize"
-	"github.com/Stan-breaks/app/utils"
 )
 
 func main() {
