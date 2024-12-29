@@ -58,6 +58,27 @@ func (n NilNode) Evaluate() interface{} {
 	return "nil"
 }
 
+type UnaryNode struct {
+	Op    string
+	Value Node
+}
+
+func (n UnaryNode) String() string {
+	return fmt.Sprintf("(%s %v)", n.Op, n.Value)
+}
+
+func (n UnaryNode) Evaluate() interface{} {
+	num := n.Value.Evaluate()
+	switch n.Op {
+	case string(utils.PLUS):
+		return 1 * num.(float32)
+	case string(utils.MINUS):
+		return -1 * num.(float32)
+	default:
+		panic("Unknown operator: " + n.Op)
+	}
+}
+
 type BinaryNode struct {
 	Left  Node
 	Op    string
