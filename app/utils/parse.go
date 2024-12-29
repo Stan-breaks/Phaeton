@@ -29,15 +29,14 @@ func IsBinaryExpression(tokens []string) bool {
 
 	operator := -1
 	for i := 1; i < lenght; i++ {
-		if isOperator(tokens[i]) {
+		if Isoperator(tokens[i]) {
 			operator = i
-			break
 		}
 		if isInvalidToken(tokens[i]) {
 			return false
 		}
 	}
-	return operator == -1
+	return operator != -1
 }
 
 func isInvalidToken(token string) bool {
@@ -78,7 +77,7 @@ func isValidOperand(tokens []string) bool {
 	return IsUnaryExpr(tokens)
 }
 
-func isOperator(token string) bool {
+func Isoperator(token string) bool {
 	operators := []string{"PLUS", "MINUS", "STAR", "SLASH"}
 	for _, op := range operators {
 		if strings.HasPrefix(token, op) {
