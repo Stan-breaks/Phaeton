@@ -42,13 +42,8 @@ func main() {
 		}
 	case "parse":
 		value := parse.Parse(tokens)
-		result := value.Evaluate()
-		switch v := result.(type) {
-		case float32:
-			fmt.Println(utils.FormatFloat(v))
-		default:
-			fmt.Println(result)
-		}
+		result := value.String()
+		fmt.Print(result)
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
