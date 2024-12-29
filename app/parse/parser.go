@@ -68,13 +68,40 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 }
 
 func parseMultipleBinaryExpr(tokens []string) models.Node {
-	left
+	var left models.Node
+	currentPosition := 0
 	if utils.Isoperator(tokens[0]) {
-
+		left = parseUnaryExpr(tokens[:2])
+		currentPosition = 2
+	} else {
+		splitValue := strings.Split(tokens[0], " ")
+		left = parsevalue(splitValue)
+		currentPosition = 1
 	}
-	return models.NilNode{}
+	for currentPosition < len(tokens) {
+		splitOperator := strings.Split(tokens[currentPosition], " ")
+		op := parseOperator(splitOperator)
+		currentPosition++
+		var right models.Node
+		if currentPosition >= len(tokens) {
+			return models.NilNode{}
+		}
+		if utils.Isoperator(tokens[currentPosition]) {
+			right = parseUnaryExpr(tokens[currentPosition : currentPosition+2])
+			currentPosition++
+		} else {
+			splitValue := strings.Split(tokens[currentPosition], " ")
+			right = parsevalue(splitValue)
+		}
+		currentPosition++
+		left = models.BinaryNode{
+			Left:  left,
+			Op:    op,
+			Right: right,
+		}
+	}
+	return left
 }
-
 func parseOperator(splitToken []string) string {
 	switch splitToken[0] {
 	case "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "LESS", "AND", "OR":

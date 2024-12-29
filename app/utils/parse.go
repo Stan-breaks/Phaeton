@@ -64,7 +64,7 @@ func IsSingleBinary(tokens []string) bool {
 			numCount++
 		}
 	}
-	return numCount < 3
+	return numCount <= 2
 }
 
 func isValidOperand(tokens []string) bool {
