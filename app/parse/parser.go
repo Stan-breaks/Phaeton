@@ -26,6 +26,7 @@ func Parse(tokens models.Tokens) models.Node {
 }
 
 func parseBinaryExpr(tokens []string) models.Node {
+
 	if utils.IsSingleBinary(tokens) {
 		return parseSingleBinaryExpr(tokens)
 	} else {
@@ -36,22 +37,24 @@ func parseBinaryExpr(tokens []string) models.Node {
 func parseSingleBinaryExpr(tokens []string) models.Node {
 	var left, right models.Node
 	op := ""
-	for index, item := range tokens {
-		splitToken := strings.Split(item, " ")
-		switch index {
-		case 0:
-			left = parsevalue(splitToken)
-		case 1:
-			op = parseOperator(splitToken)
-		case 2:
-			right = parsevalue(splitToken)
+	if utils.Isoperator(tokens[0]) {
+		left = parseUraryExpr(tokens[:1])
+		splitOperator := strings.Split(tokens[2], " ")
+		op = parseOperator(splitOperator)
+		if len(tokens[3:]) == 1 {
+			splitValue := strings.Split(tokens[3], " ")
+			right = parsevalue(splitValue)
+		} else {
+			right = parseUraryExpr(tokens[3:])
 		}
 	}
-	return models.BinaryNode{
+	result := models.BinaryNode{
 		Left:  left,
 		Op:    op,
 		Right: right,
 	}
+
+	return models.StringNode{Value: result.String()}
 }
 
 func parseMultipleBinaryExpr(tokens []string) models.Node {
@@ -147,8 +150,8 @@ func parseUraryExpr(tokens []string) models.Node {
 	if operand.Evaluate() == nil || operand.String() == "<nil>" {
 		return models.NilNode{}
 	}
-	result := "(" + operator + " " + operand.String() + ")"
-	return models.StringNode{
-		Value: result,
+	return models.UnaryNode{
+		Op:    operator,
+		Value: operand,
 	}
 }
