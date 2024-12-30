@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"strconv"
-	"strings"
 	"unicode"
 
 	"github.com/Stan-breaks/app/models"
@@ -320,10 +319,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 						if identifierCount == 0 {
 							switch fileContents[i] {
 							case 'a':
-								if fileLenght-2 > i {
-									if strings.Contains(fileContents[i:i+3], "and") {
+								if fileLenght-1 > i {
+									if i+2 <= fileLenght && fileContents[i:i+3] == "and" {
 										tokens.Success = append(tokens.Success, "AND and null")
-										if fileLenght-2 == i {
+										if fileLenght-1 == i {
 											break
 										}
 										i += 2
@@ -331,10 +330,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 'c':
-								if fileLenght-4 > i {
-									if strings.Contains(fileContents[i:i+5], "class") {
+								if fileLenght-3 > i {
+									if i+4 <= fileLenght && fileContents[i:i+5] == "class" {
 										tokens.Success = append(tokens.Success, "CLASS class null")
-										if fileLenght-4 == i {
+										if fileLenght-3 == i {
 											break
 										}
 										i += 4
@@ -343,10 +342,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 'e':
-								if fileLenght-3 > i {
-									if strings.Contains(fileContents[i:i+4], "else") {
+								if fileLenght-2 > i {
+									if i+3 <= fileLenght && fileContents[i:i+4] == "else" {
 										tokens.Success = append(tokens.Success, "ELSE else null")
-										if fileLenght-3 == i {
+										if fileLenght-2 == i {
 											break
 										}
 										i += 3
@@ -354,18 +353,18 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 'f':
-								if fileLenght-2 > i {
-									if strings.Contains(fileContents[i:i+3], "for") {
+								if fileLenght-1 > i {
+									if i+2 <= fileLenght && fileContents[i:i+3] == "for" {
 										tokens.Success = append(tokens.Success, "FOR for null")
-										if fileLenght-2 == i {
+										if fileLenght-1 == i {
 											break
 										}
 										i += 2
 										continue
 									}
-									if strings.Contains(fileContents[i:i+3], "fun") {
+									if i+2 <= fileLenght && fileContents[i:i+3] == "fun" {
 										tokens.Success = append(tokens.Success, "FUN fun null")
-										if fileLenght-2 == i {
+										if fileLenght-1 == i {
 											break
 										}
 										i += 2
@@ -373,10 +372,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 
-								if fileLenght-4 > i {
-									if strings.Contains(fileContents[i:i+5], "false") {
+								if fileLenght-3 > i {
+									if i+4 <= fileLenght && fileContents[i:i+5] == "false" {
 										tokens.Success = append(tokens.Success, "FALSE false null")
-										if fileLenght-4 == i {
+										if fileLenght-3 == i {
 											break
 										}
 										i += 4
@@ -384,10 +383,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 'i':
-								if fileLenght-1 > i {
-									if strings.Contains(fileContents[i:i+2], "if") {
+								if fileLenght > i {
+									if i+1 <= fileLenght && fileContents[i:i+2] == "if" {
 										tokens.Success = append(tokens.Success, "IF if null")
-										if fileLenght-1 == i {
+										if fileLenght == i {
 											break
 										}
 										i += 1
@@ -395,10 +394,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 'n':
-								if fileLenght-2 > i {
-									if strings.Contains(fileContents[i:i+3], "nil") {
+								if fileLenght-1 > i {
+									if i+2 <= fileLenght && fileContents[i:i+3] == "nil" {
 										tokens.Success = append(tokens.Success, "NIL nil null")
-										if fileLenght-2 == i {
+										if fileLenght-1 == i {
 											break
 										}
 										i += 2
@@ -406,10 +405,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 'o':
-								if fileLenght-1 > i {
-									if strings.Contains(fileContents[i:i+2], "or") {
+								if fileLenght > i {
+									if i+1 <= fileLenght && fileContents[i:i+2] == "or" {
 										tokens.Success = append(tokens.Success, "OR or null")
-										if fileLenght-1 == i {
+										if fileLenght == i {
 											break
 										}
 										i += 1
@@ -417,10 +416,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 'p':
-								if fileLenght-4 > i {
-									if strings.Contains(fileContents[i:i+5], "print") {
+								if fileLenght-3 > i {
+									if i+4 <= fileLenght && fileContents[i:i+5] == "print" {
 										tokens.Success = append(tokens.Success, "PRINT print null")
-										if fileLenght-4 == i {
+										if fileLenght-3 == i {
 											break
 										}
 										i += 4
@@ -428,10 +427,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 'r':
-								if fileLenght-5 > i {
-									if strings.Contains(fileContents[i:i+6], "return") {
+								if fileLenght-4 > i {
+									if i+5 <= fileLenght && fileContents[i:i+6] == "return" {
 										tokens.Success = append(tokens.Success, "RETURN return null")
-										if fileLenght-5 == i {
+										if fileLenght-4 == i {
 											break
 										}
 										i += 5
@@ -439,10 +438,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 's':
-								if fileLenght-4 > i {
-									if strings.Contains(fileContents[i:i+5], "super") {
+								if fileLenght-3 > i {
+									if i+4 <= fileLenght && fileContents[i:i+5] == "super" {
 										tokens.Success = append(tokens.Success, "SUPER super null")
-										if fileLenght-4 == i {
+										if fileLenght-3 == i {
 											break
 										}
 										i += 4
@@ -450,18 +449,18 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 't':
-								if fileLenght-3 > i {
-									if strings.Contains(fileContents[i:i+4], "true") {
+								if fileLenght-2 > i {
+									if i+3 <= fileLenght && fileContents[i:i+4] == "true" {
 										tokens.Success = append(tokens.Success, "TRUE true null")
-										if fileLenght-3 == i {
+										if fileLenght-2 == i {
 											break
 										}
 										i += 3
 										continue
 									}
-									if strings.Contains(fileContents[i:i+4], "this") {
+									if i+3 <= fileLenght && fileContents[i:i+4] == "this" {
 										tokens.Success = append(tokens.Success, "THIS this null")
-										if fileLenght-3 == i {
+										if fileLenght-2 == i {
 											break
 										}
 										i += 3
@@ -469,10 +468,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 'v':
-								if fileLenght-2 > i {
-									if strings.Contains(fileContents[i:i+3], "var") {
+								if fileLenght-1 > i {
+									if i+2 <= fileLenght && fileContents[i:i+3] == "var" {
 										tokens.Success = append(tokens.Success, "VAR var null")
-										if fileLenght-2 == i {
+										if fileLenght-1 == i {
 											break
 										}
 										i += 2
@@ -480,10 +479,10 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 									}
 								}
 							case 'w':
-								if fileLenght-4 > i {
-									if strings.Contains(fileContents[i:i+5], "while") {
+								if fileLenght-3 > i {
+									if i+4 <= fileLenght && fileContents[i:i+5] == "while" {
 										tokens.Success = append(tokens.Success, "WHILE while null")
-										if fileLenght-4 == i {
+										if fileLenght-3 == i {
 											break
 										}
 										i += 4
