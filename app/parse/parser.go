@@ -90,8 +90,23 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 			right = parseUnaryExpr(tokens[currentPosition : currentPosition+2])
 			currentPosition++
 		} else {
-			splitValue := strings.Split(tokens[currentPosition], " ")
-			right = parsevalue(splitValue)
+			if strings.HasPrefix(tokens[currentPosition], "LEFT_PAREN") {
+				var parenEnd = 0
+				for i := currentPosition; i < len(tokens); i++ {
+					if strings.HasPrefix(tokens[i], "RIGHT_PAREN") {
+						parenEnd = i
+						break
+					}
+				}
+				if parenEnd == 0 {
+					return models.NilNode{}
+				}
+				right = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
+				currentPosition = parenEnd
+			} else {
+				splitValue := strings.Split(tokens[currentPosition], " ")
+				right = parsevalue(splitValue)
+			}
 		}
 		currentPosition++
 		left = models.BinaryNode{
@@ -127,7 +142,7 @@ func parsevalue(splitToken []string) models.Node {
 		joinedString := strings.Join(splitToken, " ")
 		return models.StringNode{Value: strings.Split(joinedString, "\"")[1]}
 	default:
-		return nil
+		return models.NilNode{}
 	}
 }
 
@@ -147,9 +162,8 @@ func parseParrenthesisExpr(tokens []string) models.Node {
 		innerNode = models.NilNode{}
 	}
 
-	result := "(group " + innerNode.String() + ")"
-	return models.StringNode{
-		Value: result,
+	return models.ParenthesisNode{
+		Expression: innerNode,
 	}
 }
 
@@ -158,16 +172,18 @@ func parseUnaryExpr(tokens []string) models.Node {
 	operator := splitToken[1]
 
 	var operand models.Node
-	remainingTokens := tokens[1:]
-	if utils.IsUnaryExpr(remainingTokens) {
-		operand = parseUnaryExpr(remainingTokens)
-	} else if utils.IsParethesizedExpr(remainingTokens) {
-		operand = parseParrenthesisExpr(remainingTokens)
-	} else if len(remainingTokens) == 1 {
-		splitRemain0 := strings.Split(remainingTokens[0], " ")
+	if len(tokens[1:]) == 1 {
+		splitRemain0 := strings.Split(tokens[1], " ")
 		operand = parsevalue(splitRemain0)
 	} else {
-		return models.NilNode{}
+		remainingTokens := tokens[1:]
+		if utils.IsUnaryExpr(remainingTokens) {
+			operand = parseUnaryExpr(remainingTokens)
+		} else if utils.IsParethesizedExpr(remainingTokens) {
+			operand = parseParrenthesisExpr(remainingTokens)
+		} else {
+			return models.NilNode{}
+		}
 	}
 	if operand.Evaluate() == nil || operand.String() == "<nil>" {
 		return models.NilNode{}
