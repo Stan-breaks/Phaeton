@@ -58,6 +58,18 @@ func (n NilNode) Evaluate() interface{} {
 	return "nil"
 }
 
+type ParenthesisNode struct {
+	Expression Node
+}
+
+func (n ParenthesisNode) String() string {
+	return fmt.Sprintf("(group %s)", n.Expression.String())
+}
+
+func (n ParenthesisNode) Evaluate() interface{} {
+	return n.Expression.Evaluate()
+}
+
 type UnaryNode struct {
 	Op    string
 	Value Node
