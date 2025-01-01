@@ -41,7 +41,6 @@ func IsBinaryExpression(tokens []string) bool {
 
 func isInvalidToken(token string) bool {
 	invalidPrefixes := []string{
-		"STRING",
 		"BANG",
 		"TRUE",
 		"FALSE",
