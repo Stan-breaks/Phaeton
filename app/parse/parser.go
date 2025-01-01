@@ -2,6 +2,7 @@ package parse
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -73,30 +74,30 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 	currentPosition := 0
 	myTokens := rearrangeBinary(tokens)
 	fmt.Print(myTokens)
-	if utils.Isoperator(tokens[0]) {
-		left = parseUnaryExpr(tokens[:2])
+	if utils.Isoperator(myTokens[0]) {
+		left = parseUnaryExpr(myTokens[:2])
 		currentPosition = 2
 	} else {
-		splitValue := strings.Split(tokens[0], " ")
+		splitValue := strings.Split(myTokens[0], " ")
 		left = parsevalue(splitValue)
 		currentPosition = 1
 	}
-	for currentPosition < len(tokens) {
-		splitOperator := strings.Split(tokens[currentPosition], " ")
+	for currentPosition < len(myTokens) {
+		splitOperator := strings.Split(myTokens[currentPosition], " ")
 		op := parseOperator(splitOperator)
 		currentPosition++
 		var right models.Node
-		if currentPosition >= len(tokens) {
+		if currentPosition >= len(myTokens) {
 			return models.NilNode{}
 		}
-		if utils.Isoperator(tokens[currentPosition]) {
-			right = parseUnaryExpr(tokens[currentPosition : currentPosition+2])
+		if utils.Isoperator(myTokens[currentPosition]) {
+			right = parseUnaryExpr(myTokens[currentPosition : currentPosition+2])
 			currentPosition++
 		} else {
-			if strings.HasPrefix(tokens[currentPosition], "LEFT_PAREN") {
+			if strings.HasPrefix(myTokens[currentPosition], "LEFT_PAREN") {
 				var parenEnd = 0
-				for i := currentPosition; i < len(tokens); i++ {
-					if strings.HasPrefix(tokens[i], "RIGHT_PAREN") {
+				for i := currentPosition; i < len(myTokens); i++ {
+					if strings.HasPrefix(myTokens[i], "RIGHT_PAREN") {
 						parenEnd = i
 						break
 					}
@@ -104,10 +105,10 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 				if parenEnd == 0 {
 					return models.NilNode{}
 				}
-				right = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
+				right = parseParrenthesisExpr(myTokens[currentPosition : parenEnd+1])
 				currentPosition = parenEnd
 			} else {
-				splitValue := strings.Split(tokens[currentPosition], " ")
+				splitValue := strings.Split(myTokens[currentPosition], " ")
 				right = parsevalue(splitValue)
 			}
 		}
@@ -198,15 +199,13 @@ func parseUnaryExpr(tokens []string) models.Node {
 }
 
 func rearrangeBinary(tokens []string) []string {
-	var result []string
 	precedence := map[string]int{
 		"STAR":  4, // *
 		"SLASH": 3, // /
 		"PLUS":  2, // +
 		"MINUS": 1, // -
 	}
-	highestPrecedence := -1
-	highestIndex := 0
+	var operators []models.Operator
 	currentPosition := 0
 	if utils.Isoperator(tokens[0]) {
 		currentPosition = 2
@@ -215,9 +214,12 @@ func rearrangeBinary(tokens []string) []string {
 	}
 	for currentPosition < len(tokens) {
 		splitToken := strings.Split(tokens[currentPosition], " ")
-		if precedence[splitToken[0]] > highestPrecedence {
-			highestPrecedence = precedence[splitToken[0]]
-			highestIndex = currentPosition
+		if prec, ok := precedence[splitToken[0]]; ok {
+			operators = append(operators, models.Operator{
+				Index:      currentPosition,
+				Precedence: prec,
+				Token:      tokens[currentPosition],
+			})
 		}
 		if currentPosition < len(tokens)-1 && utils.Isoperator(tokens[currentPosition+1]) {
 			currentPosition += 1
@@ -225,6 +227,85 @@ func rearrangeBinary(tokens []string) []string {
 		currentPosition += 2
 	}
 
-	fmt.Print(tokens[highestIndex])
+	if len(operators) == 0 {
+		return tokens
+	}
+
+	sort.SliceStable(operators, func(i, j int) bool {
+		return operators[i].Precedence > operators[j].Precedence
+	})
+
+	result := make([]string, len(tokens))
+	copy(result, tokens)
+	for _, op := range operators {
+		leftStart, leftEnd := findLeftOperand(result, op.Index)
+		rightStart, rightEnd := findRightOperand(result, op.Index)
+
+		// Create new arrangement
+		newArrangement := make([]string, 0)
+
+		// Add tokens before this expression
+		newArrangement = append(newArrangement, result[:leftStart]...)
+
+		// Add this expression
+		newArrangement = append(newArrangement, result[leftStart:leftEnd]...)
+		newArrangement = append(newArrangement, op.Token)
+		newArrangement = append(newArrangement, result[rightStart:rightEnd]...)
+
+		// Add remaining tokens
+		newArrangement = append(newArrangement, result[rightEnd:]...)
+
+		result = newArrangement
+	}
+
 	return result
+}
+
+// Helper function to find the left operand boundaries
+func findLeftOperand(tokens []string, opIndex int) (start, end int) {
+	end = opIndex
+	start = end - 1
+
+	// Handle parenthesized expressions
+	if strings.HasPrefix(tokens[start], "RIGHT_PAREN") {
+		parenCount := 1
+		for start > 0 {
+			start--
+			if strings.HasPrefix(tokens[start], "RIGHT_PAREN") {
+				parenCount++
+			} else if strings.HasPrefix(tokens[start], "LEFT_PAREN") {
+				parenCount--
+				if parenCount == 0 {
+					break
+				}
+			}
+		}
+	}
+
+	return start, end
+}
+
+// Helper function to find the right operand boundaries
+func findRightOperand(tokens []string, opIndex int) (start, end int) {
+	start = opIndex + 1
+	end = start + 1
+
+	// Handle parenthesized expressions
+	if strings.HasPrefix(tokens[start], "LEFT_PAREN") {
+		parenCount := 1
+		for end < len(tokens) {
+			if strings.HasPrefix(tokens[end], "LEFT_PAREN") {
+				parenCount++
+			} else if strings.HasPrefix(tokens[end], "RIGHT_PAREN") {
+				parenCount--
+				if parenCount == 0 {
+					end++
+					break
+				}
+			}
+			end++
+		}
+	}
+
+	return start, end
 }
