@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -70,6 +71,8 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 func parseMultipleBinaryExpr(tokens []string) models.Node {
 	var left models.Node
 	currentPosition := 0
+	myTokens := rearrangeBinary(tokens)
+	fmt.Print(myTokens)
 	if utils.Isoperator(tokens[0]) {
 		left = parseUnaryExpr(tokens[:2])
 		currentPosition = 2
@@ -192,4 +195,36 @@ func parseUnaryExpr(tokens []string) models.Node {
 		Op:    operator,
 		Value: operand,
 	}
+}
+
+func rearrangeBinary(tokens []string) []string {
+	var result []string
+	precedence := map[string]int{
+		"STAR":  4, // *
+		"SLASH": 3, // /
+		"PLUS":  2, // +
+		"MINUS": 1, // -
+	}
+	highestPrecedence := -1
+	highestIndex := 0
+	currentPosition := 0
+	if utils.Isoperator(tokens[0]) {
+		currentPosition = 2
+	} else {
+		currentPosition = 1
+	}
+	for currentPosition < len(tokens) {
+		splitToken := strings.Split(tokens[currentPosition], " ")
+		if precedence[splitToken[0]] > highestPrecedence {
+			highestPrecedence = precedence[splitToken[0]]
+			highestIndex = currentPosition
+		}
+		if currentPosition < len(tokens)-1 && utils.Isoperator(tokens[currentPosition+1]) {
+			currentPosition += 1
+		}
+		currentPosition += 2
+	}
+
+	fmt.Print(tokens[highestIndex])
+	return result
 }
