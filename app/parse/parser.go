@@ -70,31 +70,30 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 func parseMultipleBinaryExpr(tokens []string) models.Node {
 	var left models.Node
 	currentPosition := 0
-	myTokens := rearrangeBinary(tokens)
-	if utils.Isoperator(myTokens[0]) {
-		left = parseUnaryExpr(myTokens[:2])
+	if utils.Isoperator(tokens[0]) {
+		left = parseUnaryExpr(tokens[:2])
 		currentPosition = 2
 	} else {
-		splitValue := strings.Split(myTokens[0], " ")
+		splitValue := strings.Split(tokens[0], " ")
 		left = parsevalue(splitValue)
 		currentPosition = 1
 	}
-	for currentPosition < len(myTokens) {
-		splitOperator := strings.Split(myTokens[currentPosition], " ")
+	for currentPosition < len(tokens) {
+		splitOperator := strings.Split(tokens[currentPosition], " ")
 		op := parseOperator(splitOperator)
 		currentPosition++
 		var right models.Node
-		if currentPosition >= len(myTokens) {
+		if currentPosition >= len(tokens) {
 			return models.NilNode{}
 		}
-		if utils.Isoperator(myTokens[currentPosition]) {
-			right = parseUnaryExpr(myTokens[currentPosition : currentPosition+2])
+		if utils.Isoperator(tokens[currentPosition]) {
+			right = parseUnaryExpr(tokens[currentPosition : currentPosition+2])
 			currentPosition++
 		} else {
-			if strings.HasPrefix(myTokens[currentPosition], "LEFT_PAREN") {
+			if strings.HasPrefix(tokens[currentPosition], "LEFT_PAREN") {
 				var parenEnd = 0
-				for i := currentPosition; i < len(myTokens); i++ {
-					if strings.HasPrefix(myTokens[i], "RIGHT_PAREN") {
+				for i := currentPosition; i < len(tokens); i++ {
+					if strings.HasPrefix(tokens[i], "RIGHT_PAREN") {
 						parenEnd = i
 						break
 					}
@@ -102,10 +101,10 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 				if parenEnd == 0 {
 					return models.NilNode{}
 				}
-				right = parseParrenthesisExpr(myTokens[currentPosition : parenEnd+1])
+				right = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
 				currentPosition = parenEnd
 			} else {
-				splitValue := strings.Split(myTokens[currentPosition], " ")
+				splitValue := strings.Split(tokens[currentPosition], " ")
 				right = parsevalue(splitValue)
 			}
 		}
@@ -117,11 +116,6 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 		}
 	}
 	return left
-}
-
-func rearrangeBinary(tokens []string) []string {
-
-	return tokens
 }
 
 func parseOperator(splitToken []string) string {
@@ -199,4 +193,79 @@ func parseUnaryExpr(tokens []string) models.Node {
 		Op:    operator,
 		Value: operand,
 	}
+}
+
+func rearrangeBinary(tokens []string) []string {
+	precedence := map[string]int{
+		"STAR":  4, // *
+		"SLASH": 3, // /
+		"PLUS":  2, // +
+		"MINUS": 1, // -
+	}
+	var operators []string
+	var operands []string
+	currentPosition := 0
+	if utils.Isoperator(tokens[0]) {
+		operators = append(operators, tokens[0])
+		operands = append(operands, tokens[1])
+		currentPosition = 2
+	} else {
+		operands = append(operands, tokens[0])
+		currentPosition = 1
+	}
+	for currentPosition < len(tokens) {
+		if currentPosition < len(tokens) && utils.Isoperator(tokens[currentPosition]) {
+			operators = append(operators, tokens[currentPosition])
+			currentPosition++
+		}
+
+		if currentPosition < len(tokens) {
+			operands = append(operands, tokens[currentPosition])
+			currentPosition++
+		}
+	}
+
+	// Rearrange based on precedence
+	var result []string
+	for len(operators) > 0 {
+		// Find highest precedence operator
+		highestPrecedence := -1
+		highestIndex := 0
+
+		for i, op := range operators {
+			opType := strings.Split(op, " ")[0]
+			if precedence[opType] > highestPrecedence {
+				highestPrecedence = precedence[opType]
+				highestIndex = i
+			}
+		}
+
+		// Add to result in order: operand, operator, operand
+		if len(result) == 0 {
+			result = append(result, operands[highestIndex])
+			result = append(result, operators[highestIndex])
+			result = append(result, operands[highestIndex+1])
+		} else {
+			// Insert the high precedence operation at the beginning
+			newResult := []string{operands[highestIndex], operators[highestIndex], operands[highestIndex+1]}
+			result = append(newResult, result...)
+		}
+
+		// Remove used operators and operands
+		operators = append(operators[:highestIndex], operators[highestIndex+1:]...)
+		operands = append(operands[:highestIndex], operands[highestIndex+2:]...)
+
+		// Insert the result as a new operand
+		operands = append(operands[:highestIndex], append([]string{strings.Join(result, " ")}, operands[highestIndex:]...)...)
+
+		// Clear result for next iteration
+		result = []string{}
+	}
+
+	// Add final operand if any remains
+	if len(operands) > 0 {
+		result = append(result, operands...)
+	}
+
+	return result
 }
