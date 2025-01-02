@@ -68,7 +68,14 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 }
 
 func parseMultipleBinaryExpr(tokens []string) models.Node {
+	precedence := map[string]int{
+		"*": 4,
+		"/": 3,
+		"+": 2,
+		"-": 1,
+	}
 	var left models.Node
+	var right models.Node
 	currentPosition := 0
 	if utils.Isoperator(tokens[0]) {
 		left = parseUnaryExpr(tokens[:2])
@@ -78,11 +85,26 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 		left = parsevalue(splitValue)
 		currentPosition = 1
 	}
+	splitOperator := strings.Split(tokens[currentPosition], " ")
+	op := parseOperator(splitOperator)
+	currentPosition++
+	if utils.Isoperator(tokens[currentPosition]) {
+		right = parseUnaryExpr(tokens[currentPosition:2])
+		currentPosition += 2
+	} else {
+		splitValue := strings.Split(tokens[currentPosition], " ")
+		right = parsevalue(splitValue)
+		currentPosition += 1
+	}
+	previousBinary := models.BinaryNode{
+		Left:  left,
+		Op:    op,
+		Right: right,
+	}
 	for currentPosition < len(tokens) {
-		splitOperator := strings.Split(tokens[currentPosition], " ")
-		op := parseOperator(splitOperator)
+		splitOperator = strings.Split(tokens[currentPosition], " ")
+		op = parseOperator(splitOperator)
 		currentPosition++
-		var right models.Node
 		if currentPosition >= len(tokens) {
 			return models.NilNode{}
 		}
@@ -108,15 +130,31 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 				right = parsevalue(splitValue)
 			}
 		}
-		currentPosition++
-		left = models.BinaryNode{
-			Left:  left,
-			Op:    op,
-			Right: right,
+		if precedence[op] > precedence[previousBinary.Op] {
+			temp := previousBinary
+			previousBinary = models.BinaryNode{
+				Left:  previousBinary.Right,
+				Op:    op,
+				Right: right,
+			}
+			left = models.BinaryNode{
+				Left:  previousBinary,
+				Op:    temp.Op,
+				Right: temp.Left,
+			}
+		} else {
+			left = models.BinaryNode{
+				Left:  left,
+				Op:    op,
+				Right: right,
+			}
 		}
+		currentPosition++
+
 	}
 	return left
 }
+
 func parseOperator(splitToken []string) string {
 	switch splitToken[0] {
 	case "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "LESS", "AND", "OR":
