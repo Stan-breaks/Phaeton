@@ -91,26 +91,19 @@ func (n UnaryNode) Evaluate() interface{} {
 	}
 }
 
-type ShiftedBinaryNode struct {
-	Value BinaryNode
-}
-
-func (n ShiftedBinaryNode) String() string {
-	return fmt.Sprintf("(%s %v %v)", n.Value.Op, n.Value.Right, n.Value.Left)
-}
-
-func (n ShiftedBinaryNode) Evaluate() interface{} {
-	return n.Value.Evaluate()
-}
-
 type BinaryNode struct {
-	Left  Node
-	Op    string
-	Right Node
+	Left    Node
+	Op      string
+	Right   Node
+	Shifted int8
 }
 
 func (n BinaryNode) String() string {
-	return fmt.Sprintf("(%s %v %v)", n.Op, n.Left, n.Right)
+	if n.Shifted != 0 {
+		return fmt.Sprintf("(%s %v %v)", n.Op, n.Right, n.Left)
+	} else {
+		return fmt.Sprintf("(%s %v %v)", n.Op, n.Left, n.Right)
+	}
 }
 
 func (n BinaryNode) Evaluate() interface{} {
