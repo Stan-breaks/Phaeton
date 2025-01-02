@@ -91,6 +91,18 @@ func (n UnaryNode) Evaluate() interface{} {
 	}
 }
 
+type ShiftedBinaryNode struct {
+	Value BinaryNode
+}
+
+func (n ShiftedBinaryNode) String() string {
+	return fmt.Sprintf("(%s %v %v)", n.Value.Op, n.Value.Right, n.Value.Left)
+}
+
+func (n ShiftedBinaryNode) Evaluate() interface{} {
+	return n.Value.Evaluate()
+}
+
 type BinaryNode struct {
 	Left  Node
 	Op    string
