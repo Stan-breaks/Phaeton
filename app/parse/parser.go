@@ -137,19 +137,13 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 				Op:    op,
 				Right: right,
 			}
-			left = models.ShiftedBinaryNode{
-				Value: models.BinaryNode{
-					Left:  previousBinary,
-					Op:    temp.Op,
-					Right: temp.Left,
-				},
+			left = models.BinaryNode{
+				Left:    previousBinary,
+				Op:      temp.Op,
+				Right:   temp.Left,
+				Shifted: 1,
 			}
-			//todo to ensure consitency btwn the left and previousBinary
-			previousBinary = models.BinaryNode{
-				Left:  previousBinary,
-				Op:    temp.Op,
-				Right: temp.Left,
-			}
+			previousBinary = left.(models.BinaryNode)
 		} else {
 			left = models.BinaryNode{
 				Left:  previousBinary,
