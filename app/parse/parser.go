@@ -144,7 +144,7 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 					Right: temp.Left,
 				},
 			}
-			//todo
+			//todo to ensure consitency btwn the left and previousBinary
 			previousBinary = models.BinaryNode{
 				Left:  previousBinary,
 				Op:    temp.Op,
