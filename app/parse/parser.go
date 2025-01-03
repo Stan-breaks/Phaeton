@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -64,6 +65,7 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 		Right: right,
 	}
 
+	fmt.Print(result)
 	return result
 }
 
