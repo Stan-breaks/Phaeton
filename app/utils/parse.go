@@ -33,7 +33,36 @@ func IsParethesizedExpr(tokens []string) bool {
 
 func IsUnaryExpr(tokens []string) bool {
 	firstToken := strings.Split(tokens[0], " ")
-	return (firstToken[0] == "BANG" || firstToken[0] == "MINUS" || firstToken[0] == "PLUS")
+	if firstToken[0] != "BANG" && firstToken[0] != "MINUS" && firstToken[0] != "PLUS" {
+		return false
+	}
+	operandCount := 0
+	for i := 1; i < len(tokens); i++ {
+		token := tokens[i]
+		if strings.HasPrefix(token, "NUMBER") ||
+			strings.HasPrefix(token, "STRING") ||
+			strings.HasPrefix(token, "TRUE") ||
+			strings.HasPrefix(token, "FALSE") {
+			operandCount++
+			continue
+		}
+		if strings.HasPrefix(token, "LEFT_PAREN") {
+			operandCount++
+			parenCount := 1
+			for j := i + 1; j < len(tokens); j++ {
+				if strings.HasPrefix(tokens[j], "LEFT_PAREN") {
+					parenCount++
+				} else if strings.HasPrefix(tokens[j], "RIGHT_PAREN") {
+					parenCount--
+					if parenCount == 0 {
+						i = j
+						break
+					}
+				}
+			}
+		}
+	}
+	return operandCount == 1
 }
 
 func IsBinaryExpression(tokens []string) bool {
