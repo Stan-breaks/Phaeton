@@ -210,7 +210,7 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 
 func parseOperator(splitToken []string) string {
 	switch splitToken[0] {
-	case "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "LESS", "AND", "OR":
+	case "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL":
 		return splitToken[1]
 	default:
 		return ""
