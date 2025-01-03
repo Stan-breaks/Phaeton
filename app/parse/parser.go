@@ -21,7 +21,6 @@ func Parse(tokens models.Tokens) models.Node {
 		return parseUnaryExpr(tokens.Success)
 	}
 	if utils.IsBinaryExpression(tokens.Success) {
-		fmt.Print(true)
 		return parseBinaryExpr(tokens.Success)
 	}
 
@@ -65,7 +64,9 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 	op := parseOperator(splitOperator)
 	currentPosition++
 	if utils.Isoperator(tokens[currentPosition]) {
-		right = parseUnaryExpr(tokens[currentPosition : currentPosition+2])
+		fmt.Print(true)
+		//todo parse longer unary
+		right = parseUnaryExpr(tokens[currentPosition:])
 	} else if strings.HasPrefix(tokens[currentPosition], "LEFT_PAREN") {
 		var parenEnd = 0
 		for i := currentPosition; i < len(tokens); i++ {
@@ -266,9 +267,9 @@ func parseUnaryExpr(tokens []string) models.Node {
 	} else {
 		remainingTokens := tokens[1:]
 		if utils.IsParethesizedExpr(remainingTokens) {
-			operand = parseUnaryExpr(remainingTokens)
-		} else if utils.IsUnaryExpr(remainingTokens) {
 			operand = parseParrenthesisExpr(remainingTokens)
+		} else if utils.IsUnaryExpr(remainingTokens) {
+			operand = parseUnaryExpr(remainingTokens)
 		} else {
 			return models.NilNode{}
 		}
