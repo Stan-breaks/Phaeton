@@ -31,7 +31,7 @@ func IsParethesizedExpr(tokens []string) bool {
 }
 
 func IsUnaryExpr(tokens []string) bool {
-	if len(tokens) < 2 {
+	if len(tokens) > 2 {
 		return false
 	}
 	firstToken := strings.Split(tokens[0], " ")
@@ -80,7 +80,7 @@ func IsSingleBinary(tokens []string) bool {
 			numCount++
 		}
 	}
-	return numCount <= 2
+	return numCount == 2
 }
 
 func Isoperator(token string) bool {
