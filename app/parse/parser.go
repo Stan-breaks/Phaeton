@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -35,37 +34,56 @@ func parseBinaryExpr(tokens []string) models.Node {
 }
 
 func parseSingleBinaryExpr(tokens []string) models.Node {
-	var left, right models.Node
-	op := ""
-	if utils.Isoperator(tokens[0]) {
-		left = parseUnaryExpr(tokens[:2])
-		splitOperator := strings.Split(tokens[2], " ")
-		op = parseOperator(splitOperator)
-		if len(tokens[3:]) == 1 {
-			splitValue := strings.Split(tokens[3], " ")
-			right = parsevalue(splitValue)
-		} else {
-			right = parseUnaryExpr(tokens[3:])
+	var left models.Node
+	var right models.Node
+	currentPosition := 0
+	if utils.Isoperator(tokens[currentPosition]) {
+		left = parseUnaryExpr(tokens[currentPosition : currentPosition+2])
+		currentPosition = 2
+	} else if strings.HasPrefix(tokens[currentPosition], "LEFT_PAREN") {
+		var parenEnd = 0
+		for i := currentPosition; i < len(tokens); i++ {
+			if strings.HasPrefix(tokens[i], "RIGHT_PAREN") {
+				parenEnd = i
+				break
+			}
 		}
+		if parenEnd == 0 {
+			return models.NilNode{}
+		}
+		left = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
+		currentPosition = parenEnd + 1
 	} else {
 		splitValue := strings.Split(tokens[0], " ")
 		left = parsevalue(splitValue)
-		splitOperator := strings.Split(tokens[1], " ")
-		op = parseOperator(splitOperator)
-		if len(tokens[2:]) == 1 {
-			splitValue = strings.Split(tokens[2], " ")
-			right = parsevalue(splitValue)
-		} else {
-			right = parseUnaryExpr(tokens[2:])
+		currentPosition = 1
+	}
+	splitOperator := strings.Split(tokens[currentPosition], " ")
+	op := parseOperator(splitOperator)
+	currentPosition++
+	if utils.Isoperator(tokens[currentPosition]) {
+		right = parseUnaryExpr(tokens[currentPosition : currentPosition+2])
+	} else if strings.HasPrefix(tokens[currentPosition], "LEFT_PAREN") {
+		var parenEnd = 0
+		for i := currentPosition; i < len(tokens); i++ {
+			if strings.HasPrefix(tokens[i], "RIGHT_PAREN") {
+				parenEnd = i
+				break
+			}
 		}
+		if parenEnd == 0 {
+			return models.NilNode{}
+		}
+		right = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
+	} else {
+		splitValue := strings.Split(tokens[currentPosition], " ")
+		right = parsevalue(splitValue)
 	}
 	result := models.BinaryNode{
 		Left:  left,
 		Op:    op,
 		Right: right,
 	}
-
-	fmt.Print(result)
 	return result
 }
 
