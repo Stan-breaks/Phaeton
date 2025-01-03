@@ -131,6 +131,11 @@ func (n BinaryNode) Evaluate() interface{} {
 		return left.(float32) > right.(float32)
 	case string(utils.LESS):
 		return left.(float32) < right.(float32)
+	case ">=":
+		return left.(float32) >= right.(float32)
+	case "<=":
+		return left.(float32) <= right.(float32)
+
 	default:
 		panic("Unknown operator: " + n.Op)
 	}
