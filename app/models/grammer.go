@@ -86,6 +86,13 @@ func (n UnaryNode) Evaluate() interface{} {
 		return 1 * num.(float32)
 	case string(utils.MINUS):
 		return -1 * num.(float32)
+	case string(utils.BANG):
+		switch num := num.(type) {
+		case bool:
+			return !num
+		default:
+			panic(fmt.Sprintf("Invalid type for ! operator: %T", num))
+		}
 	default:
 		panic("Unknown operator: " + n.Op)
 	}
