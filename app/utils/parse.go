@@ -72,19 +72,30 @@ func isInvalidToken(token string) bool {
 	return false
 }
 func IsSingleBinary(tokens []string) bool {
-	numCount := 0
-	for _, token := range tokens {
-		if strings.HasPrefix(token, "NUMBER") {
-			numCount++
+	operandCount := 0
+	for i := 0; i < len(tokens); i++ {
+		token := tokens[i]
+		if strings.HasPrefix(token, "NUMBER") || strings.HasPrefix(token, "STRING") {
+			operandCount++
+			continue
+		}
+		if strings.HasPrefix(token, "LEFT_PAREN") {
+			operandCount++
+			parenCount := 1
+			for j := i + 1; j < len(tokens); j++ {
+				if strings.HasPrefix(tokens[j], "LEFT_PAREN") {
+					parenCount++
+				} else if strings.HasPrefix(tokens[j], "RIGHT_PAREN") {
+					parenCount--
+					if parenCount == 0 {
+						i = j
+						break
+					}
+				}
+			}
 		}
 	}
-	stringCount := 0
-	for _, token := range tokens {
-		if strings.HasPrefix(token, "STRING") {
-			stringCount++
-		}
-	}
-	return numCount == 2 || stringCount == 2
+	return operandCount == 2
 }
 
 func Isoperator(token string) bool {
