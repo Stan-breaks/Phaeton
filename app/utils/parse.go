@@ -23,7 +23,7 @@ func IsParethesizedExpr(tokens []string) bool {
 		case "RIGHT_PAREN":
 			level--
 		}
-		if level == 0 && lenght > 7 {
+		if level == 0 && lenght > 4 {
 			return false
 		}
 	}
