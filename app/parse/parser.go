@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -80,6 +81,20 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 	if utils.Isoperator(tokens[0]) {
 		left = parseUnaryExpr(tokens[:2])
 		currentPosition = 2
+	} else if strings.HasPrefix(tokens[0], "LEFT_PAREN") {
+		var parenEnd = 0
+		for i := currentPosition; i < len(tokens); i++ {
+			if strings.HasPrefix(tokens[i], "RIGHT_PAREN") {
+				parenEnd = i
+				break
+			}
+		}
+		if parenEnd == 0 {
+			return models.NilNode{}
+		}
+		left = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
+		fmt.Print(utils.IsParethesizedExpr(tokens[currentPosition : parenEnd+1]))
+		currentPosition = parenEnd + 1
 	} else {
 		splitValue := strings.Split(tokens[0], " ")
 		left = parsevalue(splitValue)
@@ -89,7 +104,7 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 	op := parseOperator(splitOperator)
 	currentPosition++
 	if utils.Isoperator(tokens[currentPosition]) {
-		right = parseUnaryExpr(tokens[currentPosition:2])
+		right = parseUnaryExpr(tokens[currentPosition : currentPosition+2])
 		currentPosition += 2
 	} else {
 		splitValue := strings.Split(tokens[currentPosition], " ")
