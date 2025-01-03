@@ -1,6 +1,7 @@
 package parse
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -16,12 +17,14 @@ func Parse(tokens models.Tokens) models.Node {
 	if utils.IsParethesizedExpr(tokens.Success) {
 		return parseParrenthesisExpr(tokens.Success)
 	}
-	if utils.IsBinaryExpression(tokens.Success) {
-		return parseBinaryExpr(tokens.Success)
-	}
 	if utils.IsUnaryExpr(tokens.Success) {
 		return parseUnaryExpr(tokens.Success)
 	}
+	if utils.IsBinaryExpression(tokens.Success) {
+		fmt.Print(true)
+		return parseBinaryExpr(tokens.Success)
+	}
+
 	return models.NilNode{}
 }
 
@@ -262,9 +265,9 @@ func parseUnaryExpr(tokens []string) models.Node {
 		operand = parsevalue(splitRemain0)
 	} else {
 		remainingTokens := tokens[1:]
-		if utils.IsUnaryExpr(remainingTokens) {
+		if utils.IsParethesizedExpr(remainingTokens) {
 			operand = parseUnaryExpr(remainingTokens)
-		} else if utils.IsParethesizedExpr(remainingTokens) {
+		} else if utils.IsUnaryExpr(remainingTokens) {
 			operand = parseParrenthesisExpr(remainingTokens)
 		} else {
 			return models.NilNode{}
