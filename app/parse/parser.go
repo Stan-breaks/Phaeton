@@ -196,14 +196,9 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 				Op:    op,
 				Right: right,
 			}
-			previousBinary = models.BinaryNode{
-				Left:  previousBinary,
-				Op:    op,
-				Right: right,
-			}
+			previousBinary = left.(models.BinaryNode)
 		}
 		currentPosition++
-
 	}
 	return left
 }
