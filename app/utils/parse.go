@@ -32,7 +32,7 @@ func IsParethesizedExpr(tokens []string) bool {
 }
 
 func IsUnaryExpr(tokens []string) bool {
-	if len(tokens) > 2 {
+	if len(tokens) > 3 {
 		return false
 	}
 	firstToken := strings.Split(tokens[0], " ")
