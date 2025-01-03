@@ -243,10 +243,10 @@ func parseParrenthesisExpr(tokens []string) models.Node {
 	if len(innerTokens) == 1 {
 		splitToken := strings.Split(innerTokens[0], " ")
 		innerNode = parsevalue(splitToken)
-	} else if utils.IsUnaryExpr(innerTokens) {
-		innerNode = parseUnaryExpr(innerTokens)
 	} else if utils.IsBinaryExpression(innerTokens) {
 		innerNode = parseBinaryExpr(innerTokens)
+	} else if utils.IsUnaryExpr(innerTokens) {
+		innerNode = parseUnaryExpr(innerTokens)
 	} else if utils.IsParethesizedExpr(innerTokens) {
 		innerNode = parseParrenthesisExpr(innerTokens)
 	} else {
