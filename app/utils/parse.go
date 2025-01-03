@@ -5,12 +5,29 @@ import (
 )
 
 func IsParethesizedExpr(tokens []string) bool {
-	if len(tokens) < 2 {
+	lenght := len(tokens)
+	if lenght < 2 {
 		return false
 	}
 	firstToken := strings.Split(tokens[0], " ")
 	lastToken := strings.Split(tokens[len(tokens)-1], " ")
-	return firstToken[0] == "LEFT_PAREN" && lastToken[0] == "RIGHT_PAREN"
+	if firstToken[0] != "LEFT_PAREN" || lastToken[0] != "RIGHT_PAREN" {
+		return false
+	}
+	level := 0
+	for i := 1; i < lenght-1; i++ {
+		tokenType := strings.Split(tokens[i], " ")[0]
+		switch tokenType {
+		case "LEFT_PAREN":
+			level++
+		case "RIGHT_PAREN":
+			level--
+		}
+		if level == 0 && lenght > 7 {
+			return false
+		}
+	}
+	return true
 }
 
 func IsUnaryExpr(tokens []string) bool {
@@ -64,16 +81,6 @@ func IsSingleBinary(tokens []string) bool {
 		}
 	}
 	return numCount <= 2
-}
-
-func isValidOperand(tokens []string) bool {
-	if len(tokens) == 0 {
-		return false
-	}
-	if len(tokens) == 1 {
-		return strings.HasPrefix(tokens[0], "NUMBER")
-	}
-	return IsUnaryExpr(tokens)
 }
 
 func Isoperator(token string) bool {
