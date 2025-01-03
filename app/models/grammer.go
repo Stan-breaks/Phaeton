@@ -127,10 +127,10 @@ func (n BinaryNode) Evaluate() interface{} {
 		return left.(float32) / right.(float32)
 	case "==":
 		return left.(float32) == right.(float32)
-	case "and":
-		return left.(bool) && right.(bool)
-	case "or":
-		return left.(bool) || right.(bool)
+	case string(utils.GREATER):
+		return left.(float32) > right.(float32)
+	case string(utils.LESS):
+		return left.(float32) < right.(float32)
 	default:
 		panic("Unknown operator: " + n.Op)
 	}
