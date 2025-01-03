@@ -32,9 +32,6 @@ func IsParethesizedExpr(tokens []string) bool {
 }
 
 func IsUnaryExpr(tokens []string) bool {
-	if len(tokens) > 3 {
-		return false
-	}
 	firstToken := strings.Split(tokens[0], " ")
 	return (firstToken[0] == "BANG" || firstToken[0] == "MINUS" || firstToken[0] == "PLUS")
 }
