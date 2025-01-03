@@ -88,7 +88,7 @@ func IsSingleBinary(tokens []string) bool {
 }
 
 func Isoperator(token string) bool {
-	operators := []string{"PLUS", "MINUS", "STAR", "SLASH"}
+	operators := []string{"PLUS", "MINUS", "STAR", "SLASH", "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL"}
 	for _, op := range operators {
 		if strings.HasPrefix(token, op) {
 			return true
