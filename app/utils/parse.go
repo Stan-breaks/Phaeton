@@ -14,7 +14,7 @@ func IsParethesizedExpr(tokens []string) bool {
 	if firstToken[0] != "LEFT_PAREN" || lastToken[0] != "RIGHT_PAREN" {
 		return false
 	}
-	level := 0
+	level := 1
 	for i := 1; i < lenght-1; i++ {
 		tokenType := strings.Split(tokens[i], " ")[0]
 		switch tokenType {
@@ -23,11 +23,12 @@ func IsParethesizedExpr(tokens []string) bool {
 		case "RIGHT_PAREN":
 			level--
 		}
-		if level == 0 && lenght > 4 {
+		if level == 0 {
 			return false
 		}
 	}
-	return true
+	level--
+	return level == 0
 }
 
 func IsUnaryExpr(tokens []string) bool {
