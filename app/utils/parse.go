@@ -80,7 +80,13 @@ func IsSingleBinary(tokens []string) bool {
 			numCount++
 		}
 	}
-	return numCount == 2
+	stringCount := 0
+	for _, token := range tokens {
+		if strings.HasPrefix(token, "STRING") {
+			stringCount++
+		}
+	}
+	return numCount == 2 || stringCount == 2
 }
 
 func Isoperator(token string) bool {
