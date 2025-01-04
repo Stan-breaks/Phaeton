@@ -106,8 +106,7 @@ func IsSingleBinary(tokens []string) bool {
 		if strings.HasPrefix(token, "NUMBER") || strings.HasPrefix(token, "STRING") {
 			operandCount++
 			continue
-		}
-		if strings.HasPrefix(token, "LEFT_PAREN") {
+		} else if strings.HasPrefix(token, "LEFT_PAREN") {
 			operandCount++
 			parenCount := 1
 			for j := i + 1; j < len(tokens); j++ {
