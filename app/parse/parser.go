@@ -30,6 +30,7 @@ func parseBinaryExpr(tokens []string) models.Node {
 	if utils.IsSingleBinary(tokens) {
 		return parseSingleBinaryExpr(tokens)
 	} else {
+
 		return parseMultipleBinaryExpr(tokens)
 	}
 }
@@ -75,7 +76,7 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 		if parenEnd == 0 {
 			return models.NilNode{}
 		}
-		right = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
+		right = parseParrenthesisExpr(tokens[currentPosition:])
 	} else {
 		splitValue := strings.Split(tokens[currentPosition], " ")
 		right = parsevalue(splitValue)
