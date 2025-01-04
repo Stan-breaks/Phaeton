@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -18,12 +17,12 @@ func Parse(tokens models.Tokens) models.Node {
 		return parseParrenthesisExpr(tokens.Success)
 	}
 	if utils.IsUnaryExpr(tokens.Success) {
+
 		return parseUnaryExpr(tokens.Success)
 	}
 	if utils.IsBinaryExpression(tokens.Success) {
 		return parseBinaryExpr(tokens.Success)
 	}
-
 	return models.NilNode{}
 }
 
@@ -64,8 +63,6 @@ func parseSingleBinaryExpr(tokens []string) models.Node {
 	op := parseOperator(splitOperator)
 	currentPosition++
 	if utils.Isoperator(tokens[currentPosition]) {
-		fmt.Print(true)
-		//todo parse longer unary
 		right = parseUnaryExpr(tokens[currentPosition:])
 	} else if strings.HasPrefix(tokens[currentPosition], "LEFT_PAREN") {
 		var parenEnd = 0
@@ -209,7 +206,7 @@ func parseMultipleBinaryExpr(tokens []string) models.Node {
 
 func parseOperator(splitToken []string) string {
 	switch splitToken[0] {
-	case "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL":
+	case "PLUS", "MINUS", "STAR", "SLASH", "BANG_EQUAL", "EQUAL_EQUAL", "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL":
 		return splitToken[1]
 	default:
 		return ""
