@@ -127,6 +127,8 @@ func (n BinaryNode) Evaluate() interface{} {
 		return left.(float32) / right.(float32)
 	case "==":
 		return left.(float32) == right.(float32)
+	case "!=":
+		return left.(float32) != right.(float32)
 	case string(utils.GREATER):
 		return left.(float32) > right.(float32)
 	case string(utils.LESS):
