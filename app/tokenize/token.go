@@ -270,14 +270,26 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						tokens.Success = append(tokens.Success, "BANG ! null")
+						token := models.TokenInfo{
+							Token: "BANG ! null",
+							Line:  line,
+						}
+						tokens.Success = append(tokens.Success, token)
 					} else {
 						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
-							tokens.Success = append(tokens.Success, "BANG_EQUAL != null")
+							token := models.TokenInfo{
+								Token: "BANG_EQUAL != null",
+								Line:  line,
+							}
+							tokens.Success = append(tokens.Success, token)
 							skipCount = 1
 						default:
-							tokens.Success = append(tokens.Success, "BANG ! null")
+							token := models.TokenInfo{
+								Token: "BANG ! null",
+								Line:  line,
+							}
+							tokens.Success = append(tokens.Success, token)
 						}
 					}
 				}
@@ -292,14 +304,26 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						tokens.Success = append(tokens.Success, "EQUAL = null")
+						token := models.TokenInfo{
+							Token: "EQUAL = null",
+							Line:  line,
+						}
+						tokens.Success = append(tokens.Success, token)
 					} else {
 						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
-							tokens.Success = append(tokens.Success, "EQUAL_EQUAL == null")
+							token := models.TokenInfo{
+								Token: "EQUAL_EQUAL == null",
+								Line:  line,
+							}
+							tokens.Success = append(tokens.Success, token)
 							skipCount = 1
 						default:
-							tokens.Success = append(tokens.Success, "EQUAL = null")
+							token := models.TokenInfo{
+								Token: "EQUAL = null",
+								Line:  line,
+							}
+							tokens.Success = append(tokens.Success, token)
 						}
 					}
 				}
@@ -314,7 +338,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						tokens.Success = append(tokens.Success, "SLASH / null")
+						token := models.TokenInfo{
+							Token: "SLASH / null",
+							Line:  line,
+						}
+						tokens.Success = append(tokens.Success, token)
 					} else {
 						switch fileContents[i+1] {
 						case byte(utils.SLASH):
@@ -322,7 +350,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 								comment = 1
 							}
 						default:
-							tokens.Success = append(tokens.Success, "SLASH / null")
+							token := models.TokenInfo{
+								Token: "SLASH / null",
+								Line:  line,
+							}
+							tokens.Success = append(tokens.Success, token)
 						}
 					}
 				}
