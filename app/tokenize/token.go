@@ -87,7 +87,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 					identifier = ""
 					identifierCount = 0
 				}
-				tokens.Success = append(tokens.Success, "RIGHT_PAREN ) null")
+				token := models.TokenInfo{
+					Token: "RIGHT_PAREN ) null",
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 			}
 		case utils.LEFT_BRACE:
 			numberCount = 0
