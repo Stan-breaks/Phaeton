@@ -236,14 +236,26 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						tokens.Success = append(tokens.Success, "GREATER > null")
+						token := models.TokenInfo{
+							Token: "GREATER > null",
+							Line:  line,
+						}
+						tokens.Success = append(tokens.Success, token)
 					} else {
 						switch fileContents[i+1] {
 						case byte(utils.EQUAL):
-							tokens.Success = append(tokens.Success, "GREATER_EQUAL >= null")
+							token := models.TokenInfo{
+								Token: "GREATER_EQUAL >= null",
+								Line:  line,
+							}
+							tokens.Success = append(tokens.Success, token)
 							skipCount = 1
 						default:
-							tokens.Success = append(tokens.Success, "GREATER > null")
+							token := models.TokenInfo{
+								Token: "GREATER > null",
+								Line:  line,
+							}
+							tokens.Success = append(tokens.Success, token)
 						}
 					}
 				}
