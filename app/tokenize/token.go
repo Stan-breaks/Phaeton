@@ -2,14 +2,12 @@ package tokenize
 
 import (
 	"fmt"
-	"go/token"
 	"math"
 	"strconv"
 	"unicode"
 
 	"github.com/Stan-breaks/app/models"
 	"github.com/Stan-breaks/app/utils"
-	"golang.org/x/mod/module"
 )
 
 func Tokenize(fileContents string, fileLenght int) models.Tokens {
