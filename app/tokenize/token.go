@@ -98,7 +98,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				tokens.Success = append(tokens.Success, "LEFT_BRACE { null")
+				token := models.TokenInfo{
+					Token: "LEFT_BRACE { null",
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 			}
 		case utils.RIGHT_BRACE:
 			numberCount = 0
