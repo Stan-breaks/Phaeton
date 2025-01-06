@@ -9,6 +9,7 @@ import (
 
 	"github.com/Stan-breaks/app/models"
 	"github.com/Stan-breaks/app/utils"
+	"golang.org/x/mod/module"
 )
 
 func Tokenize(fileContents string, fileLenght int) models.Tokens {
@@ -74,7 +75,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if identifierCount == 1 {
-					tokens.Success = append(tokens.Success, fmt.Sprintf("IDENTIFIER %s null", identifier))
+					token := models.TokenInfo{
+						Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
+						Line:  line,
+					}
+					tokens.Success = append(tokens.Success, token)
 					identifier = ""
 					identifierCount = 0
 				}
@@ -93,7 +98,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if identifierCount == 1 {
-					tokens.Success = append(tokens.Success, fmt.Sprintf("IDENTIFIER %s null", identifier))
+					token := models.TokenInfo{
+						Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
+						Line:  line,
+					}
+					tokens.Success = append(tokens.Success, token)
 					identifier = ""
 					identifierCount = 0
 				}
@@ -260,7 +269,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			line += 1
 			comment = 0
 			if identifierCount == 1 {
-				tokens.Success = append(tokens.Success, fmt.Sprintf("IDENTIFIER %s null", identifier))
+				token := models.TokenInfo{
+					Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 				identifier = ""
 				identifierCount = 0
 			}
@@ -270,7 +283,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if identifierCount == 1 {
-					tokens.Success = append(tokens.Success, fmt.Sprintf("IDENTIFIER %s null", identifier))
+					token := models.TokenInfo{
+						Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
+						Line:  line,
+					}
+					tokens.Success = append(tokens.Success, token)
 					identifier = ""
 					identifierCount = 0
 				}
@@ -558,7 +575,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 	}
 	if errnum != 1 || stringCount != 1 {
 		if identifierCount == 1 {
-			tokens.Success = append(tokens.Success, fmt.Sprintf("IDENTIFIER %s null", identifier))
+			token := models.TokenInfo{
+				Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
+				Line:  line,
+			}
+			tokens.Success = append(tokens.Success, token)
 		}
 	}
 	return tokens
