@@ -397,7 +397,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			numberCount = 0
 			if stringCount == 1 {
 				stringCount = 0
-				tokens.Success = append(tokens.Success, "STRING \""+stringVariable+"\" "+stringVariable)
+				token := models.TokenInfo{
+					Token: "STRING \"" + stringVariable + "\" " + stringVariable,
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 			} else {
 				stringCount = 1
 				stringVariable = ""
