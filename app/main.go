@@ -30,15 +30,10 @@ func main() {
 	switch command {
 	case "tokenize":
 		for _, token := range tokens.Success {
-			fmt.Println(token)
+			fmt.Println(token.Token)
 		}
 		fmt.Println("EOF  null")
-		if len(tokens.Errors) != 0 {
-			for _, err := range tokens.Errors {
-				fmt.Fprintf(os.Stderr, "%s\n", err)
-			}
-			os.Exit(65)
-		}
+
 	case "parse":
 		value := parse.Parse(tokens)
 		result := value.String()
@@ -46,5 +41,11 @@ func main() {
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
+	}
+	if len(tokens.Errors) != 0 {
+		for _, err := range tokens.Errors {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+		}
+		os.Exit(65)
 	}
 }
