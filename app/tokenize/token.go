@@ -129,14 +129,22 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				tokens.Success = append(tokens.Success, "STAR * null")
+				token := models.TokenInfo{
+					Token: "STAR * null",
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 			}
 		case utils.DOT:
 			if numberCount == 1 {
 				numberString += "."
 			} else {
 				if stringCount == 0 {
-					tokens.Success = append(tokens.Success, "DOT . null")
+					token := models.TokenInfo{
+						Token: "DOT . null",
+						Line:  line,
+					}
+					tokens.Success = append(tokens.Success, token)
 				} else {
 					stringVariable += string(rune(fileContents[i]))
 				}
@@ -146,7 +154,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				tokens.Success = append(tokens.Success, "COMMA , null")
+				token := models.TokenInfo{
+					Token: "COMMA , null",
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 			}
 		case utils.PLUS:
 			numberCount = 0
