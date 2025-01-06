@@ -165,21 +165,33 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				tokens.Success = append(tokens.Success, "PLUS + null")
+				token := models.TokenInfo{
+					Token: "PLUS + null",
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 			}
 		case utils.MINUS:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				tokens.Success = append(tokens.Success, "MINUS - null")
+				token := models.TokenInfo{
+					Token: "MINUS - null",
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 			}
 		case utils.SEMICOLON:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				tokens.Success = append(tokens.Success, "SEMICOLON ; null")
+				token := models.TokenInfo{
+					Token: "SEMICOLON ; null",
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 			}
 		case utils.LESS:
 			numberCount = 0
