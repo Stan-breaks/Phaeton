@@ -2,6 +2,7 @@ package tokenize
 
 import (
 	"fmt"
+	"go/token"
 	"math"
 	"strconv"
 	"unicode"
@@ -35,14 +36,26 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 						fmt.Println("Error parsing float:", err)
 					}
 					if math.Mod(float, 1.0) == 0 {
-						tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %.1f", numberString, float))
+						token := models.TokenInfo{
+							Token: fmt.Sprintf("NUMBER %s %.1f", numberString, float),
+							Line:  line,
+						}
+						tokens.Success = append(tokens.Success, token)
 						numberCount = 0
 					} else {
-						tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %g", numberString, float))
+						token := models.TokenInfo{
+							Token: fmt.Sprintf("NUMBER %s %g", numberString, float),
+							Line:  line,
+						}
+						tokens.Success = append(tokens.Success, token)
 						numberCount = 0
 					}
 				} else {
-					tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %d.0", numberString, number))
+					token := models.TokenInfo{
+						Token: fmt.Sprintf("NUMBER %s %d.0", numberString, number),
+						Line:  line,
+					}
+					tokens.Success = append(tokens.Success, token)
 					numberCount = 0
 				}
 			}
@@ -305,14 +318,26 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 								fmt.Println("Error parsing float:", err)
 							}
 							if math.Mod(float, 1.0) == 0 {
-								tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %.1f", numberString, float))
+								token := models.TokenInfo{
+									Token: fmt.Sprintf("NUMBER %s %.1f", numberString, float),
+									Line:  line,
+								}
+								tokens.Success = append(tokens.Success, token)
 								numberCount = 0
 							} else {
-								tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %g", numberString, float))
+								token := models.TokenInfo{
+									Token: fmt.Sprintf("NUMBER %s %g", numberString, float),
+									Line:  line,
+								}
+								tokens.Success = append(tokens.Success, token)
 								numberCount = 0
 							}
 						} else {
-							tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %d.0", numberString, number))
+							token := models.TokenInfo{
+								Token: fmt.Sprintf("NUMBER %s %d.0", numberString, number),
+								Line:  line,
+							}
+							tokens.Success = append(tokens.Success, token)
 							numberCount = 0
 						}
 					} else {
@@ -511,12 +536,24 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				fmt.Println("Error parsing float:", err)
 			}
 			if math.Mod(float, 1.0) == 0 {
-				tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %.1f", numberString, float))
+				token := models.TokenInfo{
+					Token: fmt.Sprintf("NUMBER %s %.1f", numberString, float),
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 			} else {
-				tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %g", numberString, float))
+				token := models.TokenInfo{
+					Token: fmt.Sprintf("NUMBER %s %g", numberString, float),
+					Line:  line,
+				}
+				tokens.Success = append(tokens.Success, token)
 			}
 		} else {
-			tokens.Success = append(tokens.Success, fmt.Sprintf("NUMBER %s %d.0", numberString, number))
+			token := models.TokenInfo{
+				Token: fmt.Sprintf("NUMBER %s %d.0", numberString, number),
+				Line:  line,
+			}
+			tokens.Success = append(tokens.Success, token)
 		}
 	}
 	if errnum != 1 || stringCount != 1 {
