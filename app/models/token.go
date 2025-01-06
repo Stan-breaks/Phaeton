@@ -1,8 +1,13 @@
 package models
 
 type Tokens struct {
-	Success []string
+	Success []TokenInfo
 	Errors  []string
+}
+
+type TokenInfo struct {
+	Token string
+	Line  int
 }
 
 type Token struct {
