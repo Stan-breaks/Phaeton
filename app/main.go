@@ -39,7 +39,7 @@ func main() {
 		value, err := parse.Parse(tokens)
 		tokens.Errors = append(tokens.Errors, err...)
 		result := value.String()
-		fmt.Print(result)
+		fmt.Printf("%s\n", result)
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
