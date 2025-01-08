@@ -29,7 +29,7 @@ func Parse(tokens models.Tokens) (models.Node, []string) {
 	splitToken := strings.Split(tokens.Success[0].Token, " ")
 	errstr := fmt.Sprintf("[line %d] Error at %s", tokens.Success[0].Line, splitToken[1])
 	arrErr = append(arrErr, errstr)
-	return models.NilNode{}, arrErr
+	return models.StringNode{Value: ""}, arrErr
 }
 
 func parseBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
@@ -64,7 +64,7 @@ func parseSingleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
 			splitToken := strings.Split(tokens[currentPosition].Token, " ")
 			errstr := fmt.Sprintf("[line %d] Error at %s", tokens[currentPosition].Line, splitToken[1])
 			arrErr = append(arrErr, errstr)
-			return models.NilNode{}, arrErr
+			return models.StringNode{Value: ""}, arrErr
 
 		}
 		left, err = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
@@ -99,7 +99,7 @@ func parseSingleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
 			splitToken := strings.Split(tokens[currentPosition].Token, " ")
 			errstr := fmt.Sprintf("[line %d] Error at %s", tokens[currentPosition].Line, splitToken[1])
 			arrErr = append(arrErr, errstr)
-			return models.NilNode{}, arrErr
+			return models.StringNode{Value: ""}, arrErr
 		}
 		right, err = parseParrenthesisExpr(tokens[currentPosition:])
 		if err != nil {
@@ -154,7 +154,7 @@ func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) 
 			splitToken := strings.Split(tokens[currentPosition].Token, " ")
 			errstr := fmt.Sprintf("[line %d] Error at %s", tokens[currentPosition].Line, splitToken[1])
 			arrErr = append(arrErr, errstr)
-			return models.NilNode{}, arrErr
+			return models.StringNode{Value: ""}, arrErr
 		}
 		left, err = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
 		if err != nil {
@@ -189,7 +189,7 @@ func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) 
 			splitToken := strings.Split(tokens[currentPosition].Token, " ")
 			errstr := fmt.Sprintf("[line %d] Error at %s", tokens[currentPosition].Line, splitToken[1])
 			arrErr = append(arrErr, errstr)
-			return models.NilNode{}, arrErr
+			return models.StringNode{Value: ""}, arrErr
 		}
 		right, err = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
 		if err != nil {
@@ -237,7 +237,7 @@ func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) 
 					splitToken := strings.Split(tokens[currentPosition].Token, " ")
 					errstr := fmt.Sprintf("[line %d] Error at %s", tokens[currentPosition].Line, splitToken[1])
 					arrErr = append(arrErr, errstr)
-					return models.NilNode{}, arrErr
+					return models.StringNode{Value: ""}, arrErr
 				}
 				right, err = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
 				if err != nil {
@@ -311,7 +311,7 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 		err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
 		var errors []string
 		errors = append(errors, err)
-		return models.NilNode{}, errors
+		return models.StringNode{Value: ""}, errors
 	}
 }
 
@@ -345,17 +345,11 @@ func parseParrenthesisExpr(tokens []models.TokenInfo) (models.Node, []string) {
 		err := fmt.Sprintf("[Line %d] Error at '%s': Expect expression.", innerTokens[0].Line, splitToken[1])
 		var errors []string
 		arrErr = append(errors, err)
-		innerNode = models.NilNode{}
+		return models.StringNode{Value: ""}, arrErr
 	}
-	if len(arrErr) == 0 {
-		return models.ParenthesisNode{
-			Expression: innerNode,
-		}, nil
-	} else {
-		return models.ParenthesisNode{
-			Expression: innerNode,
-		}, arrErr
-	}
+	return models.ParenthesisNode{
+		Expression: innerNode,
+	}, arrErr
 }
 
 func parseUnaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
@@ -385,14 +379,14 @@ func parseUnaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
 			splitToken = strings.Split(tokens[1].Token, " ")
 			errstr := fmt.Sprintf("[line %d] Error at %s", tokens[1].Line, splitToken[1])
 			arrErr = append(arrErr, errstr)
-			return models.NilNode{}, arrErr
+			return models.StringNode{Value: ""}, arrErr
 		}
 	}
 	if operand.Evaluate() == nil || operand.String() == "<nil>" {
 		splitToken = strings.Split(tokens[1].Token, " ")
 		errstr := fmt.Sprintf("[line %d] Error at %s", tokens[1].Line, splitToken[1])
 		arrErr = append(arrErr, errstr)
-		return models.NilNode{}, arrErr
+		return models.StringNode{Value: ""}, arrErr
 	}
 	return models.UnaryNode{
 		Op:    operator,
