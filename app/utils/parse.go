@@ -2,21 +2,23 @@ package utils
 
 import (
 	"strings"
+
+	"github.com/Stan-breaks/app/models"
 )
 
-func IsParethesizedExpr(tokens []string) bool {
+func IsParethesizedExpr(tokens []models.TokenInfo) bool {
 	lenght := len(tokens)
 	if lenght < 2 {
 		return false
 	}
-	firstToken := strings.Split(tokens[0], " ")
-	lastToken := strings.Split(tokens[len(tokens)-1], " ")
+	firstToken := strings.Split(tokens[0].Token, " ")
+	lastToken := strings.Split(tokens[len(tokens)-1].Token, " ")
 	if firstToken[0] != "LEFT_PAREN" || lastToken[0] != "RIGHT_PAREN" {
 		return false
 	}
 	level := 1
 	for i := 1; i < lenght-1; i++ {
-		tokenType := strings.Split(tokens[i], " ")[0]
+		tokenType := strings.Split(tokens[i].Token, " ")[0]
 		switch tokenType {
 		case "LEFT_PAREN":
 			level++
@@ -31,28 +33,28 @@ func IsParethesizedExpr(tokens []string) bool {
 	return level == 0
 }
 
-func IsUnaryExpr(tokens []string) bool {
-	firstToken := strings.Split(tokens[0], " ")
+func IsUnaryExpr(tokens []models.TokenInfo) bool {
+	firstToken := strings.Split(tokens[0].Token, " ")
 	if firstToken[0] != "BANG" && firstToken[0] != "MINUS" && firstToken[0] != "PLUS" {
 		return false
 	}
 	operandCount := 0
 	for i := 1; i < len(tokens); i++ {
 		token := tokens[i]
-		if strings.HasPrefix(token, "NUMBER") ||
-			strings.HasPrefix(token, "STRING") ||
-			strings.HasPrefix(token, "TRUE") ||
-			strings.HasPrefix(token, "FALSE") {
+		if strings.HasPrefix(token.Token, "NUMBER") ||
+			strings.HasPrefix(token.Token, "STRING") ||
+			strings.HasPrefix(token.Token, "TRUE") ||
+			strings.HasPrefix(token.Token, "FALSE") {
 			operandCount++
 			continue
 		}
-		if strings.HasPrefix(token, "LEFT_PAREN") {
+		if strings.HasPrefix(token.Token, "LEFT_PAREN") {
 			operandCount++
 			parenCount := 1
 			for j := i + 1; j < len(tokens); j++ {
-				if strings.HasPrefix(tokens[j], "LEFT_PAREN") {
+				if strings.HasPrefix(tokens[j].Token, "LEFT_PAREN") {
 					parenCount++
-				} else if strings.HasPrefix(tokens[j], "RIGHT_PAREN") {
+				} else if strings.HasPrefix(tokens[j].Token, "RIGHT_PAREN") {
 					parenCount--
 					if parenCount == 0 {
 						i = j
@@ -65,7 +67,7 @@ func IsUnaryExpr(tokens []string) bool {
 	return operandCount == 1
 }
 
-func IsBinaryExpression(tokens []string) bool {
+func IsBinaryExpression(tokens []models.TokenInfo) bool {
 	lenght := len(tokens)
 	if lenght < 3 {
 		return false
@@ -83,7 +85,7 @@ func IsBinaryExpression(tokens []string) bool {
 	return operator != -1
 }
 
-func isInvalidToken(token string) bool {
+func isInvalidToken(token models.TokenInfo) bool {
 	invalidPrefixes := []string{
 		"TRUE",
 		"FALSE",
@@ -93,26 +95,26 @@ func isInvalidToken(token string) bool {
 	}
 
 	for _, prefix := range invalidPrefixes {
-		if strings.HasPrefix(token, prefix) {
+		if strings.HasPrefix(token.Token, prefix) {
 			return true
 		}
 	}
 	return false
 }
-func IsSingleBinary(tokens []string) bool {
+func IsSingleBinary(tokens []models.TokenInfo) bool {
 	operandCount := 0
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i]
-		if strings.HasPrefix(token, "NUMBER") || strings.HasPrefix(token, "STRING") {
+		if strings.HasPrefix(token.Token, "NUMBER") || strings.HasPrefix(token.Token, "STRING") {
 			operandCount++
 			continue
-		} else if strings.HasPrefix(token, "LEFT_PAREN") {
+		} else if strings.HasPrefix(token.Token, "LEFT_PAREN") {
 			operandCount++
 			parenCount := 1
 			for j := i + 1; j < len(tokens); j++ {
-				if strings.HasPrefix(tokens[j], "LEFT_PAREN") {
+				if strings.HasPrefix(tokens[j].Token, "LEFT_PAREN") {
 					parenCount++
-				} else if strings.HasPrefix(tokens[j], "RIGHT_PAREN") {
+				} else if strings.HasPrefix(tokens[j].Token, "RIGHT_PAREN") {
 					parenCount--
 					if parenCount == 0 {
 						i = j
@@ -125,10 +127,10 @@ func IsSingleBinary(tokens []string) bool {
 	return operandCount == 2
 }
 
-func Isoperator(token string) bool {
+func Isoperator(token models.TokenInfo) bool {
 	operators := []string{"PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "BANG_EQUAL", "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL"}
 	for _, op := range operators {
-		if strings.HasPrefix(token, op) {
+		if strings.HasPrefix(token.Token, op) {
 			return true
 		}
 	}
