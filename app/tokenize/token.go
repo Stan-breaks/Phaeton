@@ -7,7 +7,7 @@ import (
 	"unicode"
 
 	"github.com/Stan-breaks/app/models"
-	"github.com/Stan-breaks/app/utils"
+	"github.com/Stan-breaks/app/utils/runes"
 )
 
 func Tokenize(fileContents string, fileLenght int) models.Tokens {
@@ -26,7 +26,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 		if comment > 0 && rune(fileContents[i]) != '\n' {
 			continue
 		}
-		if !unicode.IsDigit(rune(fileContents[i])) && numberCount == 1 && rune(fileContents[i]) != utils.DOT {
+		if !unicode.IsDigit(rune(fileContents[i])) && numberCount == 1 && rune(fileContents[i]) != runes.DOT {
 			if numberCount == 1 {
 				number, err := strconv.Atoi(numberString)
 				if err != nil {
@@ -60,7 +60,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			}
 		}
 		switch rune(fileContents[i]) {
-		case utils.LEFT_PAREN:
+		case runes.LEFT_PAREN:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -71,7 +71,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
-		case utils.RIGHT_PAREN:
+		case runes.RIGHT_PAREN:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -91,7 +91,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
-		case utils.LEFT_BRACE:
+		case runes.LEFT_BRACE:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -102,7 +102,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
-		case utils.RIGHT_BRACE:
+		case runes.RIGHT_BRACE:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -122,7 +122,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
-		case utils.STAR:
+		case runes.STAR:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -133,7 +133,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
-		case utils.DOT:
+		case runes.DOT:
 			if numberCount == 1 {
 				numberString += "."
 			} else {
@@ -147,7 +147,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 					stringVariable += string(rune(fileContents[i]))
 				}
 			}
-		case utils.COMMA:
+		case runes.COMMA:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -158,7 +158,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
-		case utils.PLUS:
+		case runes.PLUS:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -169,7 +169,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
-		case utils.MINUS:
+		case runes.MINUS:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -180,7 +180,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
-		case utils.SEMICOLON:
+		case runes.SEMICOLON:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -191,7 +191,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
-		case utils.LESS:
+		case runes.LESS:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -207,7 +207,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 						tokens.Success = append(tokens.Success, token)
 					} else {
 						switch fileContents[i+1] {
-						case byte(utils.EQUAL):
+						case byte(runes.EQUAL):
 							token := models.TokenInfo{
 								Token: "LESS_EQUAL <= null",
 								Line:  line,
@@ -225,7 +225,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 			}
 
-		case utils.GREATER:
+		case runes.GREATER:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -241,7 +241,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 						tokens.Success = append(tokens.Success, token)
 					} else {
 						switch fileContents[i+1] {
-						case byte(utils.EQUAL):
+						case byte(runes.EQUAL):
 							token := models.TokenInfo{
 								Token: "GREATER_EQUAL >= null",
 								Line:  line,
@@ -259,7 +259,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 			}
 
-		case utils.BANG:
+		case runes.BANG:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -275,7 +275,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 						tokens.Success = append(tokens.Success, token)
 					} else {
 						switch fileContents[i+1] {
-						case byte(utils.EQUAL):
+						case byte(runes.EQUAL):
 							token := models.TokenInfo{
 								Token: "BANG_EQUAL != null",
 								Line:  line,
@@ -293,7 +293,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 			}
 
-		case utils.EQUAL:
+		case runes.EQUAL:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -309,7 +309,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 						tokens.Success = append(tokens.Success, token)
 					} else {
 						switch fileContents[i+1] {
-						case byte(utils.EQUAL):
+						case byte(runes.EQUAL):
 							token := models.TokenInfo{
 								Token: "EQUAL_EQUAL == null",
 								Line:  line,
@@ -327,7 +327,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 			}
 
-		case utils.SLASH:
+		case runes.SLASH:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -343,7 +343,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 						tokens.Success = append(tokens.Success, token)
 					} else {
 						switch fileContents[i+1] {
-						case byte(utils.SLASH):
+						case byte(runes.SLASH):
 							if stringCount == 0 {
 								comment = 1
 							}
@@ -358,7 +358,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				}
 			}
 
-		case utils.NEWLINE:
+		case runes.NEWLINE:
 			numberCount = 0
 			line += 1
 			comment = 0
@@ -371,7 +371,7 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				identifier = ""
 				identifierCount = 0
 			}
-		case utils.WHITESPACE:
+		case runes.WHITESPACE:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
@@ -386,12 +386,12 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 					identifierCount = 0
 				}
 			}
-		case utils.TAB, utils.BACKSPACE:
+		case runes.TAB, runes.BACKSPACE:
 			numberCount = 0
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			}
-		case utils.QUOTE:
+		case runes.QUOTE:
 			numberCount = 0
 			if stringCount == 1 {
 				stringCount = 0
