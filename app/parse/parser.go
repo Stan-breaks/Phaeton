@@ -306,7 +306,7 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 		return models.StringNode{Value: strings.Split(joinedString, "\"")[1]}, nil
 	default:
 		err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
-		errors := []string{}
+		var errors []string
 		errors = append(errors, err)
 		return models.NilNode{}, errors
 	}
@@ -338,6 +338,10 @@ func parseParrenthesisExpr(tokens []models.TokenInfo) (models.Node, []string) {
 			arrErr = append(arrErr, err...)
 		}
 	} else {
+		splitToken := strings.Split(tokens[len(tokens)-1].Token, " ")
+		err := fmt.Sprintf("[Line %d] Error at '%s': Expect expression.", innerTokens[0].Line, splitToken[1])
+		var errors []string
+		arrErr = append(errors, err)
 		innerNode = models.NilNode{}
 	}
 	if len(arrErr) == 0 {
