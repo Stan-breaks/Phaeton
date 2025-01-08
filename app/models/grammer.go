@@ -3,7 +3,8 @@ package models
 import (
 	"fmt"
 
-	"github.com/Stan-breaks/app/utils"
+	"github.com/Stan-breaks/app/utils/format"
+	"github.com/Stan-breaks/app/utils/runes"
 )
 
 type Node interface {
@@ -16,7 +17,7 @@ type NumberNode struct {
 }
 
 func (n NumberNode) String() string {
-	return utils.FormatFloat(n.Value)
+	return format.FormatFloat(n.Value)
 }
 
 func (n NumberNode) Evaluate() interface{} {
@@ -82,11 +83,11 @@ func (n UnaryNode) String() string {
 func (n UnaryNode) Evaluate() interface{} {
 	num := n.Value.Evaluate()
 	switch n.Op {
-	case string(utils.PLUS):
+	case string(runes.PLUS):
 		return 1 * num.(float32)
-	case string(utils.MINUS):
+	case string(runes.MINUS):
 		return -1 * num.(float32)
-	case string(utils.BANG):
+	case string(runes.BANG):
 		switch num := num.(type) {
 		case bool:
 			return !num
@@ -117,21 +118,21 @@ func (n BinaryNode) Evaluate() interface{} {
 	left := n.Left.Evaluate()
 	right := n.Right.Evaluate()
 	switch n.Op {
-	case string(utils.PLUS):
+	case string(runes.PLUS):
 		return left.(float32) + right.(float32)
-	case string(utils.MINUS):
+	case string(runes.MINUS):
 		return left.(float32) - right.(float32)
-	case string(utils.STAR):
+	case string(runes.STAR):
 		return left.(float32) * right.(float32)
-	case string(utils.SLASH):
+	case string(runes.SLASH):
 		return left.(float32) / right.(float32)
 	case "==":
 		return left.(float32) == right.(float32)
 	case "!=":
 		return left.(float32) != right.(float32)
-	case string(utils.GREATER):
+	case string(runes.GREATER):
 		return left.(float32) > right.(float32)
-	case string(utils.LESS):
+	case string(runes.LESS):
 		return left.(float32) < right.(float32)
 	case ">=":
 		return left.(float32) >= right.(float32)
