@@ -35,7 +35,9 @@ func main() {
 		fmt.Println("EOF  null")
 
 	case "parse":
-		value := parse.Parse(tokens)
+		var err []string
+		value, err := parse.Parse(tokens)
+		tokens.Errors = append(tokens.Errors, err...)
 		result := value.String()
 		fmt.Print(result)
 	default:
