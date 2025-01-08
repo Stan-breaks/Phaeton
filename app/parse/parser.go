@@ -11,7 +11,7 @@ import (
 
 func Parse(tokens models.Tokens) (models.Node, []string) {
 	if len(tokens.Success) == 0 {
-		return models.NilNode{}, nil
+		return models.StringNode{Value: ""}, nil
 	}
 	if len(tokens.Success) == 1 {
 		return parsevalue(tokens.Success[0])
