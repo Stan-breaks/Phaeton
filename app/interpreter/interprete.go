@@ -33,12 +33,46 @@ func Interprete(tokens []models.TokenInfo) error {
 			}
 			currentPosition += end
 		case strings.HasPrefix(token.Token, "VAR"):
-
+			end, err := handleAssignment(tokens[currentPosition:])
+			if err != nil {
+				return err
+			}
+			currentPosition += end
 		default:
 			currentPosition++
 		}
 	}
 	return nil
+}
+
+func handleAssignment(tokens []models.TokenInfo) (int, error) {
+	if len(tokens) < 4 {
+		return 0, fmt.Errorf("incomplete variable declaration")
+	}
+	nameToken := tokens[1]
+	if !strings.HasPrefix(nameToken.Token, "IDENTIFIER") {
+		return 0, fmt.Errorf("no identifier found")
+	}
+	valName := strings.Split(nameToken.Token, " ")[1]
+	if !strings.HasPrefix(tokens[2].Token, "EQUAL") {
+		return 0, fmt.Errorf("equal not found")
+	}
+	end := 0
+	for i := 3; i < len(tokens); i++ {
+		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
+			end = i
+		}
+	}
+	if end == 0 {
+		return 0, fmt.Errorf("no semicolon found")
+	}
+	expr, err := parse.Parse(tokens[3:end])
+	if err != nil {
+		return 0, fmt.Errorf("in valid expression")
+	}
+	value := expr.Evaluate()
+	environment[valName] = value
+	return end + 1, nil
 }
 
 func handlePrint(tokens []models.TokenInfo) (int, error) {
