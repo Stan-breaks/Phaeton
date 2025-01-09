@@ -33,13 +33,14 @@ func main() {
 			fmt.Println(token.Token)
 		}
 		fmt.Println("EOF  null")
-
 	case "parse":
 		var err []string
 		value, err := parse.Parse(tokens)
 		tokens.Errors = append(tokens.Errors, err...)
 		result := value.String()
 		fmt.Printf("%s\n", result)
+	case "run":
+
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
