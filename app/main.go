@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Stan-breaks/app/interpreter"
 	"github.com/Stan-breaks/app/parse"
 	"github.com/Stan-breaks/app/tokenize"
 )
@@ -40,7 +41,10 @@ func main() {
 		result := value.String()
 		fmt.Printf("%s\n", result)
 	case "run":
-
+		err := interpreter.Interprete(tokens.Success)
+		if err != nil {
+			tokens.Errors = append(tokens.Errors, err.Error())
+		}
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
