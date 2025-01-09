@@ -75,7 +75,13 @@ func handleIf(tokens []models.TokenInfo) error {
 	} else {
 		condition, err := parse.Parse(tokens[startCondition:endCondition])
 		if err != nil {
-			return fmt.Errorf("invalid condition")
+			return fmt.Errorf("invalid if condition")
+		}
+		if condition.Evaluate().(bool) {
+			err := Interprete(tokens[startBody:endBody])
+			if err != nil {
+				return fmt.Errorf("invalid if body")
+			}
 		}
 		return nil
 	}
