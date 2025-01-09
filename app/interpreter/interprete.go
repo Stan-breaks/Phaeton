@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+var environment = make(map[string]interface{})
+
 func Interprete(tokens []models.TokenInfo) error {
 	currentPosition := 0
 	for currentPosition < len(tokens) {
