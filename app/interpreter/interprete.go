@@ -20,7 +20,7 @@ func Interprete(tokens []models.TokenInfo) error {
 			end := findMatchingEnd(ifLine, currentPosition, tokens)
 			err := handleIf(tokens[currentPosition:end])
 			if err != nil {
-				return fmt.Errorf("line %d: %v", ifLine, err)
+				return err
 			}
 			currentPosition = end
 
@@ -30,6 +30,7 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition += end
+		case strings.HasPrefix(token.Token, "VAR"):
 
 		default:
 			currentPosition++
