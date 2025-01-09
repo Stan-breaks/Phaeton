@@ -35,7 +35,7 @@ func main() {
 		fmt.Println("EOF  null")
 	case "parse":
 		var err []string
-		value, err := parse.Parse(tokens)
+		value, err := parse.Parse(tokens.Success)
 		tokens.Errors = append(tokens.Errors, err...)
 		result := value.String()
 		fmt.Printf("%s\n", result)
