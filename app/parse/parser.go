@@ -9,25 +9,25 @@ import (
 	"github.com/Stan-breaks/app/utils"
 )
 
-func Parse(tokens models.Tokens) (models.Node, []string) {
-	if len(tokens.Success) == 0 {
+func Parse(tokens []models.TokenInfo) (models.Node, []string) {
+	if len(tokens) == 0 {
 		return models.StringNode{Value: ""}, nil
 	}
-	if len(tokens.Success) == 1 {
-		return parsevalue(tokens.Success[0])
+	if len(tokens) == 1 {
+		return parsevalue(tokens[0])
 	}
-	if utils.IsParethesizedExpr(tokens.Success) {
-		return parseParrenthesisExpr(tokens.Success)
+	if utils.IsParethesizedExpr(tokens) {
+		return parseParrenthesisExpr(tokens)
 	}
-	if utils.IsUnaryExpr(tokens.Success) {
-		return parseUnaryExpr(tokens.Success)
+	if utils.IsUnaryExpr(tokens) {
+		return parseUnaryExpr(tokens)
 	}
-	if utils.IsBinaryExpression(tokens.Success) {
-		return parseBinaryExpr(tokens.Success)
+	if utils.IsBinaryExpression(tokens) {
+		return parseBinaryExpr(tokens)
 	}
 	var arrErr []string
-	splitToken := strings.Split(tokens.Success[0].Token, " ")
-	errstr := fmt.Sprintf("[line %d] Error at %s", tokens.Success[0].Line, splitToken[1])
+	splitToken := strings.Split(tokens[0].Token, " ")
+	errstr := fmt.Sprintf("[line %d] Error at %s", tokens[0].Line, splitToken[1])
 	arrErr = append(arrErr, errstr)
 	return models.StringNode{Value: ""}, arrErr
 }
