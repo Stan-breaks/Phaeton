@@ -1,24 +1,27 @@
 package interpreter
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/Stan-breaks/app/models"
 )
 
-func Interprete(tokens []models.TokenInfo) {
+func Interprete(tokens []models.TokenInfo) error {
 	currentPosition := 0
 	for currentPosition < len(tokens) {
 		if strings.HasPrefix(tokens[currentPosition].Token, "IF") {
 			ifLine := tokens[currentPosition].Line
 			end := findMatchingEnd(ifLine, currentPosition, tokens)
-			handleIf(tokens[currentPosition:end])
+			err := handleIf(tokens[currentPosition:end])
+			if err != nil {
+				return err
+			}
 			currentPosition = end
 		} else {
 			currentPosition++
 		}
 	}
+	return nil
 }
 
 func findMatchingEnd(initialLine int, currentPosition int, tokens []models.TokenInfo) int {
@@ -37,5 +40,6 @@ func findMatchingEnd(initialLine int, currentPosition int, tokens []models.Token
 }
 
 func handleIf(tokens []models.TokenInfo) error {
-
+	currentPosition := 1
+	return nil
 }
