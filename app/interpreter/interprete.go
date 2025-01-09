@@ -1,9 +1,11 @@
 package interpreter
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/Stan-breaks/app/models"
+	"github.com/Stan-breaks/app/parse"
 )
 
 func Interprete(tokens []models.TokenInfo) error {
@@ -17,6 +19,10 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition = end
+		} else if strings.HasPrefix(tokens[currentPosition].Token, "PRINT") {
+			splitToken := strings.Split(tokens[currentPosition+1].Token, " ")
+			fmt.Print(splitToken[2])
+			currentPosition += 2
 		} else {
 			currentPosition++
 		}
@@ -41,5 +47,36 @@ func findMatchingEnd(initialLine int, currentPosition int, tokens []models.Token
 
 func handleIf(tokens []models.TokenInfo) error {
 	currentPosition := 1
-	return nil
+	startCondition := 0
+	endCondition := 0
+	startBody := 0
+	endBody := 0
+	for i := currentPosition; i < len(tokens); i++ {
+		if strings.HasPrefix(tokens[i].Token, "LEFT_PAREN") {
+			startCondition = i
+		}
+		if strings.HasPrefix(tokens[i].Token, "RIGHT_PAREN") {
+			endCondition = i
+			if strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+				startBody = i + 2
+			} else {
+				startBody = i + 1
+			}
+		}
+		if strings.HasPrefix(tokens[i].Token, "RIGHT_BRACE") {
+			endBody = i
+		}
+	}
+	if endBody == 0 {
+		endBody = len(tokens) - 1
+	}
+	if startCondition != 0 && endCondition != 0 && startBody != 0 && endBody != 0 {
+		return fmt.Errorf("invalid if")
+	} else {
+		condition, err := parse.Parse(tokens[startCondition:endCondition])
+		if err != nil {
+			return fmt.Errorf("invalid condition")
+		}
+		return nil
+	}
 }
