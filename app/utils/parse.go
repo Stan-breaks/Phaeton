@@ -44,7 +44,8 @@ func IsUnaryExpr(tokens []models.TokenInfo) bool {
 		if strings.HasPrefix(token.Token, "NUMBER") ||
 			strings.HasPrefix(token.Token, "STRING") ||
 			strings.HasPrefix(token.Token, "TRUE") ||
-			strings.HasPrefix(token.Token, "FALSE") {
+			strings.HasPrefix(token.Token, "FALSE") ||
+			strings.HasPrefix(token.Token, "IDENTIFIER") {
 			operandCount++
 			continue
 		}
@@ -89,7 +90,6 @@ func isInvalidToken(token models.TokenInfo) bool {
 	invalidPrefixes := []string{
 		"TRUE",
 		"FALSE",
-		"IDENTIFIER",
 		"LEFT_BRACE",
 		"RIGHT_BRACE",
 	}
@@ -105,7 +105,9 @@ func IsSingleBinary(tokens []models.TokenInfo) bool {
 	operandCount := 0
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i]
-		if strings.HasPrefix(token.Token, "NUMBER") || strings.HasPrefix(token.Token, "STRING") {
+		if strings.HasPrefix(token.Token, "NUMBER") ||
+			strings.HasPrefix(token.Token, "STRING") ||
+			strings.HasPrefix(token.Token, "IDENTIFIER") {
 			operandCount++
 			continue
 		} else if strings.HasPrefix(token.Token, "LEFT_PAREN") {
