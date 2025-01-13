@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Stan-breaks/app/environment"
 	"github.com/Stan-breaks/app/models"
 	"github.com/Stan-breaks/app/utils"
 )
@@ -307,6 +308,31 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 	case "STRING":
 		joinedString := strings.Join(splitToken, " ")
 		return models.StringNode{Value: strings.Split(joinedString, "\"")[1]}, nil
+	case "IDENTIFIER":
+		valname := splitToken[1]
+		value, exist := environment.Environment[valname]
+		if !exist {
+			err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
+			var errors []string
+			errors = append(errors, err)
+			return models.NilNode{}, errors
+		}
+		switch v := value.(type) {
+		case bool:
+			return models.BooleanNode{Value: v}, nil
+		case string:
+			return models.StringNode{Value: v}, nil
+		case float32:
+			return models.NumberNode{Value: v}, nil
+		case int:
+			return models.NumberNode{Value: float32(v)}, nil
+		default:
+			err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
+			var errors []string
+			errors = append(errors, err)
+			return models.NilNode{}, errors
+		}
+
 	default:
 		err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
 		var errors []string
