@@ -2,12 +2,12 @@ package interpreter
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/Stan-breaks/app/environment"
 	"github.com/Stan-breaks/app/models"
 	"github.com/Stan-breaks/app/parse"
-	"strings"
 )
-
-var environment = make(map[string]interface{})
 
 func Interprete(tokens []models.TokenInfo) error {
 	currentPosition := 0
@@ -71,7 +71,8 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("in valid expression")
 	}
 	value := expr.Evaluate()
-	environment[valName] = value
+
+	environment.Environment[valName] = value
 	return end + 1, nil
 }
 
@@ -153,7 +154,7 @@ func handleIf(tokens []models.TokenInfo) error {
 	}
 	condition, err := parse.Parse(tokens[conditionStart : conditionEnd+1])
 	if err != nil {
-		return fmt.Errorf("invalid condition: %v", err)
+		return fmt.Errorf("invalid condition")
 	}
 
 	if condition.Evaluate().(bool) {
