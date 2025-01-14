@@ -73,7 +73,6 @@ func IsBinaryExpression(tokens []models.TokenInfo) bool {
 	if lenght < 3 {
 		return false
 	}
-
 	operator := -1
 	for i := 1; i < lenght; i++ {
 		if Isoperator(tokens[i]) {
@@ -88,12 +87,9 @@ func IsBinaryExpression(tokens []models.TokenInfo) bool {
 
 func isInvalidToken(token models.TokenInfo) bool {
 	invalidPrefixes := []string{
-		"TRUE",
-		"FALSE",
 		"LEFT_BRACE",
 		"RIGHT_BRACE",
 	}
-
 	for _, prefix := range invalidPrefixes {
 		if strings.HasPrefix(token.Token, prefix) {
 			return true
@@ -101,13 +97,16 @@ func isInvalidToken(token models.TokenInfo) bool {
 	}
 	return false
 }
+
 func IsSingleBinary(tokens []models.TokenInfo) bool {
 	operandCount := 0
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i]
 		if strings.HasPrefix(token.Token, "NUMBER") ||
 			strings.HasPrefix(token.Token, "STRING") ||
-			strings.HasPrefix(token.Token, "IDENTIFIER") {
+			strings.HasPrefix(token.Token, "IDENTIFIER") ||
+			strings.HasPrefix(token.Token, "FALSE") ||
+			strings.HasPrefix(token.Token, "TRUE") {
 			operandCount++
 			continue
 		} else if strings.HasPrefix(token.Token, "LEFT_PAREN") {
