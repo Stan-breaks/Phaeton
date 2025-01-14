@@ -117,7 +117,6 @@ func parseSingleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
 		Op:    op,
 		Right: right,
 	}
-
 	if len(arrErr) == 0 {
 		return result, nil
 	} else {
