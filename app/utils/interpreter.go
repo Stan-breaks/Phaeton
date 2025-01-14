@@ -7,5 +7,5 @@ import (
 )
 
 func IsReassignment(tokens []models.TokenInfo) bool {
-	return strings.HasPrefix(tokens[0].Token, "IDENTIFIER") && strings.HasPrefix(tokens[1].Token, "EQUALS")
+	return strings.HasPrefix(tokens[0].Token, "IDENTIFIER") && strings.HasPrefix(tokens[1].Token, "EQUAL")
 }
