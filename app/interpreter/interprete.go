@@ -181,7 +181,7 @@ func handleIf(tokens []models.TokenInfo) error {
 	if conditionStart == -1 || conditionEnd == -1 || bodyStart == -1 {
 		return fmt.Errorf("malformed if statement")
 	}
-	condition, err := parse.Parse(tokens[conditionStart : conditionEnd+1])
+	condition, err := handleExpression(tokens[conditionStart+1 : conditionEnd])
 	if err != nil {
 		return fmt.Errorf("invalid if condition")
 	}
