@@ -7,6 +7,7 @@ import (
 	"github.com/Stan-breaks/app/environment"
 	"github.com/Stan-breaks/app/models"
 	"github.com/Stan-breaks/app/parse"
+	"golang.org/x/mod/module"
 )
 
 func Interprete(tokens []models.TokenInfo) error {
@@ -75,6 +76,10 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 
 	environment.Environment[valName] = value
 	return end + 1, nil
+}
+
+func handleExpression(tokens []module.TokenInfo) error {
+	return nil
 }
 
 func handlePrint(tokens []models.TokenInfo) (int, error) {
@@ -161,6 +166,7 @@ func handleIf(tokens []models.TokenInfo) error {
 		if bodyEnd == -1 {
 			bodyEnd = len(tokens)
 		}
+
 		return Interprete(tokens[bodyStart:bodyEnd])
 	}
 
