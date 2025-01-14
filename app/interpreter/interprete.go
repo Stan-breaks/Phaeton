@@ -61,6 +61,7 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	for i := 3; i < len(tokens); i++ {
 		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
 			end = i
+			break
 		}
 	}
 	if end == 0 {
@@ -68,7 +69,7 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	}
 	expr, err := parse.Parse(tokens[3:end])
 	if err != nil {
-		return 0, fmt.Errorf("in valid expression")
+		return 0, fmt.Errorf("invalid assignment expression")
 	}
 	value := expr.Evaluate()
 
@@ -154,6 +155,7 @@ func handleIf(tokens []models.TokenInfo) error {
 	}
 	condition, err := parse.Parse(tokens[conditionStart : conditionEnd+1])
 	if err != nil {
+		fmt.Print(err)
 		return fmt.Errorf("invalid condition")
 	}
 
