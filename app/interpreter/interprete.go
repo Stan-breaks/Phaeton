@@ -131,9 +131,8 @@ func handleIf(tokens []models.TokenInfo) error {
 		switch {
 		case strings.HasPrefix(token, "LEFT_PAREN") && conditionStart == -1:
 			conditionStart = i
-		case strings.HasPrefix(token, "RIGHT_PAREN"):
-			conditionEnd = i
 		case strings.HasPrefix(token, "LEFT_BRACE"):
+			conditionEnd = i - 1
 			if bodyStart == -1 {
 				bodyStart = i + 1
 			}
@@ -155,8 +154,7 @@ func handleIf(tokens []models.TokenInfo) error {
 	}
 	condition, err := parse.Parse(tokens[conditionStart : conditionEnd+1])
 	if err != nil {
-		fmt.Print(err)
-		return fmt.Errorf("invalid condition")
+		return fmt.Errorf("invalid if condition")
 	}
 
 	if condition.Evaluate().(bool) {
