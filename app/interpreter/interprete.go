@@ -7,7 +7,7 @@ import (
 	"github.com/Stan-breaks/app/environment"
 	"github.com/Stan-breaks/app/models"
 	"github.com/Stan-breaks/app/parse"
-	"golang.org/x/mod/module"
+	"github.com/Stan-breaks/app/utils"
 )
 
 func Interprete(tokens []models.TokenInfo) error {
@@ -78,15 +78,39 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	return end + 1, nil
 }
 
-func handleExpression(tokens []module.TokenInfo) error {
-	return nil
+func handleReassignment(tokens []models.TokenInfo) (models.Node, error) {
+	valname := strings.Split(tokens[0].Token, " ")[1]
+	val, err := parse.Parse(tokens[2:])
+	if err != nil {
+		return models.NilNode{}, fmt.Errorf("invalid reassignment expression")
+	}
+	environment.Environment[valname] = val.Evaluate()
+	return val, nil
+}
+func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
+	var val models.Node
+	var err error
+	var error []string
+	if utils.IsReassignment(tokens) {
+		val, err = handleReassignment(tokens)
+		if err != nil {
+			return models.NilNode{}, err
+		}
+		return val, nil
+	}
+	val, error = parse.Parse(tokens)
+	if error != nil {
+		return models.NilNode{}, fmt.Errorf("invalid expression")
+	}
+	return val, nil
 }
 
 func handlePrint(tokens []models.TokenInfo) (int, error) {
 	if len(tokens) < 2 {
 		return 0, fmt.Errorf("incomplete print statement")
 	}
-	expr, err := parse.Parse(tokens[1:])
+
+	expr, err := handleExpression(tokens[1:])
 	if err != nil {
 		return 0, fmt.Errorf("invalid print expression")
 	}
