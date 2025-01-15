@@ -19,13 +19,11 @@ func Interprete(tokens []models.TokenInfo) error {
 		token := tokens[currentPosition]
 		switch {
 		case strings.HasPrefix(token.Token, "IF"):
-			ifLine := token.Line
-			end := findMatchingEnd(ifLine, currentPosition, tokens)
-			err := handleIf(tokens[currentPosition:end])
+			end, err := handleIf(tokens[currentPosition:])
 			if err != nil {
 				return err
 			}
-			currentPosition = end
+			currentPosition += end
 		case strings.HasPrefix(token.Token, "PRINT"):
 			end, err := handlePrint(tokens[currentPosition:])
 			if err != nil {
@@ -104,7 +102,8 @@ func handleReassignment(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("%s", err[0])
 	}
 	environment.Environment[valname] = val.Evaluate()
-	return 0, nil
+
+	return end + 1, nil
 }
 
 func handleReassignmentCondition(tokens []models.TokenInfo) (models.Node, error) {
@@ -152,7 +151,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("invalid print expression")
 	}
 	result := expr.Evaluate()
-	fmt.Print(result)
+	fmt.Printf("%v\n", result)
 
 	if tokensUsed == 0 {
 		return 0, fmt.Errorf("no semicolon found after print")
@@ -160,27 +159,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 	return tokensUsed + 2, nil
 }
 
-func findMatchingEnd(initialLine int, currentPosition int, tokens []models.TokenInfo) int {
-	braceCount := 0
-	for i := currentPosition; i < len(tokens); i++ {
-		token := tokens[i].Token
-		if strings.HasPrefix(token, "LEFT_BRACE") {
-			braceCount++
-		} else if strings.HasPrefix(token, "RIGHT_BRACE") {
-			braceCount--
-			if braceCount == 0 && initialLine != tokens[i].Line {
-				return i + 1
-			}
-		} else if strings.HasPrefix(token, "SEMICOLON") && braceCount == 0 {
-			if initialLine == tokens[i].Line {
-				return i + 1
-			}
-		}
-	}
-	return len(tokens)
-}
-
-func handleIf(tokens []models.TokenInfo) error {
+func handleIf(tokens []models.TokenInfo) (int, error) {
 	conditionStart := -1
 	conditionEnd := -1
 	bodyStart := -1
@@ -219,19 +198,22 @@ exit:
 		bodyEnd = firstSemicolon
 	}
 	if conditionStart == -1 || conditionEnd == -1 || bodyStart == -1 {
-		return fmt.Errorf("malformed if statement")
+		return 0, fmt.Errorf("malformed if statement")
 	}
 	condition, err := handleExpression(tokens[conditionStart+1 : conditionEnd])
 	if err != nil {
-		return fmt.Errorf("invalid if expression: %v", err.Error())
+		return 0, fmt.Errorf("invalid if expression: %v", err.Error())
 	}
 
 	if condition.Evaluate().(bool) {
 		if bodyEnd == -1 {
 			bodyEnd = len(tokens)
 		}
-		return Interprete(tokens[bodyStart : bodyEnd+1])
+		err := Interprete(tokens[bodyStart : bodyEnd+1])
+		if err != nil {
+			return 0, fmt.Errorf("invalid body")
+		}
 	}
 
-	return nil
+	return bodyEnd + 1, nil
 }
