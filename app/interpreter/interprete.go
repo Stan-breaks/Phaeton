@@ -100,7 +100,7 @@ func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 	}
 	val, error = parse.Parse(tokens)
 	if error != nil {
-		return models.NilNode{}, fmt.Errorf("invalid expression")
+		return models.NilNode{}, fmt.Errorf("invalid expression: %v", error[0])
 	}
 	return val, nil
 }
@@ -110,21 +110,21 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("incomplete print statement")
 	}
 
-	expr, err := handleExpression(tokens[1:])
+	tokensUsed := 0
+	for i := 1; i < len(tokens); i++ {
+		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
+			tokensUsed = i
+			break
+		}
+	}
+	expr, err := parse.Parse(tokens[1:tokensUsed])
 	if err != nil {
 		return 0, fmt.Errorf("invalid print expression")
 	}
 	result := expr.Evaluate()
 	fmt.Print(result)
-	tokensUsed := 2
-	for i := 1; i < len(tokens); i++ {
-		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
-			tokensUsed = i + 1
-			break
-		}
-	}
 
-	return tokensUsed, nil
+	return tokensUsed + 1, nil
 }
 
 func findMatchingEnd(initialLine int, currentPosition int, tokens []models.TokenInfo) int {
@@ -153,13 +153,16 @@ func handleIf(tokens []models.TokenInfo) error {
 	bodyStart := -1
 	bodyEnd := -1
 	braceCount := 0
-
+	firstRightParen := -1
+	firstSemicolon := -1
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i].Token
 
 		switch {
 		case strings.HasPrefix(token, "LEFT_PAREN") && conditionStart == -1:
 			conditionStart = i
+		case strings.HasPrefix(token, "RIGHT_PAREN") && firstRightParen == -1:
+			firstRightParen = i
 		case strings.HasPrefix(token, "LEFT_BRACE"):
 			conditionEnd = i - 1
 			if bodyStart == -1 {
@@ -170,28 +173,31 @@ func handleIf(tokens []models.TokenInfo) error {
 			braceCount--
 			if braceCount == 0 {
 				bodyEnd = i - 1
+				goto exit
 			}
+		case strings.HasPrefix(token, "SEMICOLON") && firstSemicolon == -1:
+			firstSemicolon = i
 		}
 	}
-
-	if bodyStart == -1 && conditionEnd != -1 {
-		bodyStart = conditionEnd + 1
-		bodyEnd = len(tokens) - 1
+exit:
+	if bodyStart == -1 && conditionEnd == -1 {
+		bodyStart = firstRightParen + 1
+		conditionEnd = firstRightParen
+		bodyEnd = firstSemicolon
 	}
 	if conditionStart == -1 || conditionEnd == -1 || bodyStart == -1 {
 		return fmt.Errorf("malformed if statement")
 	}
 	condition, err := handleExpression(tokens[conditionStart+1 : conditionEnd])
 	if err != nil {
-		return fmt.Errorf("invalid if condition")
+		return fmt.Errorf("invalid if expression: %v", err.Error())
 	}
 
 	if condition.Evaluate().(bool) {
 		if bodyEnd == -1 {
 			bodyEnd = len(tokens)
 		}
-
-		return Interprete(tokens[bodyStart:bodyEnd])
+		return Interprete(tokens[bodyStart : bodyEnd+1])
 	}
 
 	return nil
