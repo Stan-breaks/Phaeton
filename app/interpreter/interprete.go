@@ -38,6 +38,12 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition += end
+		case strings.HasPrefix(token.Token, "IDENTIFIER"):
+			end, err := handleReassignment(tokens[currentPosition:])
+			if err != nil {
+				return err
+			}
+			currentPosition += end
 		default:
 			currentPosition++
 		}
@@ -77,7 +83,31 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	return end + 1, nil
 }
 
-func handleReassignment(tokens []models.TokenInfo) (models.Node, error) {
+func handleReassignment(tokens []models.TokenInfo) (int, error) {
+	if !strings.HasPrefix(tokens[1].Token, "EQUAL") {
+		fmt.Print(tokens)
+		return 0, fmt.Errorf("no equal found in reassignment")
+	}
+	valname := strings.Split(tokens[0].Token, " ")[1]
+	end := 0
+	for i := 2; i < len(tokens); i++ {
+		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
+			end = i
+			break
+		}
+	}
+	if end == 0 {
+		return 0, fmt.Errorf("no semicolon found in reassignment")
+	}
+	val, err := parse.Parse(tokens[2:end])
+	if err != nil {
+		return 0, fmt.Errorf("%s", err[0])
+	}
+	environment.Environment[valname] = val.Evaluate()
+	return 0, nil
+}
+
+func handleReassignmentCondition(tokens []models.TokenInfo) (models.Node, error) {
 	valname := strings.Split(tokens[0].Token, " ")[1]
 	val, err := parse.Parse(tokens[2:])
 	if err != nil {
@@ -86,12 +116,13 @@ func handleReassignment(tokens []models.TokenInfo) (models.Node, error) {
 	environment.Environment[valname] = val.Evaluate()
 	return val, nil
 }
+
 func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 	var val models.Node
 	var err error
 	var error []string
-	if utils.IsReassignment(tokens) {
-		val, err = handleReassignment(tokens)
+	if utils.IsReassignmentCondition(tokens) {
+		val, err = handleReassignmentCondition(tokens)
 		if err != nil {
 			return models.NilNode{}, err
 		}
@@ -126,7 +157,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 	if tokensUsed == 0 {
 		return 0, fmt.Errorf("no semicolon found after print")
 	}
-	return tokensUsed + 1, nil
+	return tokensUsed + 2, nil
 }
 
 func findMatchingEnd(initialLine int, currentPosition int, tokens []models.TokenInfo) int {
