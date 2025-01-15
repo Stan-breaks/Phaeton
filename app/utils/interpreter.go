@@ -6,7 +6,7 @@ import (
 	"github.com/Stan-breaks/app/models"
 )
 
-func IsReassignment(tokens []models.TokenInfo) bool {
+func IsReassignmentCondition(tokens []models.TokenInfo) bool {
 	if len(tokens) < 2 {
 		return false
 	}
