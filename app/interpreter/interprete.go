@@ -124,6 +124,9 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 	result := expr.Evaluate()
 	fmt.Print(result)
 
+	if tokensUsed == 0 {
+		return 0, fmt.Errorf("no semicolon found after print")
+	}
 	return tokensUsed + 1, nil
 }
 
