@@ -26,7 +26,6 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition = end
-
 		case strings.HasPrefix(token.Token, "PRINT"):
 			end, err := handlePrint(tokens[currentPosition:])
 			if err != nil {
