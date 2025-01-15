@@ -152,6 +152,15 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
+				if identifierCount == 1 {
+					token := models.TokenInfo{
+						Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
+						Line:  line,
+					}
+					tokens.Success = append(tokens.Success, token)
+					identifier = ""
+					identifierCount = 0
+				}
 				token := models.TokenInfo{
 					Token: "COMMA , null",
 					Line:  line,
@@ -163,6 +172,15 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
+				if identifierCount == 1 {
+					token := models.TokenInfo{
+						Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
+						Line:  line,
+					}
+					tokens.Success = append(tokens.Success, token)
+					identifier = ""
+					identifierCount = 0
+				}
 				token := models.TokenInfo{
 					Token: "PLUS + null",
 					Line:  line,
@@ -174,6 +192,15 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
+				if identifierCount == 1 {
+					token := models.TokenInfo{
+						Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
+						Line:  line,
+					}
+					tokens.Success = append(tokens.Success, token)
+					identifier = ""
+					identifierCount = 0
+				}
 				token := models.TokenInfo{
 					Token: "MINUS - null",
 					Line:  line,
@@ -185,6 +212,15 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
+				if identifierCount == 1 {
+					token := models.TokenInfo{
+						Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
+						Line:  line,
+					}
+					tokens.Success = append(tokens.Success, token)
+					identifier = ""
+					identifierCount = 0
+				}
 				token := models.TokenInfo{
 					Token: "SEMICOLON ; null",
 					Line:  line,
