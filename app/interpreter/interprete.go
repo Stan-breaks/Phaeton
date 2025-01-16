@@ -162,11 +162,14 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 func handleIf(tokens []models.TokenInfo) (int, error) {
 	conditionStart := -1
 	conditionEnd := -1
-	bodyStart := -1
-	bodyEnd := -1
+	ifBodyStart := -1
+	ifBodyEnd := -1
+	elseBodyStart := -1
+	elseBodyEnd := -1
 	braceCount := 0
 	firstRightParen := -1
 	firstSemicolon := -1
+	secondSemicolon := -1
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i].Token
 
@@ -177,27 +180,39 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 			firstRightParen = i
 		case strings.HasPrefix(token, "LEFT_BRACE"):
 			conditionEnd = i - 1
-			if bodyStart == -1 {
-				bodyStart = i + 1
+			if ifBodyStart == -1 {
+				ifBodyStart = i + 1
 			}
 			braceCount++
 		case strings.HasPrefix(token, "RIGHT_BRACE"):
 			braceCount--
 			if braceCount == 0 {
-				bodyEnd = i - 1
+				ifBodyEnd = i - 1
 				goto exit
 			}
-		case strings.HasPrefix(token, "SEMICOLON") && firstSemicolon == -1:
-			firstSemicolon = i
+		case strings.HasPrefix(token, "SEMICOLON"):
+			if firstSemicolon == -1 {
+				firstSemicolon = i
+			}
+			if secondSemicolon == -1 {
+				secondSemicolon = i
+			}
+
+		case strings.HasPrefix(token, "ELSE") && elseBodyStart == -1:
+			if strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+				elseBodyStart = i + 2
+			} else {
+				elseBodyStart = i + 1
+			}
 		}
 	}
 exit:
-	if bodyStart == -1 && conditionEnd == -1 {
-		bodyStart = firstRightParen + 1
+	if ifBodyStart == -1 && conditionEnd == -1 {
+		ifBodyStart = firstRightParen + 1
 		conditionEnd = firstRightParen
-		bodyEnd = firstSemicolon
+		ifBodyEnd = firstSemicolon
 	}
-	if conditionStart == -1 || conditionEnd == -1 || bodyStart == -1 {
+	if conditionStart == -1 || conditionEnd == -1 || ifBodyStart == -1 {
 		return 0, fmt.Errorf("malformed if statement")
 	}
 	condition, err := handleExpression(tokens[conditionStart+1 : conditionEnd])
@@ -206,14 +221,14 @@ exit:
 	}
 
 	if condition.Evaluate().(bool) {
-		if bodyEnd == -1 {
-			bodyEnd = len(tokens)
+		if ifBodyEnd == -1 {
+			ifBodyEnd = len(tokens)
 		}
-		err := Interprete(tokens[bodyStart : bodyEnd+1])
+		err := Interprete(tokens[ifBodyStart : ifBodyEnd+1])
 		if err != nil {
 			return 0, fmt.Errorf("invalid body")
 		}
 	}
 
-	return bodyEnd + 1, nil
+	return ifBodyEnd + 1, nil
 }
