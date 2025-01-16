@@ -1,1 +1,5 @@
-(-48 + 88) * (91 * 32) / (52 + 26)
+// This program initializes age with a random integer and then prints "adult"
+// if the age is greater than 18, otherwise it prints "child"
+var age = 90;
+if (age > 18) print "adult"; else print "child";
+
