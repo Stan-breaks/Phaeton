@@ -168,6 +168,8 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 	elseBodyEnd := -1
 	braceCount := 0
 	firstRightParen := -1
+	firstLeftBrace := -1
+	firstRightBrace := -1
 	firstSemicolon := -1
 	secondSemicolon := -1
 	for i := 0; i < len(tokens); i++ {
@@ -179,16 +181,27 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 		case strings.HasPrefix(token, "RIGHT_PAREN") && firstRightParen == -1:
 			firstRightParen = i
 		case strings.HasPrefix(token, "LEFT_BRACE"):
-			conditionEnd = i - 1
-			if ifBodyStart == -1 {
-				ifBodyStart = i + 1
+			if firstLeftBrace == -1 {
+				conditionEnd = i - 1
+				if ifBodyStart == -1 {
+					ifBodyStart = i + 1
+				}
+				firstLeftBrace = i
+			} else {
+				if elseBodyStart == -1 {
+					elseBodyStart = i + 1
+				}
 			}
 			braceCount++
 		case strings.HasPrefix(token, "RIGHT_BRACE"):
 			braceCount--
 			if braceCount == 0 {
-				ifBodyEnd = i - 1
-				goto exit
+				if firstRightBrace == -1 {
+					ifBodyEnd = i - 1
+					firstRightBrace = i
+				} else {
+					elseBodyEnd = i - 1
+				}
 			}
 		case strings.HasPrefix(token, "SEMICOLON"):
 			if firstSemicolon == -1 {
@@ -226,9 +239,24 @@ exit:
 		}
 		err := Interprete(tokens[ifBodyStart : ifBodyEnd+1])
 		if err != nil {
-			return 0, fmt.Errorf("invalid body")
+			return 0, fmt.Errorf("invalid if body")
+		}
+	} else {
+		if elseBodyStart != -1 {
+			if elseBodyEnd == -1 {
+				elseBodyEnd = len(tokens)
+			}
+			err := Interprete(tokens[elseBodyStart : elseBodyEnd+1])
+			if err != nil {
+				return 0, fmt.Errorf("invalid else body")
+			}
+
 		}
 	}
 
+	if secondSemicolon != -1 {
+		elseBodyEnd = len(tokens)
+		return elseBodyEnd + 1, nil
+	}
 	return ifBodyEnd + 1, nil
 }
