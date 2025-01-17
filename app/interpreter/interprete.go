@@ -215,7 +215,7 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 			} else {
 				if secondSemicolon == -1 {
 					secondSemicolon = i
-					if !strings.HasPrefix(tokens[i+1].Token, "RIGHT_BRACE") {
+					if i+1 < len(tokens) && !strings.HasPrefix(tokens[i+1].Token, "RIGHT_BRACE") {
 						goto exit
 					}
 				}
