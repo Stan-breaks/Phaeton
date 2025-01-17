@@ -201,14 +201,16 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 					firstRightBrace = i
 				} else {
 					elseBodyEnd = i - 1
+					goto exit
 				}
 			}
 		case strings.HasPrefix(token, "SEMICOLON"):
 			if firstSemicolon == -1 {
 				firstSemicolon = i
-			}
-			if secondSemicolon == -1 {
-				secondSemicolon = i
+			} else {
+				if secondSemicolon == -1 {
+					secondSemicolon = i
+				}
 			}
 
 		case strings.HasPrefix(token, "ELSE") && elseBodyStart == -1:
@@ -224,13 +226,16 @@ exit:
 		ifBodyStart = firstRightParen + 1
 		conditionEnd = firstRightParen
 		ifBodyEnd = firstSemicolon
+		if secondSemicolon != -1 {
+			elseBodyEnd = secondSemicolon
+		}
 	}
 	if conditionStart == -1 || conditionEnd == -1 || ifBodyStart == -1 {
 		return 0, fmt.Errorf("malformed if statement")
 	}
 	condition, err := handleExpression(tokens[conditionStart+1 : conditionEnd])
 	if err != nil {
-		return 0, fmt.Errorf("invalid if expression: %v", err.Error())
+		return 0, fmt.Errorf("invalid if condition: %v", err.Error())
 	}
 
 	if condition.Evaluate().(bool) {
@@ -244,7 +249,7 @@ exit:
 	} else {
 		if elseBodyStart != -1 {
 			if elseBodyEnd == -1 {
-				elseBodyEnd = len(tokens)
+				elseBodyEnd = secondSemicolon
 			}
 			err := Interprete(tokens[elseBodyStart : elseBodyEnd+1])
 			if err != nil {
@@ -254,9 +259,13 @@ exit:
 		}
 	}
 
-	if secondSemicolon != -1 {
-		elseBodyEnd = len(tokens)
+	if elseBodyEnd == -1 {
+		if secondSemicolon != -1 {
+			elseBodyEnd = secondSemicolon
+			return elseBodyEnd + 1, nil
+		}
+		return ifBodyEnd + 1, nil
+	} else {
 		return elseBodyEnd + 1, nil
 	}
-	return ifBodyEnd + 1, nil
 }
