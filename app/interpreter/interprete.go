@@ -160,6 +160,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 }
 
 func handleIf(tokens []models.TokenInfo) (int, error) {
+
 	conditionStart := -1
 	conditionEnd := -1
 	ifBodyStart := -1
@@ -182,7 +183,11 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 			firstRightParen = i
 		case strings.HasPrefix(token, "LEFT_BRACE"):
 			if firstLeftBrace == -1 {
-				conditionEnd = i - 1
+				if strings.HasPrefix(tokens[i-1].Token, "RIGHT_PAREN") {
+					conditionEnd = i - 1
+				} else {
+					conditionEnd = firstRightParen
+				}
 				if ifBodyStart == -1 {
 					ifBodyStart = i + 1
 				}
@@ -210,6 +215,9 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 			} else {
 				if secondSemicolon == -1 {
 					secondSemicolon = i
+					if !strings.HasPrefix(tokens[i+1].Token, "RIGHT_BRACE") {
+						goto exit
+					}
 				}
 			}
 
@@ -226,15 +234,13 @@ exit:
 		ifBodyStart = firstRightParen + 1
 		conditionEnd = firstRightParen
 		ifBodyEnd = firstSemicolon
-		if secondSemicolon != -1 {
-			elseBodyEnd = secondSemicolon
-		}
 	}
 	if conditionStart == -1 || conditionEnd == -1 || ifBodyStart == -1 {
 		return 0, fmt.Errorf("malformed if statement")
 	}
 	condition, err := handleExpression(tokens[conditionStart+1 : conditionEnd])
 	if err != nil {
+		fmt.Print(tokens[conditionEnd])
 		return 0, fmt.Errorf("invalid if condition: %v", err.Error())
 	}
 
