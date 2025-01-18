@@ -38,7 +38,6 @@ func Interprete(tokens []models.TokenInfo) error {
 			currentPosition += end
 		case strings.HasPrefix(token.Token, "IDENTIFIER"):
 			end, err := handleReassignment(tokens[currentPosition:])
-			fmt.Print(tokens[currentPosition+end])
 			if err != nil {
 				return err
 			}
@@ -155,7 +154,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 	if tokensUsed == 0 {
 		return 0, fmt.Errorf("no semicolon found after print")
 	}
-	return tokensUsed + 2, nil
+	return tokensUsed + 1, nil
 }
 
 func handleIf(tokens []models.TokenInfo) (int, error) {
