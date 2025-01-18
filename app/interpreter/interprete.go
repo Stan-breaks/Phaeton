@@ -38,6 +38,7 @@ func Interprete(tokens []models.TokenInfo) error {
 			currentPosition += end
 		case strings.HasPrefix(token.Token, "IDENTIFIER"):
 			end, err := handleReassignment(tokens[currentPosition:])
+			fmt.Print(tokens[currentPosition+end])
 			if err != nil {
 				return err
 			}
@@ -83,7 +84,6 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 
 func handleReassignment(tokens []models.TokenInfo) (int, error) {
 	if !strings.HasPrefix(tokens[1].Token, "EQUAL") {
-		fmt.Print(tokens)
 		return 0, fmt.Errorf("no equal found in reassignment")
 	}
 	valname := strings.Split(tokens[0].Token, " ")[1]
@@ -102,7 +102,6 @@ func handleReassignment(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("%s", err[0])
 	}
 	environment.Environment[valname] = val.Evaluate()
-
 	return end + 1, nil
 }
 
