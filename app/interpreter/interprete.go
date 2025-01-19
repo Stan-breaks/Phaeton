@@ -192,7 +192,7 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 				}
 			}
 		case strings.HasPrefix(token, "ELSE"):
-			if braceCount == 0 {
+			if braceCount == 0 && elseBodyStart == -1 {
 				ifBodyEnd = i - 1
 				if strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
 					elseBodyStart = i + 2
@@ -203,26 +203,30 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 		}
 	}
 	if conditionStart == -1 || conditionEnd == -1 || ifBodyStart == -1 || ifBodyEnd == -1 {
+		fmt.Print(tokens)
 		return 0, fmt.Errorf("malformed if statement")
 	}
 	condition, err := handleExpression(tokens[conditionStart+1 : conditionEnd])
 	if err != nil {
-		fmt.Print(tokens[conditionEnd])
 		return 0, fmt.Errorf("invalid if condition: %v", err.Error())
 	}
 	if condition.Evaluate().(bool) {
-		err := Interprete(tokens[ifBodyStart : ifBodyEnd+1])
+		err := Interprete(tokens[ifBodyStart:ifBodyEnd])
 		if err != nil {
 			return 0, fmt.Errorf("invalid if body: %v", err.Error())
 		}
 	} else {
-
-		err := Interprete(tokens[elseBodyStart : elseBodyEnd+1])
-		if err != nil {
-			return 0, fmt.Errorf("invalid else body")
+		if elseBodyEnd != -1 {
+			err := Interprete(tokens[elseBodyStart:elseBodyEnd])
+			if err != nil {
+				return 0, fmt.Errorf("invalid else body: %v", err.Error())
+			}
 		}
-
 	}
 
-	return ifBodyEnd + 1, nil
+	if elseBodyEnd == -1 {
+		return ifBodyEnd + 1, nil
+	} else {
+		return elseBodyEnd + 1, nil
+	}
 }
