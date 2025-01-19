@@ -232,7 +232,7 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 			return 0, fmt.Errorf("invalid if body: %v", err.Error())
 		}
 	} else {
-		if elseBodyEnd != -1 {
+		if elseBodyEnd != -1 && elseBodyStart != -1 {
 			err := Interprete(tokens[elseBodyStart : elseBodyEnd+1])
 			if err != nil {
 				return 0, fmt.Errorf("invalid else body: %v", err.Error())
