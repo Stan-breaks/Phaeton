@@ -216,6 +216,8 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 					}
 				}
 			}
+		default:
+
 		}
 	}
 
@@ -239,7 +241,7 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 			}
 		}
 	}
-	if elseBodyEnd == -1 {
+	if elseBodyEnd == -1 || elseBodyStart == -1 {
 		return ifBodyEnd + 1, nil
 	} else {
 		return elseBodyEnd + 1, nil
