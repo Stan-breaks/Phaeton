@@ -179,6 +179,14 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 			if parenCount == 0 && conditionEnd == -1 {
 				conditionEnd = i
 				ifBodyStart = i + 1
+				if !strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+					for j := i + 1; j < len(tokens); j++ {
+						if strings.HasPrefix(tokens[j].Token, "SEMICOLON") {
+							ifBodyEnd = j
+							break
+						}
+					}
+				}
 			}
 		case strings.HasPrefix(token, "LEFT_BRACE"):
 			braceCount++
