@@ -205,6 +205,8 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 				ifBodyEnd = i - 1
 				if strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
 					elseBodyStart = i + 2
+				} else if strings.HasPrefix(tokens[i+1].Token, "IF") {
+					continue
 				} else {
 					elseBodyStart = i + 1
 					for j := i + 1; j < len(tokens); j++ {
