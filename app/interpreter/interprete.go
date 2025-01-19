@@ -187,7 +187,8 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 			if braceCount == 0 {
 				if ifBodyEnd != -1 && elseBodyEnd == -1 {
 					elseBodyEnd = i
-				} else {
+				}
+				if ifBodyEnd == -1 {
 					ifBodyEnd = i
 				}
 			}
@@ -218,7 +219,6 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("invalid if condition: %v", err.Error())
 	}
 	if condition.Evaluate().(bool) {
-		fmt.Print(tokens[ifBodyStart : ifBodyEnd+1])
 		err := Interprete(tokens[ifBodyStart : ifBodyEnd+1])
 		if err != nil {
 			return 0, fmt.Errorf("invalid if body: %v", err.Error())
