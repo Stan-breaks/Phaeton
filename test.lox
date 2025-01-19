@@ -1,5 +1,10 @@
-// This program initializes age with a random integer and then prints "adult"
-// if the age is greater than 18, otherwise it prints "child"
-var age = 90;
-if (age > 18) print "adult"; else print "child";
+ // This program uses a random boolean to decide which branch to execute,
+ // and then prints the appropriate string
+ if (true) {
+   print "if block";
+ } else print "else statement";
+
+ if (true) print "if statement"; else {
+   print "else block";
+ }
 
