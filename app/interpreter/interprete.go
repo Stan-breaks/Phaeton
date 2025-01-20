@@ -240,6 +240,9 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 				}
 			}
 
+		case strings.HasPrefix(token, "SEMICOLON") && len(positions.ElseIfBlocks) > 0 && i-1 == positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd:
+			fmt.Print(true)
+			currentBlock = "if"
 		case strings.HasPrefix(token, "ELSE"):
 			if braceCount == 0 {
 				if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "IF") {
