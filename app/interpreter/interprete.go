@@ -193,6 +193,10 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 	currentBlock := "if"
 
 	for i := 0; i < len(tokens); i++ {
+		if len(positions.ElseIfBlocks) > 0 && positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd != -1 && currentBlock == "if" {
+			continue
+		}
+
 		token := tokens[i].Token
 		switch {
 		case strings.HasPrefix(token, "LEFT_PAREN"):
@@ -234,15 +238,23 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 					positions.IfBodyEnd = i
 				} else if currentBlock == "elif" && len(positions.ElseIfBlocks) > 0 {
 					positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd = i
-					currentBlock = "if"
+					if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "ELSE") {
+						currentBlock = "else"
+					} else {
+						currentBlock = "if"
+					}
 				} else if currentBlock == "else" {
 					positions.ElseBodyEnd = i
 				}
 			}
 
-		case strings.HasPrefix(token, "SEMICOLON") && len(positions.ElseIfBlocks) > 0 && i-1 == positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd:
-			fmt.Print(true)
-			currentBlock = "if"
+		case strings.HasPrefix(token, "SEMICOLON") && len(positions.ElseIfBlocks) > 0 && i == positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd:
+			if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "ELSE") {
+				currentBlock = "else"
+			} else {
+				currentBlock = "if"
+			}
+
 		case strings.HasPrefix(token, "ELSE"):
 			if braceCount == 0 {
 				if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "IF") {
