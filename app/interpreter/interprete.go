@@ -131,57 +131,39 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 
 func handleIf(tokens []models.TokenInfo) (int, error) {
 	positions := findIfStatementPositions(tokens)
-	if !positions.isValid() {
+	if !positions.IsValid() {
 		return 0, fmt.Errorf("malformed if statement")
 	}
-	condition, err := handleExpression(tokens[positions.conditionStart+1 : positions.conditionEnd])
+	condition, err := handleExpression(tokens[positions.ConditionStart+1 : positions.ConditionEnd])
 	if err != nil {
 		return 0, fmt.Errorf("invalid if condition: %v", err.Error())
 	}
 	if condition.Evaluate().(bool) {
-		err := Interprete(tokens[positions.ifBodyStart : positions.ifBodyEnd+1])
+		err := Interprete(tokens[positions.IfBodyStart : positions.IfBodyEnd+1])
 		if err != nil {
 			return 0, fmt.Errorf("invalid if body: %v", err.Error())
 		}
-	} else if positions.hasElseBlock() {
-		err := Interprete(tokens[positions.elseBodyStart : positions.elseBodyEnd+1])
+	} else if positions.HasElseBlock() {
+		err := Interprete(tokens[positions.ElseBodyStart : positions.ElseBodyEnd+1])
 		if err != nil {
 			return 0, fmt.Errorf("invalid else body: %v", err.Error())
 		}
 	}
 
-	if !positions.hasElseBlock() {
-		return positions.ifBodyEnd + 1, nil
+	if !positions.HasElseBlock() {
+		return positions.IfBodyEnd + 1, nil
 	}
-	return positions.elseBodyEnd + 1, nil
+	return positions.ElseBodyEnd + 1, nil
 }
 
-type ifStatementPositions struct {
-	conditionStart int
-	conditionEnd   int
-	ifBodyStart    int
-	ifBodyEnd      int
-	elseBodyStart  int
-	elseBodyEnd    int
-}
-
-func (p ifStatementPositions) isValid() bool {
-	return p.conditionStart != -1 && p.conditionEnd != -1 &&
-		p.ifBodyStart != -1 && p.ifBodyEnd != -1
-}
-
-func (p ifStatementPositions) hasElseBlock() bool {
-	return p.elseBodyEnd != -1 && p.elseBodyStart != -1
-}
-
-func findIfStatementPositions(tokens []models.TokenInfo) ifStatementPositions {
-	positions := ifStatementPositions{
-		conditionStart: -1,
-		conditionEnd:   -1,
-		ifBodyStart:    -1,
-		ifBodyEnd:      -1,
-		elseBodyStart:  -1,
-		elseBodyEnd:    -1,
+func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPositions {
+	positions := models.IfStatementPositions{
+		ConditionStart: -1,
+		ConditionEnd:   -1,
+		IfBodyStart:    -1,
+		IfBodyEnd:      -1,
+		ElseBodyStart:  -1,
+		ElseBodyEnd:    -1,
 	}
 
 	parenCount := 0
@@ -192,18 +174,18 @@ func findIfStatementPositions(tokens []models.TokenInfo) ifStatementPositions {
 
 		switch {
 		case strings.HasPrefix(token, "LEFT_PAREN"):
-			if positions.conditionStart == -1 && parenCount == 0 {
-				positions.conditionStart = i
+			if positions.ConditionStart == -1 && parenCount == 0 {
+				positions.ConditionStart = i
 			}
 			parenCount++
 
 		case strings.HasPrefix(token, "RIGHT_PAREN"):
 			parenCount--
-			if parenCount == 0 && positions.conditionEnd == -1 {
-				positions.conditionEnd = i
-				positions.ifBodyStart = i + 1
+			if parenCount == 0 && positions.ConditionEnd == -1 {
+				positions.ConditionEnd = i
+				positions.IfBodyStart = i + 1
 				if !strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
-					positions.ifBodyEnd = findSemicolonPosition(tokens[i+1:]) + i + 1
+					positions.IfBodyEnd = findSemicolonPosition(tokens[i+1:]) + i + 1
 				}
 			}
 
@@ -213,24 +195,24 @@ func findIfStatementPositions(tokens []models.TokenInfo) ifStatementPositions {
 		case strings.HasPrefix(token, "RIGHT_BRACE"):
 			braceCount--
 			if braceCount == 0 {
-				if positions.ifBodyEnd != -1 && positions.elseBodyEnd == -1 {
-					positions.elseBodyEnd = i
+				if positions.IfBodyEnd != -1 && positions.ElseBodyEnd == -1 {
+					positions.ElseBodyEnd = i
 				}
-				if positions.ifBodyEnd == -1 {
-					positions.ifBodyEnd = i
+				if positions.IfBodyEnd == -1 {
+					positions.IfBodyEnd = i
 				}
 			}
 
 		case strings.HasPrefix(token, "ELSE"):
-			if braceCount == 0 && positions.elseBodyStart == -1 {
-				positions.ifBodyEnd = i - 1
+			if braceCount == 0 && positions.ElseBodyStart == -1 {
+				positions.IfBodyEnd = i - 1
 				if strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
-					positions.elseBodyStart = i + 2
+					positions.ElseBodyStart = i + 2
 				} else if strings.HasPrefix(tokens[i+1].Token, "IF") {
 					continue
 				} else {
-					positions.elseBodyStart = i + 1
-					positions.elseBodyEnd = findSemicolonPosition(tokens[i+1:]) + i + 1
+					positions.ElseBodyStart = i + 1
+					positions.ElseBodyEnd = findSemicolonPosition(tokens[i+1:]) + i + 1
 				}
 			}
 		}
