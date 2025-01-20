@@ -166,6 +166,9 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 	elseBodyEnd := -1
 	parenCount := 0
 	braceCount := 0
+	elseIf := false
+	elseIfStart := -1
+	elseIfEnd := -1
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i].Token
 		switch {
@@ -193,8 +196,15 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 		case strings.HasPrefix(token, "RIGHT_BRACE"):
 			braceCount--
 			if braceCount == 0 {
-				if ifBodyEnd != -1 && elseBodyEnd == -1 {
+				if ifBodyEnd != -1 && elseBodyEnd == -1 && elseIf == false {
 					elseBodyEnd = i
+				}
+				if ifBodyEnd != -1 && elseBodyEnd == -1 && elseIf == true {
+					elseIfEnd = i
+					err := Interprete(tokens[elseIfStart:elseIfEnd])
+					if err != nil {
+						return 0, fmt.Errorf("invalid else if : %v", err.Error())
+					}
 				}
 				if ifBodyEnd == -1 {
 					ifBodyEnd = i
@@ -205,8 +215,8 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 				ifBodyEnd = i - 1
 				if strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
 					elseBodyStart = i + 2
-				} else if strings.HasPrefix(tokens[i+1].Token, "IF") {
-					continue
+				} else if strings.HasPrefix(tokens[i+1].Token, "IF") && elseIf == false {
+					elseIf = true
 				} else {
 					elseBodyStart = i + 1
 					for j := i + 1; j < len(tokens); j++ {
