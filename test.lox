@@ -1,10 +1,9 @@
- // This program uses multiple if statements to categorize a person
- // into different life stages based on their age
- var age = 93;
- var stage = "unknown";
- if (age < 18) { stage = "child"; }
- else if (age >= 18) { stage = "adult"; }
- else if (age >= 65) { stage = "senior"; }
- else if (age >= 100) { stage = "centenarian"; }
- print stage;
-
+ // This program uses a random boolean to decide which branch to execute,
+ // and then prints the appropriate string
+ if (true) {
+   print "quz";
+ } else if (true) print "quz";
+print "stan";
+ if (true) print "quz"; else if (true) {
+   print "quz";
+ }
