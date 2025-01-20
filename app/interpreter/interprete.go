@@ -61,7 +61,7 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	if !strings.HasPrefix(tokens[2].Token, "EQUAL") {
 		return 0, fmt.Errorf("equal not found")
 	}
-	semicolonPosition := findSemicolonPosition(tokens[3:])
+	semicolonPosition := utils.FindSemicolonPosition(tokens[3:])
 	if semicolonPosition == -1 {
 		return 0, fmt.Errorf("no semicolon found")
 	}
@@ -79,7 +79,7 @@ func handleReassignment(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("no equal found in reassignment")
 	}
 	variableName := strings.Split(tokens[0].Token, " ")[1]
-	semicolonPosition := findSemicolonPosition(tokens[2:])
+	semicolonPosition := utils.FindSemicolonPosition(tokens[2:])
 	if semicolonPosition == -1 {
 		return 0, fmt.Errorf("no semicolon found in reassignment")
 	}
@@ -116,7 +116,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 	if len(tokens) < 2 {
 		return 0, fmt.Errorf("incomplete print statement")
 	}
-	semicolonPosition := findSemicolonPosition(tokens)
+	semicolonPosition := utils.FindSemicolonPosition(tokens)
 	if semicolonPosition == 0 {
 		return 0, fmt.Errorf("no semicolon found after print")
 	}
@@ -185,7 +185,7 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 				positions.ConditionEnd = i
 				positions.IfBodyStart = i + 1
 				if !strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
-					positions.IfBodyEnd = findSemicolonPosition(tokens[i+1:]) + i + 1
+					positions.IfBodyEnd = utils.FindSemicolonPosition(tokens[i+1:]) + i + 1
 				}
 			}
 
@@ -212,19 +212,10 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 					continue
 				} else {
 					positions.ElseBodyStart = i + 1
-					positions.ElseBodyEnd = findSemicolonPosition(tokens[i+1:]) + i + 1
+					positions.ElseBodyEnd = utils.FindSemicolonPosition(tokens[i+1:]) + i + 1
 				}
 			}
 		}
 	}
 	return positions
-}
-
-func findSemicolonPosition(tokens []models.TokenInfo) int {
-	for i := 0; i < len(tokens); i++ {
-		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
-			return i
-		}
-	}
-	return -1
 }
