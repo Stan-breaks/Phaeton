@@ -151,7 +151,6 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 			if err != nil {
 				return 0, fmt.Errorf("invalid else-if condition: %v", err.Error())
 			}
-
 			if elseIfCondition.Evaluate().(bool) {
 				err := Interprete(tokens[elseIfBlock.BodyStart : elseIfBlock.BodyEnd+1])
 				if err != nil {
@@ -170,7 +169,6 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 		}
 	}
 
-	// Return the position after the last executed block
 	if positions.HasElseBlock() {
 		return positions.ElseBodyEnd + 1, nil
 	} else if len(positions.ElseIfBlocks) > 0 {
@@ -236,6 +234,7 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 					positions.IfBodyEnd = i
 				} else if currentBlock == "elif" && len(positions.ElseIfBlocks) > 0 {
 					positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd = i
+					currentBlock = "if"
 				} else if currentBlock == "else" {
 					positions.ElseBodyEnd = i
 				}
@@ -245,10 +244,6 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 			if braceCount == 0 {
 				if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "IF") {
 					currentBlock = "elif"
-					i++
-					if currentBlock == "if" {
-						positions.IfBodyEnd = i - 1
-					}
 				} else {
 					currentBlock = "else"
 					if len(positions.ElseIfBlocks) > 0 {
