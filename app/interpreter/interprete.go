@@ -19,29 +19,29 @@ func Interprete(tokens []models.TokenInfo) error {
 		token := tokens[currentPosition]
 		switch {
 		case strings.HasPrefix(token.Token, "IF"):
-			end, err := handleIf(tokens[currentPosition:])
+			tokensProcessed, err := handleIf(tokens[currentPosition:])
 			if err != nil {
 				return err
 			}
-			currentPosition += end
+			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "PRINT"):
-			end, err := handlePrint(tokens[currentPosition:])
+			tokensProcessed, err := handlePrint(tokens[currentPosition:])
 			if err != nil {
 				return err
 			}
-			currentPosition += end
+			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "VAR"):
-			end, err := handleAssignment(tokens[currentPosition:])
+			tokensProcessed, err := handleAssignment(tokens[currentPosition:])
 			if err != nil {
 				return err
 			}
-			currentPosition += end
+			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "IDENTIFIER"):
-			end, err := handleReassignment(tokens[currentPosition:])
+			tokensProcessed, err := handleReassignment(tokens[currentPosition:])
 			if err != nil {
 				return err
 			}
-			currentPosition += end
+			currentPosition += tokensProcessed
 		default:
 			currentPosition++
 		}
@@ -57,205 +57,192 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	if !strings.HasPrefix(nameToken.Token, "IDENTIFIER") {
 		return 0, fmt.Errorf("no identifier found")
 	}
-	valName := strings.Split(nameToken.Token, " ")[1]
+	variableName := strings.Split(nameToken.Token, " ")[1]
 	if !strings.HasPrefix(tokens[2].Token, "EQUAL") {
 		return 0, fmt.Errorf("equal not found")
 	}
-	end := 0
-	for i := 3; i < len(tokens); i++ {
-		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
-			end = i
-			break
-		}
-	}
-	if end == 0 {
+	semicolonPosition := findSemicolonPosition(tokens[3:])
+	if semicolonPosition == -1 {
 		return 0, fmt.Errorf("no semicolon found")
 	}
-	expr, err := parse.Parse(tokens[3:end])
+	expression, err := parse.Parse(tokens[3 : semicolonPosition+3])
 	if err != nil {
 		return 0, fmt.Errorf("invalid assignment expression")
 	}
-	value := expr.Evaluate()
-
-	environment.Environment[valName] = value
-	return end + 1, nil
+	value := expression.Evaluate()
+	environment.Environment[variableName] = value
+	return semicolonPosition + 4, nil
 }
 
 func handleReassignment(tokens []models.TokenInfo) (int, error) {
 	if !strings.HasPrefix(tokens[1].Token, "EQUAL") {
 		return 0, fmt.Errorf("no equal found in reassignment")
 	}
-	valname := strings.Split(tokens[0].Token, " ")[1]
-	end := 0
-	for i := 2; i < len(tokens); i++ {
-		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
-			end = i
-			break
-		}
-	}
-	if end == 0 {
+	variableName := strings.Split(tokens[0].Token, " ")[1]
+	semicolonPosition := findSemicolonPosition(tokens[2:])
+	if semicolonPosition == -1 {
 		return 0, fmt.Errorf("no semicolon found in reassignment")
 	}
-	val, err := parse.Parse(tokens[2:end])
+	expression, err := parse.Parse(tokens[2 : semicolonPosition+2])
 	if err != nil {
 		return 0, fmt.Errorf("%s", err[0])
 	}
-	environment.Environment[valname] = val.Evaluate()
-	return end + 1, nil
+	environment.Environment[variableName] = expression.Evaluate()
+	return semicolonPosition + 3, nil
 }
 
 func handleReassignmentCondition(tokens []models.TokenInfo) (models.Node, error) {
-	valname := strings.Split(tokens[0].Token, " ")[1]
-	val, err := parse.Parse(tokens[2:])
+	variableName := strings.Split(tokens[0].Token, " ")[1]
+	expression, err := parse.Parse(tokens[2:])
 	if err != nil {
 		return models.NilNode{}, fmt.Errorf("invalid reassignment expression")
 	}
-	environment.Environment[valname] = val.Evaluate()
-	return val, nil
+	environment.Environment[variableName] = expression.Evaluate()
+	return expression, nil
 }
 
 func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
-	var val models.Node
-	var err error
-	var error []string
 	if utils.IsReassignmentCondition(tokens) {
-		val, err = handleReassignmentCondition(tokens)
-		if err != nil {
-			return models.NilNode{}, err
-		}
-		return val, nil
+		return handleReassignmentCondition(tokens)
 	}
-	val, error = parse.Parse(tokens)
-	if error != nil {
-		return models.NilNode{}, fmt.Errorf("invalid expression: %v", error[0])
+	expression, parseErrors := parse.Parse(tokens)
+	if parseErrors != nil {
+		return models.NilNode{}, fmt.Errorf("invalid expression: %v", parseErrors[0])
 	}
-	return val, nil
+	return expression, nil
 }
 
 func handlePrint(tokens []models.TokenInfo) (int, error) {
 	if len(tokens) < 2 {
 		return 0, fmt.Errorf("incomplete print statement")
 	}
-
-	tokensUsed := 0
-	for i := 0; i < len(tokens); i++ {
-		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
-			tokensUsed = i
-			break
-		}
-	}
-	if tokensUsed == 0 {
+	semicolonPosition := findSemicolonPosition(tokens)
+	if semicolonPosition == 0 {
 		return 0, fmt.Errorf("no semicolon found after print")
 	}
-	expr, err := parse.Parse(tokens[1:tokensUsed])
+	expression, err := parse.Parse(tokens[1:semicolonPosition])
 	if err != nil {
 		return 0, fmt.Errorf("invalid print expression")
 	}
-	result := expr.Evaluate()
+	result := expression.Evaluate()
 	fmt.Printf("%v\n", result)
-
-	return tokensUsed + 1, nil
+	return semicolonPosition + 1, nil
 }
 
 func handleIf(tokens []models.TokenInfo) (int, error) {
-	conditionStart := -1
-	conditionEnd := -1
-	ifBodyStart := -1
-	ifBodyEnd := -1
-	elseBodyStart := -1
-	elseBodyEnd := -1
-	parenCount := 0
-	braceCount := 0
-	elseIf := false
-	elseIfStart := -1
-	elseIfEnd := -1
-	for i := 0; i < len(tokens); i++ {
-		token := tokens[i].Token
-		switch {
-		case strings.HasPrefix(token, "LEFT_PAREN"):
-			if conditionStart == -1 && parenCount == 0 {
-				conditionStart = i
-			}
-			parenCount++
-		case strings.HasPrefix(token, "RIGHT_PAREN"):
-			parenCount--
-			if parenCount == 0 && conditionEnd == -1 {
-				conditionEnd = i
-				ifBodyStart = i + 1
-				if !strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
-					for j := i + 1; j < len(tokens); j++ {
-						if strings.HasPrefix(tokens[j].Token, "SEMICOLON") {
-							ifBodyEnd = j
-							break
-						}
-					}
-				}
-			}
-		case strings.HasPrefix(token, "LEFT_BRACE"):
-			braceCount++
-		case strings.HasPrefix(token, "RIGHT_BRACE"):
-			braceCount--
-			if braceCount == 0 {
-				if ifBodyEnd != -1 && elseBodyEnd == -1 && elseIf == false {
-					elseBodyEnd = i
-				}
-				if ifBodyEnd != -1 && elseBodyEnd == -1 && elseIf == true {
-					elseIfEnd = i
-					err := Interprete(tokens[elseIfStart:elseIfEnd])
-					if err != nil {
-						return 0, fmt.Errorf("invalid else if : %v", err.Error())
-					}
-				}
-				if ifBodyEnd == -1 {
-					ifBodyEnd = i
-				}
-			}
-		case strings.HasPrefix(token, "ELSE"):
-			if braceCount == 0 && elseBodyStart == -1 {
-				ifBodyEnd = i - 1
-				if strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
-					elseBodyStart = i + 2
-				} else if strings.HasPrefix(tokens[i+1].Token, "IF") && elseIf == false {
-					elseIf = true
-				} else {
-					elseBodyStart = i + 1
-					for j := i + 1; j < len(tokens); j++ {
-						if strings.HasPrefix(tokens[j].Token, "SEMICOLON") {
-							elseBodyEnd = j
-							break
-						}
-
-					}
-				}
-			}
-		default:
-
-		}
-	}
-
-	if conditionStart == -1 || conditionEnd == -1 || ifBodyStart == -1 || ifBodyEnd == -1 {
+	positions := findIfStatementPositions(tokens)
+	if !positions.isValid() {
 		return 0, fmt.Errorf("malformed if statement")
 	}
-	condition, err := handleExpression(tokens[conditionStart+1 : conditionEnd])
+	condition, err := handleExpression(tokens[positions.conditionStart+1 : positions.conditionEnd])
 	if err != nil {
 		return 0, fmt.Errorf("invalid if condition: %v", err.Error())
 	}
 	if condition.Evaluate().(bool) {
-		err := Interprete(tokens[ifBodyStart : ifBodyEnd+1])
+		err := Interprete(tokens[positions.ifBodyStart : positions.ifBodyEnd+1])
 		if err != nil {
 			return 0, fmt.Errorf("invalid if body: %v", err.Error())
 		}
-	} else {
-		if elseBodyEnd != -1 && elseBodyStart != -1 {
-			err := Interprete(tokens[elseBodyStart : elseBodyEnd+1])
-			if err != nil {
-				return 0, fmt.Errorf("invalid else body: %v", err.Error())
+	} else if positions.hasElseBlock() {
+		err := Interprete(tokens[positions.elseBodyStart : positions.elseBodyEnd+1])
+		if err != nil {
+			return 0, fmt.Errorf("invalid else body: %v", err.Error())
+		}
+	}
+
+	if !positions.hasElseBlock() {
+		return positions.ifBodyEnd + 1, nil
+	}
+	return positions.elseBodyEnd + 1, nil
+}
+
+type ifStatementPositions struct {
+	conditionStart int
+	conditionEnd   int
+	ifBodyStart    int
+	ifBodyEnd      int
+	elseBodyStart  int
+	elseBodyEnd    int
+}
+
+func (p ifStatementPositions) isValid() bool {
+	return p.conditionStart != -1 && p.conditionEnd != -1 &&
+		p.ifBodyStart != -1 && p.ifBodyEnd != -1
+}
+
+func (p ifStatementPositions) hasElseBlock() bool {
+	return p.elseBodyEnd != -1 && p.elseBodyStart != -1
+}
+
+func findIfStatementPositions(tokens []models.TokenInfo) ifStatementPositions {
+	positions := ifStatementPositions{
+		conditionStart: -1,
+		conditionEnd:   -1,
+		ifBodyStart:    -1,
+		ifBodyEnd:      -1,
+		elseBodyStart:  -1,
+		elseBodyEnd:    -1,
+	}
+
+	parenCount := 0
+	braceCount := 0
+
+	for i := 0; i < len(tokens); i++ {
+		token := tokens[i].Token
+
+		switch {
+		case strings.HasPrefix(token, "LEFT_PAREN"):
+			if positions.conditionStart == -1 && parenCount == 0 {
+				positions.conditionStart = i
+			}
+			parenCount++
+
+		case strings.HasPrefix(token, "RIGHT_PAREN"):
+			parenCount--
+			if parenCount == 0 && positions.conditionEnd == -1 {
+				positions.conditionEnd = i
+				positions.ifBodyStart = i + 1
+				if !strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+					positions.ifBodyEnd = findSemicolonPosition(tokens[i+1:]) + i + 1
+				}
+			}
+
+		case strings.HasPrefix(token, "LEFT_BRACE"):
+			braceCount++
+
+		case strings.HasPrefix(token, "RIGHT_BRACE"):
+			braceCount--
+			if braceCount == 0 {
+				if positions.ifBodyEnd != -1 && positions.elseBodyEnd == -1 {
+					positions.elseBodyEnd = i
+				}
+				if positions.ifBodyEnd == -1 {
+					positions.ifBodyEnd = i
+				}
+			}
+
+		case strings.HasPrefix(token, "ELSE"):
+			if braceCount == 0 && positions.elseBodyStart == -1 {
+				positions.ifBodyEnd = i - 1
+				if strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+					positions.elseBodyStart = i + 2
+				} else if strings.HasPrefix(tokens[i+1].Token, "IF") {
+					continue
+				} else {
+					positions.elseBodyStart = i + 1
+					positions.elseBodyEnd = findSemicolonPosition(tokens[i+1:]) + i + 1
+				}
 			}
 		}
 	}
-	if elseBodyEnd == -1 || elseBodyStart == -1 {
-		return ifBodyEnd + 1, nil
-	} else {
-		return elseBodyEnd + 1, nil
+	return positions
+}
+
+func findSemicolonPosition(tokens []models.TokenInfo) int {
+	for i := 0; i < len(tokens); i++ {
+		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
+			return i
+		}
 	}
+	return -1
 }
