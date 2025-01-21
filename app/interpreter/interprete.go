@@ -71,7 +71,7 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	}
 	value := expression.Evaluate()
 	environment.Environment[variableName] = value
-	return semicolonPosition + 4, nil
+	return semicolonPosition + 1, nil
 }
 
 func handleReassignment(tokens []models.TokenInfo) (int, error) {
@@ -241,10 +241,11 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 					if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "ELSE") {
 						currentBlock = "else"
 					} else {
-						currentBlock = "if"
+						goto exit
 					}
 				} else if currentBlock == "else" {
 					positions.ElseBodyEnd = i
+					goto exit
 				}
 			}
 
@@ -257,7 +258,6 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 				}
 			}
 			if i == positions.ElseBodyEnd {
-				fmt.Print(true)
 				goto exit
 			}
 
