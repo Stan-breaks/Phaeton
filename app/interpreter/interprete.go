@@ -88,7 +88,7 @@ func handleReassignment(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("%s", err[0])
 	}
 	environment.Environment[variableName] = expression.Evaluate()
-	return semicolonPosition + 3, nil
+	return semicolonPosition + 1, nil
 }
 
 func handleReassignmentCondition(tokens []models.TokenInfo) (models.Node, error) {
@@ -140,6 +140,7 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 	}
 
 	if condition.Evaluate().(bool) {
+
 		err := Interprete(tokens[positions.IfBodyStart : positions.IfBodyEnd+1])
 		if err != nil {
 			return 0, fmt.Errorf("invalid if body: %v", err.Error())
@@ -152,7 +153,9 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 				return 0, fmt.Errorf("invalid else-if condition: %v", err.Error())
 			}
 			if elseIfCondition.Evaluate().(bool) {
+				fmt.Print(positions)
 				err := Interprete(tokens[elseIfBlock.BodyStart : elseIfBlock.BodyEnd+1])
+
 				if err != nil {
 					return 0, fmt.Errorf("invalid else-if body: %v", err.Error())
 				}
