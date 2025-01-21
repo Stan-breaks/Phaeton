@@ -1,9 +1,1 @@
- // This program uses a random boolean to decide which branch to execute,
- // and then prints the appropriate string
- if (false) {
-   print "quz";
- } else if (true) print "quz"; else {print "yow";}
-print "stan";
- if (true) print "quz"; else if (true) {
-   print "quz";
- }
+if (true) if (true) print "nested true";}
