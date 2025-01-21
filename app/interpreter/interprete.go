@@ -139,36 +139,37 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("invalid if condition: %v", err.Error())
 	}
 
+	conditionMet := false
 	if condition.Evaluate().(bool) {
-
 		err := Interprete(tokens[positions.IfBodyStart : positions.IfBodyEnd+1])
 		if err != nil {
 			return 0, fmt.Errorf("invalid if body: %v", err.Error())
 		}
-	} else {
-		conditionMet := false
-		for _, elseIfBlock := range positions.ElseIfBlocks {
+		conditionMet = true
+	}
+	for _, elseIfBlock := range positions.ElseIfBlocks {
+
+		if elseIfBlock.BodyEnd > 0 && elseIfBlock.ConditionEnd > 0 && elseIfBlock.BodyStart > 0 && elseIfBlock.ConditionStart > 0 {
 			elseIfCondition, err := handleExpression(tokens[elseIfBlock.ConditionStart+1 : elseIfBlock.ConditionEnd])
 			if err != nil {
 				return 0, fmt.Errorf("invalid else-if condition: %v", err.Error())
 			}
 			if elseIfCondition.Evaluate().(bool) {
-				fmt.Print(positions)
 				err := Interprete(tokens[elseIfBlock.BodyStart : elseIfBlock.BodyEnd+1])
 
 				if err != nil {
 					return 0, fmt.Errorf("invalid else-if body: %v", err.Error())
 				}
 				conditionMet = true
-				break
 			}
 		}
 
-		if !conditionMet && positions.HasElseBlock() {
-			err := Interprete(tokens[positions.ElseBodyStart : positions.ElseBodyEnd+1])
-			if err != nil {
-				return 0, fmt.Errorf("invalid else body: %v", err.Error())
-			}
+	}
+
+	if !conditionMet && positions.HasElseBlock() {
+		err := Interprete(tokens[positions.ElseBodyStart : positions.ElseBodyEnd+1])
+		if err != nil {
+			return 0, fmt.Errorf("invalid else body: %v", err.Error())
 		}
 	}
 
@@ -196,10 +197,6 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 	currentBlock := "if"
 
 	for i := 0; i < len(tokens); i++ {
-		if len(positions.ElseIfBlocks) > 0 && positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd != -1 && currentBlock == "if" {
-			continue
-		}
-
 		token := tokens[i].Token
 		switch {
 		case strings.HasPrefix(token, "LEFT_PAREN"):
@@ -279,7 +276,7 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 						positions.IfBodyEnd = i - 1
 					}
 
-					if strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+					if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
 						positions.ElseBodyStart = i + 2
 					} else {
 						positions.ElseBodyStart = i + 1
