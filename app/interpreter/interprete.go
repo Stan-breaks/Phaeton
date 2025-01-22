@@ -196,7 +196,6 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 	parenCount := 0
 	braceCount := 0
 	currentBlock := "if"
-
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i].Token
 		switch {
@@ -218,6 +217,9 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 					positions.IfBodyStart = i + 1
 					if !strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
 						positions.IfBodyEnd = utils.FindSemicolonPosition(tokens[i+1:]) + i + 1
+					}
+					if strings.HasPrefix(tokens[i+1].Token, "IF") {
+						positions.IfBodyEnd = utils.FindLastSemicolonInSameLine(tokens[i+1:]) + i + 1
 					}
 				} else if currentBlock == "elif" && len(positions.ElseIfBlocks) > 0 {
 					lastBlock := &positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1]
