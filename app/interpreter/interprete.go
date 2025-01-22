@@ -131,6 +131,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 
 func handleIf(tokens []models.TokenInfo) (int, error) {
 	positions := findIfStatementPositions(tokens)
+	fmt.Println(positions)
 	if !positions.IsValid() {
 		return 0, fmt.Errorf("malformed if statement")
 	}
@@ -148,7 +149,6 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 		conditionMet := false
 		for _, elseIfBlock := range positions.ElseIfBlocks {
 
-			fmt.Println(elseIfBlock.BodyEnd)
 			if elseIfBlock.BodyEnd > 0 && elseIfBlock.ConditionEnd > 0 && elseIfBlock.BodyStart > 0 && elseIfBlock.ConditionStart > 0 {
 				elseIfCondition, err := handleExpression(tokens[elseIfBlock.ConditionStart+1 : elseIfBlock.ConditionEnd])
 				if err != nil {
@@ -201,9 +201,9 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 		token := tokens[i].Token
 		switch {
 		case strings.HasPrefix(token, "LEFT_PAREN"):
-			if currentBlock == "if" && positions.ConditionStart == -1 && parenCount == 0 {
+			if currentBlock == "if" && positions.ConditionStart == -1 && parenCount == 0 && braceCount == 0 {
 				positions.ConditionStart = i
-			} else if currentBlock == "elif" && parenCount == 0 {
+			} else if currentBlock == "elif" && parenCount == 0 && braceCount == 0 {
 				positions.ElseIfBlocks = append(positions.ElseIfBlocks, models.ElseIfBlock{
 					ConditionStart: i,
 				})
@@ -212,7 +212,7 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 
 		case strings.HasPrefix(token, "RIGHT_PAREN"):
 			parenCount--
-			if parenCount == 0 {
+			if parenCount == 0 && braceCount == 0 {
 				if currentBlock == "if" && positions.ConditionEnd == -1 {
 					positions.ConditionEnd = i
 					positions.IfBodyStart = i + 1
@@ -233,16 +233,11 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 			braceCount++
 		case strings.HasPrefix(token, "RIGHT_BRACE"):
 			braceCount--
-			if braceCount == 0 {
+			if braceCount == 0 && parenCount == 0 {
 				if currentBlock == "if" && positions.IfBodyEnd == -1 {
 					positions.IfBodyEnd = i
 				} else if currentBlock == "elif" && len(positions.ElseIfBlocks) > 0 {
 					positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd = i
-					if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "ELSE") {
-						currentBlock = "else"
-					} else {
-						goto exit
-					}
 				} else {
 					positions.ElseBodyEnd = i
 					goto exit
