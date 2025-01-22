@@ -71,7 +71,7 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	}
 	value := expression.Evaluate()
 	environment.Environment[variableName] = value
-	return semicolonPosition + 1, nil
+	return semicolonPosition + 4, nil
 }
 
 func handleReassignment(tokens []models.TokenInfo) (int, error) {
@@ -88,7 +88,7 @@ func handleReassignment(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("%s", err[0])
 	}
 	environment.Environment[variableName] = expression.Evaluate()
-	return semicolonPosition + 1, nil
+	return semicolonPosition + 3, nil
 }
 
 func handleReassignmentCondition(tokens []models.TokenInfo) (models.Node, error) {
@@ -139,37 +139,38 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("invalid if condition: %v", err.Error())
 	}
 
-	conditionMet := false
 	if condition.Evaluate().(bool) {
 		err := Interprete(tokens[positions.IfBodyStart : positions.IfBodyEnd+1])
 		if err != nil {
 			return 0, fmt.Errorf("invalid if body: %v", err.Error())
 		}
-		conditionMet = true
-	}
-	for _, elseIfBlock := range positions.ElseIfBlocks {
+	} else {
+		conditionMet := false
+		for _, elseIfBlock := range positions.ElseIfBlocks {
 
-		if elseIfBlock.BodyEnd > 0 && elseIfBlock.ConditionEnd > 0 && elseIfBlock.BodyStart > 0 && elseIfBlock.ConditionStart > 0 {
-			elseIfCondition, err := handleExpression(tokens[elseIfBlock.ConditionStart+1 : elseIfBlock.ConditionEnd])
-			if err != nil {
-				return 0, fmt.Errorf("invalid else-if condition: %v", err.Error())
-			}
-			if elseIfCondition.Evaluate().(bool) {
-				err := Interprete(tokens[elseIfBlock.BodyStart : elseIfBlock.BodyEnd+1])
-
+			fmt.Println(elseIfBlock.BodyEnd)
+			if elseIfBlock.BodyEnd > 0 && elseIfBlock.ConditionEnd > 0 && elseIfBlock.BodyStart > 0 && elseIfBlock.ConditionStart > 0 {
+				elseIfCondition, err := handleExpression(tokens[elseIfBlock.ConditionStart+1 : elseIfBlock.ConditionEnd])
 				if err != nil {
-					return 0, fmt.Errorf("invalid else-if body: %v", err.Error())
+					return 0, fmt.Errorf("invalid else-if condition: %v", err.Error())
 				}
-				conditionMet = true
+				if elseIfCondition.Evaluate().(bool) {
+					err := Interprete(tokens[elseIfBlock.BodyStart : elseIfBlock.BodyEnd+1])
+
+					if err != nil {
+						return 0, fmt.Errorf("invalid else-if body: %v", err.Error())
+					}
+					conditionMet = true
+					break
+				}
 			}
 		}
 
-	}
-
-	if !conditionMet && positions.HasElseBlock() {
-		err := Interprete(tokens[positions.ElseBodyStart : positions.ElseBodyEnd+1])
-		if err != nil {
-			return 0, fmt.Errorf("invalid else body: %v", err.Error())
+		if !conditionMet && positions.HasElseBlock() {
+			err := Interprete(tokens[positions.ElseBodyStart : positions.ElseBodyEnd+1])
+			if err != nil {
+				return 0, fmt.Errorf("invalid else body: %v", err.Error())
+			}
 		}
 	}
 
@@ -230,7 +231,6 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 
 		case strings.HasPrefix(token, "LEFT_BRACE"):
 			braceCount++
-
 		case strings.HasPrefix(token, "RIGHT_BRACE"):
 			braceCount--
 			if braceCount == 0 {
@@ -243,13 +243,13 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 					} else {
 						goto exit
 					}
-				} else if currentBlock == "else" {
+				} else {
 					positions.ElseBodyEnd = i
 					goto exit
 				}
 			}
 
-		case strings.HasPrefix(token, "SEMICOLON"):
+		case strings.HasPrefix(token, "SEMICOLON") && braceCount == 0:
 			if len(positions.ElseIfBlocks) > 0 && i == positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd {
 				if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "ELSE") {
 					currentBlock = "else"
@@ -261,27 +261,25 @@ func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPosit
 				goto exit
 			}
 
-		case strings.HasPrefix(token, "ELSE"):
-			if braceCount == 0 {
-				if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "IF") {
-					currentBlock = "elif"
-				} else {
-					currentBlock = "else"
-					if len(positions.ElseIfBlocks) > 0 {
-						lastBlock := &positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1]
-						if lastBlock.BodyEnd == -1 {
-							lastBlock.BodyEnd = i - 1
-						}
-					} else if positions.IfBodyEnd == -1 {
-						positions.IfBodyEnd = i - 1
+		case strings.HasPrefix(token, "ELSE") && braceCount == 0:
+			if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "IF") {
+				currentBlock = "elif"
+			} else {
+				currentBlock = "else"
+				if len(positions.ElseIfBlocks) > 0 {
+					lastBlock := &positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1]
+					if lastBlock.BodyEnd == -1 {
+						lastBlock.BodyEnd = i - 1
 					}
+				} else if positions.IfBodyEnd == -1 {
+					positions.IfBodyEnd = i - 1
+				}
 
-					if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
-						positions.ElseBodyStart = i + 2
-					} else {
-						positions.ElseBodyStart = i + 1
-						positions.ElseBodyEnd = utils.FindSemicolonPosition(tokens[i+1:]) + i + 1
-					}
+				if i+1 < len(tokens) && strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+					positions.ElseBodyStart = i + 2
+				} else {
+					positions.ElseBodyStart = i + 1
+					positions.ElseBodyEnd = utils.FindSemicolonPosition(tokens[i+1:]) + i + 1
 				}
 			}
 		}
