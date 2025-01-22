@@ -34,3 +34,26 @@ func FindSemicolonPosition(tokens []models.TokenInfo) int {
 	}
 	return -1
 }
+
+func FindLastSemicolonInSameLine(tokens []models.TokenInfo) int {
+	parenCount := 0
+	braceCount := 0
+	val := -1
+	for i, token := range tokens {
+		switch {
+		case strings.HasPrefix(token.Token, "LEFT_PAREN"):
+			parenCount++
+		case strings.HasPrefix(token.Token, "RIGHT_PAREN"):
+			parenCount--
+		case strings.HasPrefix(token.Token, "LEFT_BRACE"):
+			braceCount++
+		case strings.HasPrefix(token.Token, "RIGHT_BRACE"):
+			braceCount--
+		case strings.HasPrefix(token.Token, "SEMICOLON"):
+			if parenCount == 0 && braceCount == 0 {
+				val = i
+			}
+		}
+	}
+	return val
+}
