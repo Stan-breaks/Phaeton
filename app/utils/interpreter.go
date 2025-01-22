@@ -14,9 +14,22 @@ func IsReassignmentCondition(tokens []models.TokenInfo) bool {
 }
 
 func FindSemicolonPosition(tokens []models.TokenInfo) int {
-	for i := 0; i < len(tokens); i++ {
-		if strings.HasPrefix(tokens[i].Token, "SEMICOLON") {
-			return i
+	parenCount := 0
+	braceCount := 0
+	for i, token := range tokens {
+		switch {
+		case strings.HasPrefix(token.Token, "LEFT_PAREN"):
+			parenCount++
+		case strings.HasPrefix(token.Token, "RIGHT_PAREN"):
+			parenCount--
+		case strings.HasPrefix(token.Token, "LEFT_BRACE"):
+			braceCount++
+		case strings.HasPrefix(token.Token, "RIGHT_BRACE"):
+			braceCount--
+		case strings.HasPrefix(token.Token, "SEMICOLON"):
+			if parenCount == 0 && braceCount == 0 {
+				return i
+			}
 		}
 	}
 	return -1
