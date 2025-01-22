@@ -131,7 +131,6 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 
 func handleIf(tokens []models.TokenInfo) (int, error) {
 	positions := findIfStatementPositions(tokens)
-	fmt.Println(positions)
 	if !positions.IsValid() {
 		return 0, fmt.Errorf("malformed if statement")
 	}
