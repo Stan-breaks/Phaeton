@@ -55,6 +55,9 @@ go build -o phaeton cmd/main.go
 
 # Parse without execution (AST preview)
 ./phaeton parse example.phn
+
+# View tokens with execution (tokenizer preview)
+./phaeton tokenize example.phn
 ```
 
 ---
