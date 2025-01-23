@@ -43,8 +43,6 @@ cd phaeton
 # Build interpreter
 go build -o phaeton cmd/main.go
 
-# Verify installation
-./phaeton --version
 ```
 
 ---
