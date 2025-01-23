@@ -117,7 +117,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("incomplete print statement")
 	}
 	semicolonPosition := utils.FindSemicolonPosition(tokens)
-	if semicolonPosition == 0 {
+	if semicolonPosition == -1 {
 		return 0, fmt.Errorf("no semicolon found after print")
 	}
 	expression, err := parse.Parse(tokens[1:semicolonPosition])
@@ -139,7 +139,7 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("invalid if condition: %v", err.Error())
 	}
 
-	if condition.Evaluate().(bool) {
+	if condition.IsTruthy() {
 		err := Interprete(tokens[positions.IfBodyStart : positions.IfBodyEnd+1])
 		if err != nil {
 			return 0, fmt.Errorf("invalid if body: %v", err.Error())
@@ -153,7 +153,7 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 				if err != nil {
 					return 0, fmt.Errorf("invalid else-if condition: %v", err.Error())
 				}
-				if elseIfCondition.Evaluate().(bool) {
+				if elseIfCondition.IsTruthy() {
 					err := Interprete(tokens[elseIfBlock.BodyStart : elseIfBlock.BodyEnd+1])
 
 					if err != nil {
