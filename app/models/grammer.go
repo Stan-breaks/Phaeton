@@ -10,6 +10,7 @@ import (
 type Node interface {
 	String() string
 	Evaluate() interface{}
+	IsTruthy() bool
 }
 
 type NumberNode struct {
@@ -24,6 +25,10 @@ func (n NumberNode) Evaluate() interface{} {
 	return n.Value
 }
 
+func (n NumberNode) IsTruthy() bool {
+	return n.Value > 0
+}
+
 type StringNode struct {
 	Value string
 }
@@ -34,6 +39,9 @@ func (n StringNode) String() string {
 
 func (n StringNode) Evaluate() interface{} {
 	return n.Value
+}
+func (n StringNode) IsTruthy() bool {
+	return n.Value != "" && n.Value != "nil"
 }
 
 type BooleanNode struct {
@@ -48,6 +56,10 @@ func (n BooleanNode) Evaluate() interface{} {
 	return n.Value
 }
 
+func (n BooleanNode) IsTruthy() bool {
+	return n.Value
+}
+
 type NilNode struct {
 }
 
@@ -57,6 +69,10 @@ func (n NilNode) String() string {
 
 func (n NilNode) Evaluate() interface{} {
 	return "nil"
+}
+
+func (n NilNode) IsTruthy() bool {
+	return false
 }
 
 type ParenthesisNode struct {
@@ -69,6 +85,10 @@ func (n ParenthesisNode) String() string {
 
 func (n ParenthesisNode) Evaluate() interface{} {
 	return n.Expression.Evaluate()
+}
+
+func (n ParenthesisNode) IsTruthy() bool {
+	return n.Expression.IsTruthy()
 }
 
 type UnaryNode struct {
@@ -96,6 +116,16 @@ func (n UnaryNode) Evaluate() interface{} {
 		}
 	default:
 		panic("Unknown operator: " + n.Op)
+	}
+}
+func (n UnaryNode) IsTruthy() bool {
+	switch v := n.Evaluate().(type) {
+	case float32:
+		return v > 0
+	case bool:
+		return v
+	default:
+		return false
 	}
 }
 
@@ -138,9 +168,26 @@ func (n BinaryNode) Evaluate() interface{} {
 		return left.(float32) >= right.(float32)
 	case "<=":
 		return left.(float32) <= right.(float32)
-
+	case "or":
+		if n.Left.IsTruthy() {
+			return left
+		} else {
+			return right
+		}
 	default:
 		panic("Unknown operator: " + n.Op)
 	}
 
+}
+func (n BinaryNode) IsTruthy() bool {
+	switch v := n.Evaluate().(type) {
+	case float32:
+		return v > 0
+	case bool:
+		return v
+	case string:
+		return v != "" && v != "nil"
+	default:
+		return false
+	}
 }
