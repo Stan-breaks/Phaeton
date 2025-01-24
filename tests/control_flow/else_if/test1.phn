@@ -1,0 +1,3 @@
+// tests/control_flow/else_if/test1.phn
+if (true) print "if branch"; 
+else if (true) print "else-if branch";

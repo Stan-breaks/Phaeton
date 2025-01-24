@@ -1,0 +1,2 @@
+// tests/control_flow/if/basic.phn
+if (true) print "if branch";
