@@ -1,0 +1,2 @@
+// This program uses nested if statements to print a message
+if (true) if (true) print "nested true";
