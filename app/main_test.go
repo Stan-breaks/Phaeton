@@ -19,12 +19,12 @@ type TestCase struct {
 
 func TestMain(m *testing.M) {
 	// Build interpreter before tests
-	build := exec.Command("go", "build", "-o", "phaeton", "./app/main.go")
+	build := exec.Command("go", "build", "-o", "phaeton", "./main.go")
 	if err := build.Run(); err != nil {
 		panic("Build failed: " + err.Error())
 	}
-
 	code := m.Run()
+	os.Remove("phaeton")
 	os.Exit(code)
 }
 
@@ -32,10 +32,28 @@ func TestIntegration(t *testing.T) {
 	tests := []TestCase{
 		{
 			Name:     "IfStatement_Basic",
-			FilePath: "control_flow/if/test1.phn",
+			FilePath: "tests/control_flow/if/test1.phn",
 			Command:  "run",
 			WantOutput: []string{
 				"if branch",
+			},
+			WantExit: 0,
+		},
+		{
+			Name:     "nested_Complex",
+			FilePath: "tests/control_flow/nested/test1.phn",
+			Command:  "run",
+			WantOutput: []string{
+				"young adult\neligible for voting: true\nfirst-time voter: likely\neligible for driving: full license\neligible for drinking (US): true\nremember: drink responsibly",
+			},
+			WantExit: 0,
+		},
+		{
+			Name:     "nested_Basic",
+			FilePath: "tests/control_flow/nested/test2.phn",
+			Command:  "run",
+			WantOutput: []string{
+				"world",
 			},
 			WantExit: 0,
 		},
@@ -53,7 +71,7 @@ func TestIntegration(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.Name, func(t *testing.T) {
-			fullPath := filepath.Join("tests", tc.FilePath)
+			fullPath := filepath.Join("../", tc.FilePath)
 
 			cmd := exec.Command("./phaeton", tc.Command, fullPath)
 			output, _ := cmd.CombinedOutput()
@@ -68,7 +86,7 @@ func TestIntegration(t *testing.T) {
 			outStr := string(output)
 			for _, want := range tc.WantOutput {
 				if !strings.Contains(outStr, want) {
-					t.Errorf("Missing expected output: %q", want)
+					t.Errorf("expected output: %q\n received output: %q", want, outStr)
 				}
 			}
 
