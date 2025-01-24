@@ -1,0 +1,7 @@
+Logs from your program will appear here!
+young adult
+eligible for voting: true
+first-time voter: likely
+eligible for driving: full license
+eligible for drinking (US): true
+remember: drink responsibly!
