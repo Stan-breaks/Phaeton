@@ -1,3 +1,0 @@
- (a = false) or (b = true) or (a = "hello");
- print a;
- print b;
