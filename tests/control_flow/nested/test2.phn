@@ -1,0 +1,4 @@
+// This program uses nested if statements to print a message
+if (true) {
+  if (false) print "world"; else print "world";
+}
