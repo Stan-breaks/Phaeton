@@ -1,0 +1,21 @@
+Logs from your program will appear here!
+LEFT_PAREN ( null
+NUMBER 98 98.0
+PLUS + null
+NUMBER 27 27.0
+RIGHT_PAREN ) null
+GREATER > null
+NUMBER 57 57.0
+BANG_EQUAL != null
+LEFT_PAREN ( null
+STRING "Success" Success
+BANG_EQUAL != null
+STRING "Failure" Failure
+RIGHT_PAREN ) null
+BANG_EQUAL != null
+LEFT_PAREN ( null
+NUMBER 67 67.0
+GREATER_EQUAL >= null
+NUMBER 86 86.0
+RIGHT_PAREN ) null
+EOF  null
