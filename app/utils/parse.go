@@ -130,7 +130,7 @@ func IsSingleBinary(tokens []models.TokenInfo) bool {
 }
 
 func Isoperator(token models.TokenInfo) bool {
-	operators := []string{"OR", "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "BANG_EQUAL", "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL"}
+	operators := []string{"OR", "AND", "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "BANG_EQUAL", "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL"}
 	for _, op := range operators {
 		if strings.HasPrefix(token.Token, op) {
 			return true
