@@ -1,0 +1,2 @@
+Logs from your program will appear here!
+(- (- 20.0 (* 10.0 50.0)) 82.0)
