@@ -22,6 +22,10 @@ func main() {
 	command := os.Args[1]
 
 	filename := os.Args[2]
+	if filename[len(filename)-4:] != ".phn" {
+		fmt.Println("Error: File should have .phn extension")
+		os.Exit(1)
+	}
 	rawFileContents, err := os.ReadFile(filename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error reading file: %v\n", err)
