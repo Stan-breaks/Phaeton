@@ -1,4 +1,3 @@
-Logs from your program will appear here!
 LEFT_BRACE { null
 IDENTIFIER str1 null
 EQUAL = null

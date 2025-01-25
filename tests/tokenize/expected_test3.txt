@@ -1,4 +1,3 @@
-Logs from your program will appear here!
 IDENTIFIER message null
 EQUAL = null
 STRING "Hello, World!" Hello, World!
