@@ -1,0 +1,33 @@
+Logs from your program will appear here!
+LEFT_BRACE { null
+IDENTIFIER str1 null
+EQUAL = null
+STRING "Test" Test
+IDENTIFIER str2 null
+EQUAL = null
+STRING "Case" Case
+IDENTIFIER num1 null
+EQUAL = null
+NUMBER 100 100.0
+IDENTIFIER num2 null
+EQUAL = null
+NUMBER 200.00 200.0
+IDENTIFIER result null
+EQUAL = null
+LEFT_PAREN ( null
+IDENTIFIER str1 null
+EQUAL_EQUAL == null
+IDENTIFIER str2 null
+RIGHT_PAREN ) null
+BANG_EQUAL != null
+LEFT_PAREN ( null
+LEFT_PAREN ( null
+IDENTIFIER num1 null
+PLUS + null
+IDENTIFIER num2 null
+RIGHT_PAREN ) null
+GREATER_EQUAL >= null
+NUMBER 300 300.0
+RIGHT_PAREN ) null
+RIGHT_BRACE } null
+EOF  null
