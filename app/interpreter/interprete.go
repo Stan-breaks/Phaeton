@@ -48,6 +48,8 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition += tokensProcessed
+		case strings.HasPrefix(token.Token, "WHILE"):
+
 		default:
 			currentPosition++
 		}
