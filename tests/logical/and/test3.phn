@@ -1,0 +1,5 @@
+var a = "quz";
+var b = "quz";
+(a = true) and (b = false) and (a = "bad");
+print a;
+print b;

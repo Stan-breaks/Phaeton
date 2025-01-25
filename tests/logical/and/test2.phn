@@ -1,0 +1,6 @@
+print false and 1;
+print true and 1;
+print 23 and "hello" and false;
+
+print 23 and true;
+print 23 and "hello" and 23;

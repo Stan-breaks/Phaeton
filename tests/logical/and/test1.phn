@@ -1,0 +1,7 @@
+if (false and "bad") print "foo";
+if (nil and "bad") print "foo";
+
+if (true and "hello") print "hello";
+if (97 and "baz") print "baz";
+if ("baz" and "baz") print "baz";
+if ("" and "bar") print "bar";
