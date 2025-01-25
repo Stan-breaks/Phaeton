@@ -101,9 +101,16 @@ func TestIntegration(t *testing.T) {
 			WantExit:   0,
 		},
 		{
+			Name:       "Logical_or_statement",
+			FilePath:   "tests/logical/or/test.phn",
+			Command:    "run",
+			WantOutput: "tests/logical/or/expected_test.txt",
+			WantExit:   0,
+		},
+		{
 			Name:       "Current_test",
 			FilePath:   "tests/current/test.phn",
-			Command:    "parse",
+			Command:    "run",
 			WantOutput: "tests/current/expected_test.txt",
 			WantExit:   0,
 		},

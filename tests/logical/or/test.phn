@@ -1,0 +1,5 @@
+var a = "hello";
+var b = "hello";
+(a = false) or (b = true) or (a = "hello");
+print a;
+print b;
