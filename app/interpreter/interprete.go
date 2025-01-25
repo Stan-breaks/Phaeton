@@ -42,11 +42,50 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition += tokensProcessed
+		case strings.HasPrefix(token.Token, "LEFT_PAREN"):
+			tokensProcessed, err := handleParenStatement(tokens[currentPosition:])
+			if err != nil {
+				return err
+			}
+			currentPosition += tokensProcessed
 		default:
 			currentPosition++
 		}
 	}
 	return nil
+}
+
+func handleParenStatement(tokens []models.TokenInfo) (int, error) {
+	end := utils.FindSemicolonPosition(tokens)
+	if end == 0 {
+		return 0, fmt.Errorf("no semicolon found")
+	}
+	startParen := 0
+	endParen := utils.FindClosingParen(tokens[startParen:])
+	for endParen < end {
+		truthy, err := handleCondition(tokens[startParen+1 : endParen])
+		if err != nil {
+			return 0, err
+		}
+		if truthy {
+			break
+		}
+		startParen = endParen + 2
+		endParen = utils.FindClosingParen(tokens[startParen:]) + startParen
+	}
+	return end, nil
+}
+
+func handleCondition(tokens []models.TokenInfo) (bool, error) {
+	node, err := handleReassignmentCondition(tokens)
+	if err != nil {
+		return false, err
+	}
+	if node.IsTruthy() {
+		return true, nil
+	} else {
+		return false, nil
+	}
 }
 
 func handleAssignment(tokens []models.TokenInfo) (int, error) {
