@@ -41,7 +41,7 @@ func (n StringNode) Evaluate() interface{} {
 	return n.Value
 }
 func (n StringNode) IsTruthy() bool {
-	return n.Value != "" && n.Value != "nil"
+	return n.Value != "nil"
 }
 
 type BooleanNode struct {
@@ -174,6 +174,14 @@ func (n BinaryNode) Evaluate() interface{} {
 		} else {
 			return right
 		}
+	case "and":
+		if !n.Left.IsTruthy() && n.Right.IsTruthy() {
+			return left
+		} else if !n.Right.IsTruthy() && n.Left.IsTruthy() {
+			return right
+		} else {
+			return right
+		}
 	default:
 		panic("Unknown operator: " + n.Op)
 	}
@@ -186,7 +194,7 @@ func (n BinaryNode) IsTruthy() bool {
 	case bool:
 		return v
 	case string:
-		return v != "" && v != "nil"
+		return v != "nil"
 	default:
 		return false
 	}
