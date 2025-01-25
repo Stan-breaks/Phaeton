@@ -100,6 +100,13 @@ func TestIntegration(t *testing.T) {
 			WantOutput: "tests/parser/expected_test3.txt",
 			WantExit:   0,
 		},
+		{
+			Name:       "Current_test",
+			FilePath:   "tests/current/test.phn",
+			Command:    "parse",
+			WantOutput: "tests/current/expected_test.txt",
+			WantExit:   0,
+		},
 	}
 
 	for _, tc := range tests {
