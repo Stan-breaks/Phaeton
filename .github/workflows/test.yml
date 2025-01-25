@@ -18,6 +18,9 @@ jobs:
         cd app
         go test -v
       
-    - name: Check test results
+    - name: Fail if tests fail
       if: failure()
-      run: exit 1
+      uses: actions/github-script@v6
+      with:
+        script: |
+          core.setFailed('Tests failed')
