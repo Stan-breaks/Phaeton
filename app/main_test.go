@@ -66,22 +66,40 @@ func TestIntegration(t *testing.T) {
 			WantExit:   0,
 		},
 		{
+			Name:       "Tokenize_mid",
+			FilePath:   "tests/tokenize/test3.phn",
+			Command:    "tokenize",
+			WantOutput: "tests/tokenize/expected_test3.txt",
+			WantExit:   0,
+		},
+		{
 			Name:       "Tokenize_Complex",
 			FilePath:   "tests/tokenize/test2.phn",
 			Command:    "tokenize",
 			WantOutput: "tests/tokenize/expected_test2.txt",
 			WantExit:   0,
 		},
-		// {
-		// 	Name:     "Parsing_InvalidSyntax",
-		// 	FilePath: "parsing/invalid_syntax.phn",
-		// 	Command:  "parse",
-		// 	WantError: []string{
-		// 		"Unterminated string",
-		// 	},
-		// 	WantExit: 65,
-		// },
-		// // Add more test cases
+		{
+			Name:       "Parser_basic",
+			FilePath:   "tests/parser/test1.phn",
+			Command:    "parse",
+			WantOutput: "tests/parser/expected_test1.txt",
+			WantExit:   0,
+		},
+		{
+			Name:       "Parser_mid",
+			FilePath:   "tests/parser/test2.phn",
+			Command:    "parse",
+			WantOutput: "tests/parser/expected_test2.txt",
+			WantExit:   0,
+		},
+		{
+			Name:       "Parser_complex",
+			FilePath:   "tests/parser/test3.phn",
+			Command:    "parse",
+			WantOutput: "tests/parser/expected_test3.txt",
+			WantExit:   0,
+		},
 	}
 
 	for _, tc := range tests {
