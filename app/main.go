@@ -10,9 +10,11 @@ import (
 )
 
 func main() {
-	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
-
 	if len(os.Args) < 3 {
+		if os.Args[1] == "--version" {
+			fmt.Println("Phaeton v0.0.0")
+			os.Exit(0)
+		}
 		fmt.Fprintln(os.Stderr, "Usage: ./your_program.sh tokenize <filename>")
 		os.Exit(1)
 	}
