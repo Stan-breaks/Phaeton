@@ -1,2 +1,1 @@
-Logs from your program will appear here!
 (group 11.44)

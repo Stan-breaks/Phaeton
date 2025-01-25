@@ -1,2 +1,1 @@
-Logs from your program will appear here!
 (group (/ (* 85.0 (- 50.0)) (group (* 77.0 55.0))))
