@@ -1,4 +1,3 @@
-Logs from your program will appear here!
 young adult
 eligible for voting: true
 first-time voter: likely
