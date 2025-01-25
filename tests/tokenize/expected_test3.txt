@@ -1,0 +1,8 @@
+Logs from your program will appear here!
+IDENTIFIER message null
+EQUAL = null
+STRING "Hello, World!" Hello, World!
+IDENTIFIER number null
+EQUAL = null
+NUMBER 123 123.0
+EOF  null
