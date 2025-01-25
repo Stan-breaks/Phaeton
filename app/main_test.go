@@ -108,10 +108,24 @@ func TestIntegration(t *testing.T) {
 			WantExit:   0,
 		},
 		{
-			Name:       "Current_test",
-			FilePath:   "tests/current/test.phn",
+			Name:       "Logical_and_basic",
+			FilePath:   "tests/logical/and/test1.phn",
 			Command:    "run",
-			WantOutput: "tests/current/expected_test.txt",
+			WantOutput: "tests/logical/and/expected_test1.txt",
+			WantExit:   0,
+		},
+		{
+			Name:       "Logical_and_mid",
+			FilePath:   "tests/logical/and/test2.phn",
+			Command:    "run",
+			WantOutput: "tests/logical/and/expected_test2.txt",
+			WantExit:   0,
+		},
+		{
+			Name:       "Logical_and_Complex",
+			FilePath:   "tests/logical/and/test3.phn",
+			Command:    "run",
+			WantOutput: "tests/logical/and/expected_test3.txt",
 			WantExit:   0,
 		},
 	}
