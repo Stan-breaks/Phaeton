@@ -49,21 +49,17 @@ func Interprete(tokens []models.TokenInfo) error {
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "WHILE"):
-			environment.Global.PushScope()
 			tokensProcessed, err := handleWhile(tokens[currentPosition:])
 			if err != nil {
 				return err
 			}
 			currentPosition += tokensProcessed
-			environment.Global.PopScope()
 		case strings.HasPrefix(token.Token, "FOR"):
-			environment.Global.PushScope()
 			tokensProcessed, err := handleFor(tokens[currentPosition:])
 			if err != nil {
 				return err
 			}
 			currentPosition += tokensProcessed
-			environment.Global.PopScope()
 		default:
 			currentPosition++
 		}
@@ -72,6 +68,9 @@ func Interprete(tokens []models.TokenInfo) error {
 }
 
 func handleFor(tokens []models.TokenInfo) (int, error) {
+	environment.Global.PushScope()
+	defer environment.Global.PopScope()
+
 	positions := findForPositions(tokens)
 	if !positions.IsValid() {
 		return positions.BodyEnd + 1, fmt.Errorf("invalid for statement")
@@ -93,9 +92,7 @@ func handleFor(tokens []models.TokenInfo) (int, error) {
 	}
 	if condition.IsTruthy() {
 		for {
-			environment.Global.PushScope()
 			err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
-			environment.Global.PopScope()
 			if err != nil {
 				return positions.BodyEnd + 1, err
 			}
@@ -159,6 +156,8 @@ exit:
 }
 
 func handleWhile(tokens []models.TokenInfo) (int, error) {
+	environment.Global.PushScope()
+	defer environment.Global.PopScope()
 	positions := findWhilePositions(tokens)
 	if !positions.IsValid() {
 		return positions.BodyEnd + 1, fmt.Errorf("invalid while statement")
