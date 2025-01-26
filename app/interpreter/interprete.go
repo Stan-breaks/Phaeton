@@ -93,7 +93,9 @@ func handleFor(tokens []models.TokenInfo) (int, error) {
 	}
 	if condition.IsTruthy() {
 		for {
+			environment.Global.PushScope()
 			err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
+			environment.Global.PopScope()
 			if err != nil {
 				return positions.BodyEnd + 1, err
 			}
