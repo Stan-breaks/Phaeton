@@ -1,0 +1,3 @@
+for (var world = 0; world < 3; world = world + 1) {
+  print world;
+}
