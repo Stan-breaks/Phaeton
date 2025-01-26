@@ -36,3 +36,14 @@ type WhileStatementPositions struct {
 func (p WhileStatementPositions) IsValid() bool {
 	return p.ConditionStart != -1 && p.ConditionEnd != -1 && p.BodyStart != -1 && p.BodyEnd != -1
 }
+
+type ForStatementPositions struct {
+	ConditionStart int
+	ConditionEnd   int
+	BodyStart      int
+	BodyEnd        int
+}
+
+func (p ForStatementPositions) IsValid() bool {
+	return p.ConditionStart != -1 && p.ConditionEnd != -1 && p.BodyStart != -1 && p.BodyEnd != -1
+}
