@@ -65,7 +65,27 @@ func Interprete(tokens []models.TokenInfo) error {
 func handleWhile(tokens []models.TokenInfo) (int, error) {
 	positions := FindWhilePositions(tokens)
 	if !positions.IsValid() {
-		return 0, fmt.Errorf("invalid while statement")
+		return positions.BodyEnd + 1, fmt.Errorf("invalid while statement")
+	}
+	condition, err := handleExpression(tokens[positions.ConditionStart+1 : positions.ConditionEnd])
+	if err != nil {
+		return positions.BodyEnd + 1, fmt.Errorf("invalid while condition")
+	}
+	if condition.IsTruthy() {
+		for {
+			err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
+			if err != nil {
+				return positions.BodyEnd + 1, fmt.Errorf("invalid while body")
+			}
+			condition, err = handleExpression(tokens[positions.ConditionStart+1 : positions.ConditionEnd])
+			if err != nil {
+				return positions.BodyEnd + 1, fmt.Errorf("invalid while condition")
+			}
+			if !condition.IsTruthy() {
+				break
+			}
+		}
+
 	}
 	return positions.BodyEnd + 1, nil
 }
@@ -217,7 +237,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 	if semicolonPosition == -1 {
 		return 0, fmt.Errorf("no semicolon found after print")
 	}
-	expression, err := parse.Parse(tokens[1:semicolonPosition])
+	expression, err := handleExpression(tokens[1:semicolonPosition])
 	if err != nil {
 		return 0, fmt.Errorf("invalid print expression")
 	}
