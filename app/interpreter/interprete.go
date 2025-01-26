@@ -54,7 +54,12 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition += tokensProcessed
-
+		case strings.HasPrefix(token.Token, "FOR"):
+			tokensProcessed, err := handleFor(tokens[currentPosition:])
+			if err != nil {
+				return err
+			}
+			currentPosition += tokensProcessed
 		default:
 			currentPosition++
 		}
@@ -62,8 +67,58 @@ func Interprete(tokens []models.TokenInfo) error {
 	return nil
 }
 
+func handleFor(tokens []models.TokenInfo) (int, error) {
+	positions := findForPositions(tokens)
+	if !positions.IsValid() {
+		return positions.BodyEnd + 1, fmt.Errorf("invalid for statement")
+	}
+	fmt.Println(tokens[positions.ConditionStart+1 : positions.ConditionEnd])
+
+	return positions.BodyEnd + 1, nil
+}
+
+func findForPositions(tokens []models.TokenInfo) models.ForStatementPositions {
+	positions := models.ForStatementPositions{
+		ConditionStart: 1,
+		ConditionEnd:   -1,
+		BodyStart:      -1,
+		BodyEnd:        -1,
+	}
+	parenCount := 0
+	braceCount := 0
+	for i := 1; i < len(tokens); i++ {
+		token := tokens[i].Token
+		switch {
+		case strings.HasPrefix(token, "LEFT_PAREN"):
+			parenCount++
+		case strings.HasPrefix(token, "RIGHT_PAREN"):
+			parenCount--
+			if parenCount == 0 && positions.ConditionEnd == -1 {
+				positions.ConditionEnd = i
+				positions.BodyStart = i + 1
+				if !strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+					positions.BodyEnd = utils.FindLastSemicolonInSameLine(tokens[i+1:]) + i + 1
+				}
+			}
+		case strings.HasPrefix(token, "LEFT_BRACE"):
+			braceCount++
+		case strings.HasPrefix(token, "RIGHT_BRACE"):
+			braceCount--
+			if braceCount == 0 && positions.BodyEnd == -1 {
+				positions.BodyEnd = i
+				goto exit
+			}
+		case strings.HasPrefix(token, "SEMICOLON") && positions.BodyEnd == i && parenCount == 0 && braceCount == 0:
+			goto exit
+		}
+
+	}
+exit:
+	return positions
+}
+
 func handleWhile(tokens []models.TokenInfo) (int, error) {
-	positions := FindWhilePositions(tokens)
+	positions := findWhilePositions(tokens)
 	if !positions.IsValid() {
 		return positions.BodyEnd + 1, fmt.Errorf("invalid while statement")
 	}
@@ -90,7 +145,7 @@ func handleWhile(tokens []models.TokenInfo) (int, error) {
 	return positions.BodyEnd + 1, nil
 }
 
-func FindWhilePositions(tokens []models.TokenInfo) models.WhileStatementPositions {
+func findWhilePositions(tokens []models.TokenInfo) models.WhileStatementPositions {
 	positions := models.WhileStatementPositions{
 		ConditionStart: 1,
 		ConditionEnd:   -1,
