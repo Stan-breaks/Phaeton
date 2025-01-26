@@ -12,7 +12,6 @@ import (
 
 func Interprete(tokens []models.TokenInfo) error {
 	currentPosition := 0
-	braceCount := 0
 	for currentPosition < len(tokens) {
 		if currentPosition >= len(tokens) {
 			break
@@ -50,29 +49,21 @@ func Interprete(tokens []models.TokenInfo) error {
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "WHILE"):
+			environment.Global.PushScope()
 			tokensProcessed, err := handleWhile(tokens[currentPosition:])
 			if err != nil {
 				return err
 			}
 			currentPosition += tokensProcessed
+			environment.Global.PopScope()
 		case strings.HasPrefix(token.Token, "FOR"):
+			environment.Global.PushScope()
 			tokensProcessed, err := handleFor(tokens[currentPosition:])
 			if err != nil {
 				return err
 			}
 			currentPosition += tokensProcessed
-		case strings.HasPrefix(token.Token, "LEFT_BRACE"):
-			if braceCount == 0 {
-				environment.Global.PushScope()
-			}
-			braceCount++
-			currentPosition++
-		case strings.HasPrefix(token.Token, "RIGHT_BRACE"):
-			braceCount--
-			if braceCount == 0 {
-				environment.Global.PopScope()
-			}
-			currentPosition++
+			environment.Global.PopScope()
 		default:
 
 			currentPosition++
