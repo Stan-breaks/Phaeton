@@ -60,15 +60,6 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition += tokensProcessed
-		case strings.HasPrefix(token.Token, "LEFT_BRACE"):
-			environment.Global.PushScope()
-			currentPosition++
-			err := Interprete(tokens[currentPosition:])
-			environment.Global.PopScope()
-			if err != nil {
-				return err
-			}
-			currentPosition = utils.FindClosingBrace(tokens[currentPosition:]) + currentPosition + 1
 		default:
 			currentPosition++
 		}
@@ -100,24 +91,40 @@ func handleFor(tokens []models.TokenInfo) (int, error) {
 		return positions.BodyEnd + 1, err
 	}
 	if condition.IsTruthy() {
-		for {
-			err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
-			if err != nil {
-				return positions.BodyEnd + 1, err
-			}
-			if expressionStart != expressionEnd {
-				_, err := handleExpression(tokens[expressionStart:expressionEnd])
+		if expressionStart != expressionEnd {
+			for {
+				environment.Global.PushScope()
+				err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
+				environment.Global.PopScope()
 				if err != nil {
 					return positions.BodyEnd + 1, err
 				}
-			}
+				_, err = handleExpression(tokens[expressionStart:expressionEnd])
+				if err != nil {
+					return positions.BodyEnd + 1, err
+				}
 
-			condition, err = handleExpression(tokens[conditionStart:conditionEnd])
-			if err != nil {
-				return positions.BodyEnd + 1, err
+				condition, err = handleExpression(tokens[conditionStart:conditionEnd])
+				if err != nil {
+					return positions.BodyEnd + 1, err
+				}
+				if !condition.IsTruthy() {
+					break
+				}
 			}
-			if !condition.IsTruthy() {
-				break
+		} else {
+			for {
+				err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
+				if err != nil {
+					return positions.BodyEnd + 1, err
+				}
+				condition, err = handleExpression(tokens[conditionStart:conditionEnd])
+				if err != nil {
+					return positions.BodyEnd + 1, err
+				}
+				if !condition.IsTruthy() {
+					break
+				}
 			}
 		}
 	}
