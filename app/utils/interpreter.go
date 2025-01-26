@@ -39,7 +39,11 @@ func FindLastSemicolonInSameLine(tokens []models.TokenInfo) int {
 	parenCount := 0
 	braceCount := 0
 	val := -1
+	line := tokens[0].Line
 	for i, token := range tokens {
+		if token.Line != line {
+			goto exit
+		}
 		switch {
 		case strings.HasPrefix(token.Token, "LEFT_PAREN"):
 			parenCount++
@@ -55,6 +59,7 @@ func FindLastSemicolonInSameLine(tokens []models.TokenInfo) int {
 			}
 		}
 	}
+exit:
 	return val
 }
 
