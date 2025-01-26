@@ -89,7 +89,7 @@ if (score >= 90) {
 | Value               | Evaluation |
 | ------------------- | ---------- |
 | `0`                 | Falsy      |
-| `""` (empty string) | Falsy      |
+| `""` (empty string) | Truthy     |
 | `"nil"`             | Falsy      |
 | Non-zero number     | Truthy     |
 | Non-empty string    | Truthy     |
@@ -128,7 +128,7 @@ Life stage: young adult
 ## Roadmap
 
 - [x] Basic conditional logic
-- [ ] Looping constructs
+- [x] Looping constructs
 - [ ] Function definitions
 - [ ] Standard library (math, string utils)
 
