@@ -310,7 +310,7 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 		return models.StringNode{Value: strings.Split(joinedString, "\"")[1]}, nil
 	case "IDENTIFIER":
 		valname := splitToken[1]
-		value, exist := environment.Environment[valname]
+		value, exist := environment.Global.Get(valname)
 		if !exist {
 			err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
 			var errors []string
