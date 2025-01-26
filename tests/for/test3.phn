@@ -1,0 +1,7 @@
+var world = 0;
+for (; world < 2; world = world + 1) print world;
+
+for (var foo = 0; foo < 2;) {
+  print foo;
+  foo = foo + 1;
+}
