@@ -1,0 +1,2 @@
+Product of numbers 1 to 5:
+120
