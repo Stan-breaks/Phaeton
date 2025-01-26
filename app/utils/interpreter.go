@@ -78,19 +78,3 @@ func FindClosingParen(tokens []models.TokenInfo) int {
 	}
 	return 0
 }
-
-func FindClosingBrace(tokens []models.TokenInfo) int {
-	braceCount := 0
-	for i, token := range tokens {
-		switch {
-		case strings.HasPrefix(token.Token, "LEFT_BRACE"):
-			braceCount++
-		case strings.HasPrefix(token.Token, "RIGHT_BRACE"):
-			braceCount--
-			if braceCount == 0 {
-				return i
-			}
-		}
-	}
-	return 0
-}
