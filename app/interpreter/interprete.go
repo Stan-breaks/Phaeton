@@ -65,7 +65,6 @@ func Interprete(tokens []models.TokenInfo) error {
 			currentPosition += tokensProcessed
 			environment.Global.PopScope()
 		default:
-
 			currentPosition++
 		}
 	}
@@ -300,7 +299,7 @@ func handleReassignment(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("%s", err[0])
 	}
 	value := expression.Evaluate()
-	environment.Global.Set(variableName, value)
+	environment.Global.Reset(variableName, value)
 	return semicolonPosition + 3, nil
 }
 
@@ -311,7 +310,7 @@ func handleReassignmentCondition(tokens []models.TokenInfo) (models.Node, error)
 		return models.NilNode{}, fmt.Errorf("invalid reassignment expression")
 	}
 	value := expression.Evaluate()
-	environment.Global.Set(variableName, value)
+	environment.Global.Reset(variableName, value)
 	return expression, nil
 }
 
