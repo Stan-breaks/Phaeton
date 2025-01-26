@@ -24,6 +24,15 @@ func (e *Environment) Set(variableName string, value interface{}) {
 	e.Scope[len(e.Scope)-1][variableName] = value
 }
 
+func (e *Environment) Reset(variableName string, value interface{}) {
+	for i := len(e.Scope) - 1; i >= 0; i-- {
+		if _, ok := e.Scope[i][variableName]; ok {
+			e.Scope[i][variableName] = value
+			break
+		}
+	}
+}
+
 func (e *Environment) Get(variableName string) (interface{}, bool) {
 	for i := len(e.Scope) - 1; i >= 0; i-- {
 		if val, ok := e.Scope[i][variableName]; ok {
