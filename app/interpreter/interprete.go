@@ -60,6 +60,15 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition += tokensProcessed
+		case strings.HasPrefix(token.Token, "LEFT_BRACE"):
+			environment.Global.PushScope()
+			currentPosition++
+			err := Interprete(tokens[currentPosition:])
+			environment.Global.PopScope()
+			if err != nil {
+				return err
+			}
+			currentPosition = utils.FindClosingBrace(tokens[currentPosition:]) + currentPosition + 1
 		default:
 			currentPosition++
 		}
