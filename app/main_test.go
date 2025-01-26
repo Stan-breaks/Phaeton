@@ -151,6 +151,30 @@ func TestIntegration(t *testing.T) {
 			Command:    "run",
 			WantOutput: "tests/while/expected_test4.txt",
 			WantExit:   0,
+		}, {
+			Name:       "for_01",
+			FilePath:   "tests/for/test1.phn",
+			Command:    "run",
+			WantOutput: "tests/for/expected_test1.txt",
+			WantExit:   0,
+		}, {
+			Name:       "for_02",
+			FilePath:   "tests/for/test2.phn",
+			Command:    "run",
+			WantOutput: "tests/for/expected_test2.txt",
+			WantExit:   0,
+		}, {
+			Name:       "for_03",
+			FilePath:   "tests/for/test3.phn",
+			Command:    "run",
+			WantOutput: "tests/for/expected_test3.txt",
+			WantExit:   0,
+		}, {
+			Name:       "for_04",
+			FilePath:   "tests/for/test4.phn",
+			Command:    "run",
+			WantOutput: "tests/for/expected_test4.txt",
+			WantExit:   0,
 		},
 	}
 
