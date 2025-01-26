@@ -49,12 +49,60 @@ func Interprete(tokens []models.TokenInfo) error {
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "WHILE"):
+			tokensProcessed, err := handleWhile(tokens[currentPosition:])
+			if err != nil {
+				return err
+			}
+			currentPosition += tokensProcessed
 
 		default:
 			currentPosition++
 		}
 	}
 	return nil
+}
+
+func handleWhile(tokens []models.TokenInfo) (int, error) {
+	positions := FindWhilePositions(tokens)
+	if !positions.IsValid() {
+		return 0, fmt.Errorf("invalid while statement")
+	}
+	return positions.BodyEnd + 1, nil
+}
+
+func FindWhilePositions(tokens []models.TokenInfo) models.WhileStatementPositions {
+	positions := models.WhileStatementPositions{
+		ConditionStart: 1,
+		ConditionEnd:   -1,
+		BodyStart:      -1,
+		BodyEnd:        -1,
+	}
+	parenCount := 0
+	braceCount := 0
+	for i := 1; i < len(tokens); i++ {
+		token := tokens[i].Token
+		switch {
+		case strings.HasPrefix(token, "LEFT_PAREN"):
+			parenCount++
+		case strings.HasPrefix(token, "RIGHT_PAREN"):
+			parenCount--
+			if parenCount == 0 && positions.ConditionEnd == -1 {
+				positions.ConditionEnd = i
+				positions.BodyStart = i + 1
+			}
+		case strings.HasPrefix(token, "LEFT_BRACE"):
+			braceCount++
+		case strings.HasPrefix(token, "RIGHT_BRACE"):
+			braceCount--
+			if braceCount == 0 && positions.BodyEnd == -1 {
+				positions.BodyEnd = i
+				goto exit
+			}
+		}
+
+	}
+exit:
+	return positions
 }
 
 func handleParenStatement(tokens []models.TokenInfo) (int, error) {
