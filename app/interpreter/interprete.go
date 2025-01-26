@@ -89,6 +89,9 @@ func FindWhilePositions(tokens []models.TokenInfo) models.WhileStatementPosition
 			if parenCount == 0 && positions.ConditionEnd == -1 {
 				positions.ConditionEnd = i
 				positions.BodyStart = i + 1
+				if !strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+					positions.BodyEnd = utils.FindLastSemicolonInSameLine(tokens[i+1:]) + i + 1
+				}
 			}
 		case strings.HasPrefix(token, "LEFT_BRACE"):
 			braceCount++
@@ -98,6 +101,8 @@ func FindWhilePositions(tokens []models.TokenInfo) models.WhileStatementPosition
 				positions.BodyEnd = i
 				goto exit
 			}
+		case strings.HasPrefix(token, "SEMICOLON") && positions.BodyEnd == i && parenCount == 0 && braceCount == 0:
+			goto exit
 		}
 
 	}
