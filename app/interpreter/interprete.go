@@ -12,6 +12,7 @@ import (
 
 func Interprete(tokens []models.TokenInfo) error {
 	currentPosition := 0
+	braceCount := 0
 	for currentPosition < len(tokens) {
 		if currentPosition >= len(tokens) {
 			break
@@ -60,7 +61,20 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition += tokensProcessed
+		case strings.HasPrefix(token.Token, "LEFT_BRACE"):
+			if braceCount == 0 {
+				environment.Global.PushScope()
+			}
+			braceCount++
+			currentPosition++
+		case strings.HasPrefix(token.Token, "RIGHT_BRACE"):
+			braceCount--
+			if braceCount == 0 {
+				environment.Global.PopScope()
+			}
+			currentPosition++
 		default:
+
 			currentPosition++
 		}
 	}
@@ -72,8 +86,43 @@ func handleFor(tokens []models.TokenInfo) (int, error) {
 	if !positions.IsValid() {
 		return positions.BodyEnd + 1, fmt.Errorf("invalid for statement")
 	}
-	fmt.Println(tokens[positions.ConditionStart+1 : positions.ConditionEnd])
+	declarationStart := positions.ConditionStart + 1
+	declarationEnd := utils.FindSemicolonPosition(tokens[positions.ConditionStart+1:positions.ConditionEnd]) + positions.ConditionStart + 1
+	conditionStart := declarationEnd + 1
+	conditionEnd := utils.FindSemicolonPosition(tokens[declarationEnd+1:positions.ConditionEnd]) + declarationEnd + 1
+	expressionStart := conditionEnd + 1
+	expressionEnd := positions.ConditionEnd
 
+	err := Interprete(tokens[declarationStart : declarationEnd+1])
+	if err != nil {
+		return positions.BodyEnd + 1, err
+	}
+	condition, err := handleExpression(tokens[conditionStart:conditionEnd])
+	if err != nil {
+		return positions.BodyEnd + 1, err
+	}
+	if condition.IsTruthy() {
+		for {
+			err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
+			if err != nil {
+				return positions.BodyEnd + 1, err
+			}
+			if expressionStart != expressionEnd {
+				_, err := handleExpression(tokens[expressionStart:expressionEnd])
+				if err != nil {
+					return positions.BodyEnd + 1, err
+				}
+			}
+
+			condition, err = handleExpression(tokens[conditionStart:conditionEnd])
+			if err != nil {
+				return positions.BodyEnd + 1, err
+			}
+			if !condition.IsTruthy() {
+				break
+			}
+		}
+	}
 	return positions.BodyEnd + 1, nil
 }
 
@@ -242,7 +291,7 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("invalid assignment expression")
 	}
 	value := expression.Evaluate()
-	environment.Environment[variableName] = value
+	environment.Global.Set(variableName, value)
 	return semicolonPosition + 4, nil
 }
 
@@ -259,7 +308,8 @@ func handleReassignment(tokens []models.TokenInfo) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("%s", err[0])
 	}
-	environment.Environment[variableName] = expression.Evaluate()
+	value := expression.Evaluate()
+	environment.Global.Set(variableName, value)
 	return semicolonPosition + 3, nil
 }
 
@@ -269,7 +319,8 @@ func handleReassignmentCondition(tokens []models.TokenInfo) (models.Node, error)
 	if err != nil {
 		return models.NilNode{}, fmt.Errorf("invalid reassignment expression")
 	}
-	environment.Environment[variableName] = expression.Evaluate()
+	value := expression.Evaluate()
+	environment.Global.Set(variableName, value)
 	return expression, nil
 }
 
