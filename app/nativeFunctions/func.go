@@ -1,4 +1,4 @@
-package nativefunctions
+package nativeFunctions
 
 import "time"
 
