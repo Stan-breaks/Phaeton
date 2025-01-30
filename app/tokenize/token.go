@@ -534,6 +534,20 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 
 									}
 								}
+								if fileLenght-5 > i {
+									if i+6 <= fileLenght && fileContents[i:i+7] == "clock()" {
+										token := models.TokenInfo{
+											Token: "FUNCTION clock null",
+											Line:  line,
+										}
+										tokens.Success = append(tokens.Success, token)
+										if fileLenght-5 == i {
+											break
+										}
+										i += 6
+										continue
+									}
+								}
 							case 'e':
 								if fileLenght-2 > i {
 									if i+3 <= fileLenght && fileContents[i:i+4] == "else" {
