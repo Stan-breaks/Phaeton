@@ -7,7 +7,7 @@ import (
 
 	"github.com/Stan-breaks/app/environment"
 	"github.com/Stan-breaks/app/models"
-	nativefunctions "github.com/Stan-breaks/app/nativeFunctions"
+	"github.com/Stan-breaks/app/nativeFunctions"
 	"github.com/Stan-breaks/app/utils"
 )
 
@@ -336,7 +336,7 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 	case "FUNCTION":
 		var errors []string
 		funcName := splitToken[1]
-		value := nativefunctions.GlobalFunctions[funcName]
+		value := nativeFunctions.GlobalFunctions[funcName]
 		return models.NumberNode{Value: value.(float32)}, errors
 	default:
 		err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
