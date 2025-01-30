@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func FormatFloat(v float32) string {
+func FormatFloat(v float64) string {
 	s := fmt.Sprintf("%.5f", v)
 	s = strings.Trim(s, "0")
 	if string(s[len(s)-1]) == "." {
