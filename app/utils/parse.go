@@ -107,6 +107,7 @@ func IsSingleBinary(tokens []models.TokenInfo) bool {
 			strings.HasPrefix(token.Token, "IDENTIFIER") ||
 			strings.HasPrefix(token.Token, "FALSE") ||
 			strings.HasPrefix(token.Token, "TRUE") ||
+			strings.HasPrefix(token.Token, "FUNCTION") ||
 			strings.HasPrefix(token.Token, "NIL") {
 			operandCount++
 			continue
