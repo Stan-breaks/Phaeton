@@ -298,7 +298,7 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 	switch splitToken[0] {
 	case "NUMBER":
 		num, _ := strconv.ParseFloat(splitToken[1], 32)
-		floatnum := float32(num)
+		floatnum := float64(num)
 		return models.NumberNode{Value: floatnum}, nil
 	case "TRUE":
 		return models.BooleanNode{Value: true}, nil
@@ -323,10 +323,10 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 			return models.BooleanNode{Value: v}, nil
 		case string:
 			return models.StringNode{Value: v}, nil
-		case float32:
+		case float64:
 			return models.NumberNode{Value: v}, nil
 		case int:
-			return models.NumberNode{Value: float32(v)}, nil
+			return models.NumberNode{Value: float64(v)}, nil
 		default:
 			err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
 			var errors []string
@@ -337,7 +337,7 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 		var errors []string
 		funcName := splitToken[1]
 		value := nativeFunctions.GlobalFunctions[funcName]
-		return models.NumberNode{Value: value.(float32)}, errors
+		return models.NumberNode{Value: value.(float64)}, errors
 	default:
 		err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
 		var errors []string
