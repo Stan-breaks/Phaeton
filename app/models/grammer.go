@@ -14,7 +14,7 @@ type Node interface {
 }
 
 type NumberNode struct {
-	Value float32
+	Value float64
 }
 
 func (n NumberNode) String() string {
@@ -104,9 +104,9 @@ func (n UnaryNode) Evaluate() interface{} {
 	num := n.Value.Evaluate()
 	switch n.Op {
 	case string(runes.PLUS):
-		return 1 * num.(float32)
+		return 1 * num.(float64)
 	case string(runes.MINUS):
-		return -1 * num.(float32)
+		return -1 * num.(float64)
 	case string(runes.BANG):
 		switch num := num.(type) {
 		case bool:
@@ -120,7 +120,7 @@ func (n UnaryNode) Evaluate() interface{} {
 }
 func (n UnaryNode) IsTruthy() bool {
 	switch v := n.Evaluate().(type) {
-	case float32:
+	case float64:
 		return v > 0
 	case bool:
 		return v
@@ -149,25 +149,25 @@ func (n BinaryNode) Evaluate() interface{} {
 	right := n.Right.Evaluate()
 	switch n.Op {
 	case string(runes.PLUS):
-		return left.(float32) + right.(float32)
+		return left.(float64) + right.(float64)
 	case string(runes.MINUS):
-		return left.(float32) - right.(float32)
+		return left.(float64) - right.(float64)
 	case string(runes.STAR):
-		return left.(float32) * right.(float32)
+		return left.(float64) * right.(float64)
 	case string(runes.SLASH):
-		return left.(float32) / right.(float32)
+		return left.(float64) / right.(float64)
 	case "==":
 		return left == right
 	case "!=":
 		return left != right
 	case string(runes.GREATER):
-		return left.(float32) > right.(float32)
+		return left.(float64) > right.(float64)
 	case string(runes.LESS):
-		return left.(float32) < right.(float32)
+		return left.(float64) < right.(float64)
 	case ">=":
-		return left.(float32) >= right.(float32)
+		return left.(float64) >= right.(float64)
 	case "<=":
-		return left.(float32) <= right.(float32)
+		return left.(float64) <= right.(float64)
 	case "or":
 		if n.Left.IsTruthy() {
 			return left
@@ -189,7 +189,7 @@ func (n BinaryNode) Evaluate() interface{} {
 }
 func (n BinaryNode) IsTruthy() bool {
 	switch v := n.Evaluate().(type) {
-	case float32:
+	case float64:
 		return v > 0
 	case bool:
 		return v
