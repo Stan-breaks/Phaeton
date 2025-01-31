@@ -60,11 +60,53 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition += tokensProcessed
+		case strings.HasPrefix(token.Token, "FUN"):
+			tokensProcessed, err := handleFun(tokens[currentPosition:])
+			if err != nil {
+				return err
+			}
+			currentPosition += tokensProcessed
 		default:
 			currentPosition++
 		}
 	}
 	return nil
+}
+
+func handleFun(tokens []models.TokenInfo) (int, error) {
+	positions := findFunPositions(tokens)
+
+}
+
+func findFunPositions(tokens []models.TokenInfo) models.FunStatementPositions {
+	positions := models.FunStatementPositions{
+		ArgumentStart: 1,
+		ArgumentEnd:   -1,
+		BodyStart:     -1,
+		BodyEnd:       -1,
+	}
+	parenCount := 0
+	braceCount := 0
+	for i := 0; i < len(tokens); i++ {
+		switch {
+		case strings.HasPrefix(tokens[i].Token, "LEFT_PAREN"):
+			parenCount++
+		case strings.HasPrefix(tokens[i].Token, "RIGHT_PAREN"):
+			parenCount--
+			if parenCount == 0 && positions.ArgumentEnd == -1 {
+				positions.ArgumentEnd = i
+
+			}
+		case strings.HasPrefix(tokens[i].Token, "LEFT_BRACE"):
+			braceCount++
+		case strings.HasPrefix(tokens[i].Token, "RIGHT_BRACE"):
+			braceCount--
+			if braceCount == 0 && positions.BodyEnd == -1 {
+				positions.BodyEnd = i
+			}
+		}
+	}
+	return positions
 }
 
 func handleFor(tokens []models.TokenInfo) (int, error) {
