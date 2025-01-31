@@ -47,3 +47,14 @@ type ForStatementPositions struct {
 func (p ForStatementPositions) IsValid() bool {
 	return p.ConditionStart != -1 && p.ConditionEnd != -1 && p.BodyStart != -1 && p.BodyEnd != -1
 }
+
+type FunStatementPositions struct {
+	ArgumentStart int
+	ArgumentEnd   int
+	BodyStart     int
+	BodyEnd       int
+}
+
+func (p FunStatementPositions) IsValid() bool {
+	return p.ArgumentStart != -1 && p.ArgumentEnd != -1 && p.BodyStart != -1 && p.BodyEnd != -1
+}
