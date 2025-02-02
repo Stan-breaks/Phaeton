@@ -7,7 +7,7 @@ import (
 )
 
 func IsFunctionCall(tokens []models.TokenInfo) bool {
-	return strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") && strings.HasPrefix(tokens[2].Token, "RIGHT_PAREN")
+	return strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") && strings.HasPrefix(tokens[len(tokens)-2].Token, "RIGHT_PAREN")
 }
 
 func IsReassignmentCondition(tokens []models.TokenInfo) bool {
