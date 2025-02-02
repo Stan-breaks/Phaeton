@@ -181,6 +181,18 @@ func TestIntegration(t *testing.T) {
 			Command:    "run",
 			WantOutput: "tests/functions/expected_test1.txt",
 			WantExit:   0,
+		}, {
+			Name:       "func_02",
+			FilePath:   "tests/functions/test2.phn",
+			Command:    "run",
+			WantOutput: "tests/functions/expected_test2.txt",
+			WantExit:   0,
+		}, {
+			Name:       "func_03",
+			FilePath:   "tests/functions/test3.phn",
+			Command:    "run",
+			WantOutput: "tests/functions/expected_test3.txt",
+			WantExit:   0,
 		},
 	}
 
