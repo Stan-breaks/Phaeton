@@ -37,11 +37,20 @@ func Interprete(tokens []models.TokenInfo) error {
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "IDENTIFIER"):
-			tokensProcessed, err := handleReassignment(tokens[currentPosition:])
-			if err != nil {
-				return err
+			if utils.IsFunctionCall(tokens[currentPosition:]) {
+				tokensProcessed, err := handleFunCall(tokens[currentPosition:])
+				if err != nil {
+					return err
+				}
+				currentPosition += tokensProcessed
+			} else {
+				tokensProcessed, err := handleReassignment(tokens[currentPosition:])
+				if err != nil {
+					return err
+				}
+				currentPosition += tokensProcessed
 			}
-			currentPosition += tokensProcessed
+
 		case strings.HasPrefix(token.Token, "LEFT_PAREN"):
 			tokensProcessed, err := handleParenStatement(tokens[currentPosition:])
 			if err != nil {
@@ -73,9 +82,30 @@ func Interprete(tokens []models.TokenInfo) error {
 	return nil
 }
 
+func handleFunCall(tokens []models.TokenInfo) (int, error) {
+	funName := strings.Split(tokens[0].Token, " ")[1]
+	value, bool := environment.Global.Get(funName)
+	if !bool {
+		return 3, fmt.Errorf("function not defined")
+	}
+	switch v := value.(type) {
+	case []models.TokenInfo:
+		err := Interprete(v)
+		if err != nil {
+			return 3, err
+		}
+	}
+	return 3, nil
+}
+
 func handleFun(tokens []models.TokenInfo) (int, error) {
 	positions := findFunPositions(tokens)
-
+	if !positions.IsValid() {
+		return positions.BodyEnd + 1, fmt.Errorf("invalid function")
+	}
+	funName := strings.Split(tokens[1].Token, " ")[1]
+	environment.Global.Set(funName, tokens[positions.BodyStart:positions.BodyEnd+1])
+	return positions.BodyEnd + 1, nil
 }
 
 func findFunPositions(tokens []models.TokenInfo) models.FunStatementPositions {
@@ -95,6 +125,7 @@ func findFunPositions(tokens []models.TokenInfo) models.FunStatementPositions {
 			parenCount--
 			if parenCount == 0 && positions.ArgumentEnd == -1 {
 				positions.ArgumentEnd = i
+				positions.BodyStart = i + 1
 
 			}
 		case strings.HasPrefix(tokens[i].Token, "LEFT_BRACE"):

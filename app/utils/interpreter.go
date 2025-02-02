@@ -6,6 +6,10 @@ import (
 	"github.com/Stan-breaks/app/models"
 )
 
+func IsFunctionCall(tokens []models.TokenInfo) bool {
+	return strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") && strings.HasPrefix(tokens[2].Token, "RIGHT_PAREN")
+}
+
 func IsReassignmentCondition(tokens []models.TokenInfo) bool {
 	if len(tokens) < 2 {
 		return false
