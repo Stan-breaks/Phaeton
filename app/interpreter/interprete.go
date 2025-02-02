@@ -83,19 +83,23 @@ func Interprete(tokens []models.TokenInfo) error {
 }
 
 func handleFunCall(tokens []models.TokenInfo) (int, error) {
+	semicolon := utils.FindSemicolonPosition(tokens)
+	if semicolon == -1 {
+		return 0, fmt.Errorf("no semicolon found")
+	}
 	funName := strings.Split(tokens[0].Token, " ")[1]
 	value, bool := environment.Global.Get(funName)
 	if !bool {
-		return 3, fmt.Errorf("function not defined")
+		return 0, fmt.Errorf("function not defined")
 	}
 	switch v := value.(type) {
 	case []models.TokenInfo:
 		err := Interprete(v)
 		if err != nil {
-			return 3, err
+			return 0, err
 		}
 	}
-	return 3, nil
+	return semicolon + 1, nil
 }
 
 func handleFun(tokens []models.TokenInfo) (int, error) {
@@ -104,7 +108,11 @@ func handleFun(tokens []models.TokenInfo) (int, error) {
 		return positions.BodyEnd + 1, fmt.Errorf("invalid function")
 	}
 	funName := strings.Split(tokens[1].Token, " ")[1]
-	environment.Global.Set(funName, tokens[positions.BodyStart:positions.BodyEnd+1])
+	function := models.Function{
+		Arguments: tokens[positions.ArgumentStart+1 : positions.ArgumentEnd],
+		Body:      tokens[positions.BodyStart : positions.BodyEnd+1],
+	}
+	environment.Global.Set(funName, function)
 	return positions.BodyEnd + 1, nil
 }
 
