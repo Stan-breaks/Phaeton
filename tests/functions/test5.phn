@@ -1,0 +1,2 @@
+fun f3(a, b, c) { print a + b + c; }
+f3(24, 24, 24);
