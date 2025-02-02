@@ -58,3 +58,8 @@ type FunStatementPositions struct {
 func (p FunStatementPositions) IsValid() bool {
 	return p.ArgumentStart != -1 && p.ArgumentEnd != -1 && p.BodyStart != -1 && p.BodyEnd != -1
 }
+
+type Function struct {
+	Arguments []interface{}
+	Body      []interface{}
+}
