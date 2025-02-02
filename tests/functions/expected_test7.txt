@@ -1,0 +1,2 @@
+Grade for given score is:
+B
