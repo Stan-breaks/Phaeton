@@ -83,6 +83,8 @@ func Interprete(tokens []models.TokenInfo) error {
 }
 
 func handleFunCall(tokens []models.TokenInfo) (int, error) {
+	environment.Global.PushScope()
+	defer environment.Global.PopScope()
 	semicolon := utils.FindSemicolonPosition(tokens)
 	if semicolon == -1 {
 		return 0, fmt.Errorf("no semicolon found")
@@ -93,11 +95,37 @@ func handleFunCall(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("function not defined")
 	}
 	switch v := value.(type) {
-	case []models.TokenInfo:
-		err := Interprete(v)
-		if err != nil {
-			return 0, err
+	case models.Function:
+		switch a := v.Arguments.(type) {
+		case []models.TokenInfo:
+			argumentEnd := utils.FindClosingParen(tokens)
+			args := tokens[2:argumentEnd]
+			if len(a) != len(args) {
+				return 0, fmt.Errorf("invalid no of function argument")
+			}
+			if len(a) > 0 {
+				for i := 0; i < len(a); i++ {
+					if !strings.HasPrefix(a[i].Token, "COMMA") {
+						valName := strings.Split(a[i].Token, " ")[1]
+						value, err := parse.Parse(args[i : i+1])
+
+						if err != nil {
+							return 0, fmt.Errorf("invalid arguments")
+						}
+						environment.Global.Set(valName, value.Evaluate())
+					}
+				}
+
+			}
 		}
+		switch b := v.Body.(type) {
+		case []models.TokenInfo:
+			err := Interprete(b)
+			if err != nil {
+				return 0, err
+			}
+		}
+
 	}
 	return semicolon + 1, nil
 }
@@ -118,7 +146,7 @@ func handleFun(tokens []models.TokenInfo) (int, error) {
 
 func findFunPositions(tokens []models.TokenInfo) models.FunStatementPositions {
 	positions := models.FunStatementPositions{
-		ArgumentStart: 1,
+		ArgumentStart: -1,
 		ArgumentEnd:   -1,
 		BodyStart:     -1,
 		BodyEnd:       -1,
@@ -128,6 +156,9 @@ func findFunPositions(tokens []models.TokenInfo) models.FunStatementPositions {
 	for i := 0; i < len(tokens); i++ {
 		switch {
 		case strings.HasPrefix(tokens[i].Token, "LEFT_PAREN"):
+			if parenCount == 0 && positions.ArgumentStart == -1 {
+				positions.ArgumentStart = i
+			}
 			parenCount++
 		case strings.HasPrefix(tokens[i].Token, "RIGHT_PAREN"):
 			parenCount--
