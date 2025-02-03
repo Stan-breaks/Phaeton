@@ -327,7 +327,7 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 			return models.NumberNode{Value: v}, nil
 		case int:
 			return models.NumberNode{Value: float64(v)}, nil
-		case []models.TokenInfo:
+		case models.Function:
 			return models.StringNode{Value: "<fn " + valname + ">"}, nil
 		default:
 			err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
