@@ -60,6 +60,6 @@ func (p FunStatementPositions) IsValid() bool {
 }
 
 type Function struct {
-	Arguments []interface{}
-	Body      []interface{}
+	Arguments interface{}
+	Body      interface{}
 }
