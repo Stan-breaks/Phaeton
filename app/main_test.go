@@ -215,7 +215,7 @@ func TestIntegration(t *testing.T) {
 			Name:       "func_07",
 			FilePath:   "tests/functions/test7.phn",
 			Command:    "run",
-			WantOutput: "tests/functions/expected_test3.txt",
+			WantOutput: "tests/functions/expected_test7.txt",
 			WantExit:   0,
 		},
 	}
