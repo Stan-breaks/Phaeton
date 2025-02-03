@@ -68,8 +68,11 @@ func parseSingleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
 		Right: right,
 	}
 
-	return result, arrErr
-
+	if len(arrErr) == 0 {
+		return result, nil
+	} else {
+		return result, arrErr
+	}
 }
 
 func parseOperand(tokens []models.TokenInfo) (models.Node, int, []string) {
@@ -150,39 +153,12 @@ func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) 
 			arrErr = append(arrErr, errstr)
 			return models.NilNode{}, arrErr
 		}
-		if utils.Isoperator(tokens[currentPosition]) {
-			right, err = parseUnaryExpr(tokens[currentPosition : currentPosition+2])
-			if err != nil {
-				arrErr = append(arrErr, err...)
-			}
-			currentPosition++
-		} else {
-			if strings.HasPrefix(tokens[currentPosition].Token, "LEFT_PAREN") {
-				var parenEnd = 0
-				for i := currentPosition; i < len(tokens); i++ {
-					if strings.HasPrefix(tokens[i].Token, "RIGHT_PAREN") {
-						parenEnd = i
-						break
-					}
-				}
-				if parenEnd == 0 {
-					splitToken := strings.Split(tokens[currentPosition].Token, " ")
-					errstr := fmt.Sprintf("[line %d] Error at %s", tokens[currentPosition].Line, splitToken[1])
-					arrErr = append(arrErr, errstr)
-					return models.StringNode{Value: ""}, arrErr
-				}
-				right, err = parseParrenthesisExpr(tokens[currentPosition : parenEnd+1])
-				if err != nil {
-					arrErr = append(arrErr, err...)
-				}
-				currentPosition = parenEnd
-			} else {
-				right, err = parsevalue(tokens[currentPosition])
-				if err != nil {
-					arrErr = append(arrErr, err...)
-				}
-			}
+		right, tokensUsed, err = parseOperand(tokens[currentPosition:])
+		if len(err) == 0 {
+			arrErr = append(arrErr, err...)
 		}
+		currentPosition += tokensUsed
+
 		if precedence[op] > precedence[previousBinary.Op] {
 			temp := previousBinary
 			previousBinary = models.BinaryNode{
@@ -205,7 +181,6 @@ func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) 
 			}
 			previousBinary = left.(models.BinaryNode)
 		}
-		currentPosition++
 	}
 	if len(arrErr) == 0 {
 		return left, nil
