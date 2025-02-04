@@ -111,10 +111,10 @@ func parseOperand(tokens []models.TokenInfo) (models.Node, int, []string) {
 
 func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
 	precedence := map[string]int{
-		"*": 4,
+		"*": 3,
 		"/": 3,
 		"+": 2,
-		"-": 1,
+		"-": 2,
 	}
 
 	var nodeStack []models.BinaryNode
@@ -135,7 +135,7 @@ func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) 
 		arrErr = append(arrErr, err...)
 		currentPosition += tokensUsed
 
-		for len(opStack) > 0 && precedence[currentOp] < precedence[opStack[len(opStack)-1]] {
+		for len(opStack) > 0 && precedence[currentOp] <= precedence[opStack[len(opStack)-1]] {
 			prevOp := opStack[len(opStack)-1]
 			opStack = opStack[:len(opStack)-1]
 
