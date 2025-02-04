@@ -116,77 +116,62 @@ func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) 
 		"+": 2,
 		"-": 1,
 	}
-	var left models.Node
-	var right models.Node
+
+	var nodeStack []models.BinaryNode
+	var opStack []string
 	var arrErr []string
-	var err []string
 	currentPosition := 0
 
 	left, tokensUsed, err := parseOperand(tokens[currentPosition:])
-	if len(err) == 0 {
-		arrErr = append(arrErr, err...)
-	}
+	arrErr = append(arrErr, err...)
 	currentPosition += tokensUsed
 
-	splitOperator := strings.Split(tokens[currentPosition].Token, " ")
-	op := parseOperator(splitOperator)
-	currentPosition++
-
-	right, tokensUsed, err = parseOperand(tokens[currentPosition:])
-	if len(err) == 0 {
-		arrErr = append(arrErr, err...)
-	}
-	currentPosition += tokensUsed
-
-	previousBinary := models.BinaryNode{
-		Left:  left,
-		Op:    op,
-		Right: right,
-	}
 	for currentPosition < len(tokens) {
-		splitOperator = strings.Split(tokens[currentPosition].Token, " ")
-		op = parseOperator(splitOperator)
+		splitOperator := strings.Split(tokens[currentPosition].Token, " ")
+		currentOp := parseOperator(splitOperator)
 		currentPosition++
-		if currentPosition >= len(tokens) {
-			splitToken := strings.Split(tokens[currentPosition].Token, " ")
-			errstr := fmt.Sprintf("[line %d] Error at %s", tokens[currentPosition].Line, splitToken[1])
-			arrErr = append(arrErr, errstr)
-			return models.NilNode{}, arrErr
-		}
-		right, tokensUsed, err = parseOperand(tokens[currentPosition:])
-		if len(err) == 0 {
-			arrErr = append(arrErr, err...)
-		}
+
+		right, tokensUsed, err := parseOperand(tokens[currentPosition:])
+		arrErr = append(arrErr, err...)
 		currentPosition += tokensUsed
 
-		if precedence[op] > precedence[previousBinary.Op] {
-			temp := previousBinary
-			previousBinary = models.BinaryNode{
-				Left:  previousBinary.Right,
-				Op:    op,
-				Right: right,
-			}
+		for len(opStack) > 0 && precedence[currentOp] < precedence[opStack[len(opStack)-1]] {
+			prevOp := opStack[len(opStack)-1]
+			opStack = opStack[:len(opStack)-1]
+
+			prevRight := nodeStack[len(nodeStack)-1]
+			nodeStack = nodeStack[:len(nodeStack)-1]
+
 			left = models.BinaryNode{
-				Left:    previousBinary,
-				Op:      temp.Op,
-				Right:   temp.Left,
-				Shifted: 1,
+				Left:  prevRight.Left,
+				Op:    prevOp,
+				Right: left,
 			}
-			previousBinary = left.(models.BinaryNode)
-		} else {
-			left = models.BinaryNode{
-				Left:  previousBinary,
-				Op:    op,
-				Right: right,
-			}
-			previousBinary = left.(models.BinaryNode)
+		}
+
+		nodeStack = append(nodeStack, models.BinaryNode{Left: left, Op: currentOp})
+		opStack = append(opStack, currentOp)
+		left = right
+	}
+
+	for len(opStack) > 0 {
+		prevOp := opStack[len(opStack)-1]
+		opStack = opStack[:len(opStack)-1]
+
+		prevNode := nodeStack[len(nodeStack)-1]
+		nodeStack = nodeStack[:len(nodeStack)-1]
+
+		left = models.BinaryNode{
+			Left:  prevNode.Left,
+			Op:    prevOp,
+			Right: left,
 		}
 	}
-	if len(arrErr) == 0 {
-		return left, nil
-	} else {
+
+	if len(arrErr) > 0 {
 		return left, arrErr
 	}
+	return left, nil
 }
 
 func parseOperator(splitToken []string) string {
