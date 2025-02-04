@@ -241,6 +241,30 @@ func TestIntegration(t *testing.T) {
 			Command:    "run",
 			WantOutput: "tests/NativeFunctions/expected_test2.txt",
 			WantExit:   0,
+		}, {
+			Name:       "fucntion_return_01",
+			FilePath:   "tests/functionReturns/test1.phn",
+			Command:    "run",
+			WantOutput: "tests/NativeFunctions/expected_test1.txt",
+			WantExit:   0,
+		}, {
+			Name:       "function_return_02",
+			FilePath:   "tests/functionReturns/test2.phn",
+			Command:    "run",
+			WantOutput: "tests/functionReturns/expected_test2.txt",
+			WantExit:   0,
+		}, {
+			Name:       "function_return_03",
+			FilePath:   "tests/functionsReturns/test3.phn",
+			Command:    "run",
+			WantOutput: "tests/functionReturns/expected_test3.txt",
+			WantExit:   0,
+		}, {
+			Name:       "function_return_04",
+			FilePath:   "tests/functionReturns/test4.phn",
+			Command:    "run",
+			WantOutput: "tests/functionReturns/expected_test4.txt",
+			WantExit:   0,
 		},
 	}
 
