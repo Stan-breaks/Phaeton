@@ -111,12 +111,14 @@ func parseOperand(tokens []models.TokenInfo) (models.Node, int, []string) {
 
 func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
 	precedence := map[string]int{
-		"*": 3,
-		"/": 3,
-		"+": 2,
-		"-": 2,
+		"*":  5,
+		"/":  5,
+		"+":  4,
+		"-":  4,
+		">":  2,
+		"<":  2,
+		">=": 2,
 	}
-
 	var nodeStack []models.BinaryNode
 	var opStack []string
 	var arrErr []string
