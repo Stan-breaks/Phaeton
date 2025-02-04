@@ -223,6 +223,12 @@ func TestIntegration(t *testing.T) {
 			Command:    "run",
 			WantOutput: "tests/functions/expected_test7.txt",
 			WantExit:   0,
+		}, {
+			Name:       "Native_function",
+			FilePath:   "tests/NativeFunctions/test1.phn",
+			Command:    "run",
+			WantOutput: "tests/NativeFunctions/expected_test1.txt",
+			WantExit:   0,
 		},
 	}
 
