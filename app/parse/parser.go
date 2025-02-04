@@ -81,11 +81,17 @@ func parseOperand(tokens []models.TokenInfo) (models.Node, int, []string) {
 	var err []string
 	tokensUsed := 0
 	if utils.Isoperator(tokens[0]) {
-		node, err = parseUnaryExpr(tokens[:2])
+		if strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") {
+			parenEnd := utils.FindClosingParen(tokens)
+			tokensUsed = parenEnd + 1
+		} else {
+			tokensUsed = 2
+		}
+		node, err = parseUnaryExpr(tokens[:tokensUsed])
 		if err != nil {
 			arrErr = append(arrErr, err...)
 		}
-		tokensUsed = 2
+
 	} else if strings.HasPrefix(tokens[0].Token, "LEFT_PAREN") {
 		parenEnd := utils.FindClosingParen(tokens)
 		if parenEnd == 0 {
@@ -111,13 +117,14 @@ func parseOperand(tokens []models.TokenInfo) (models.Node, int, []string) {
 
 func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
 	precedence := map[string]int{
-		"*":  5,
-		"/":  5,
-		"+":  4,
-		"-":  4,
+		"*":  4,
+		"/":  4,
+		"+":  3,
+		"-":  3,
 		">":  2,
 		"<":  2,
 		">=": 2,
+		"<=": 2,
 	}
 	var nodeStack []models.BinaryNode
 	var opStack []string
@@ -231,8 +238,10 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 	case "FUNCTION":
 		var errors []string
 		funcName := splitToken[1]
-		value := nativeFunctions.GlobalFunctions[funcName]
-		return models.NumberNode{Value: value.(float64)}, errors
+		val := nativeFunctions.GlobalFunctions[funcName]
+		fn := val.(func() float64)
+		value := fn()
+		return models.NumberNode{Value: value}, errors
 	default:
 		err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
 		var errors []string
