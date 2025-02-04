@@ -1,0 +1,2 @@
+Starting timer for 0.2 seconds
+Timer ended
