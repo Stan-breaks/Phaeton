@@ -105,6 +105,12 @@ func TestIntegration(t *testing.T) {
 			Command:    "parse",
 			WantOutput: "tests/parser/expected_test4.txt",
 			WantExit:   0,
+		}, {
+			Name:       "Parser_edgeCase_02",
+			FilePath:   "tests/parser/test5.phn",
+			Command:    "parse",
+			WantOutput: "tests/parser/expected_test5.txt",
+			WantExit:   0,
 		},
 		{
 			Name:       "Logical_or_statement",
@@ -224,10 +230,16 @@ func TestIntegration(t *testing.T) {
 			WantOutput: "tests/functions/expected_test7.txt",
 			WantExit:   0,
 		}, {
-			Name:       "Native_function",
+			Name:       "native_function_01",
 			FilePath:   "tests/NativeFunctions/test1.phn",
 			Command:    "run",
 			WantOutput: "tests/NativeFunctions/expected_test1.txt",
+			WantExit:   0,
+		}, {
+			Name:       "Native_function_02",
+			FilePath:   "tests/NativeFunctions/test2.phn",
+			Command:    "run",
+			WantOutput: "tests/NativeFunctions/expected_test2.txt",
 			WantExit:   0,
 		},
 	}
