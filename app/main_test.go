@@ -99,6 +99,12 @@ func TestIntegration(t *testing.T) {
 			Command:    "parse",
 			WantOutput: "tests/parser/expected_test3.txt",
 			WantExit:   0,
+		}, {
+			Name:       "Parser_edgeCase",
+			FilePath:   "tests/parser/test4.phn",
+			Command:    "parse",
+			WantOutput: "tests/parser/expected_test4.txt",
+			WantExit:   0,
 		},
 		{
 			Name:       "Logical_or_statement",
