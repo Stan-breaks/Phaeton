@@ -7,5 +7,5 @@ func timeInSeconds() float64 {
 }
 
 var GlobalFunctions = map[string]interface{}{
-	"clock": timeInSeconds(),
+	"clock": timeInSeconds,
 }
