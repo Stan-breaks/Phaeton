@@ -447,6 +447,10 @@ func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 	if utils.IsReassignmentCondition(tokens) {
 		return handleReassignmentCondition(tokens)
 	}
+	if utils.ExpressionHasFunctionCall(tokens) {
+		fmt.Println(tokens)
+		return models.NilNode{}, nil
+	}
 	expression, parseErrors := parse.Parse(tokens)
 	if parseErrors != nil {
 		return models.NilNode{}, fmt.Errorf("invalid expression: %v", parseErrors[0])

@@ -9,6 +9,22 @@ import (
 func IsFunctionCall(tokens []models.TokenInfo) bool {
 	return strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") && strings.HasPrefix(tokens[len(tokens)-2].Token, "RIGHT_PAREN")
 }
+func IsFunctionCallExpression(tokens []models.TokenInfo) bool {
+	return strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") && strings.HasPrefix(tokens[len(tokens)-1].Token, "RIGHT_PAREN")
+}
+
+func ExpressionHasFunctionCall(tokens []models.TokenInfo) bool {
+	identifier := -1
+	for i, token := range tokens {
+		switch {
+		case strings.HasPrefix(token.Token, "IDENTIFIER"):
+			identifier = i
+		case strings.HasPrefix(token.Token, "RIGHT_PAREN") && identifier != -1:
+			return IsFunctionCallExpression(tokens[identifier : i+1])
+		}
+	}
+	return false
+}
 
 func IsReassignmentCondition(tokens []models.TokenInfo) bool {
 	if len(tokens) < 2 {
