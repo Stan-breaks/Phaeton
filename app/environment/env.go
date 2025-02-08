@@ -1,45 +1,69 @@
 package environment
 
+type Scope struct {
+	Variables   map[string]interface{}
+	ReturnValue interface{}
+	HasReturn   bool
+}
+
 type Environment struct {
-	Scope []map[string]interface{}
+	Scopes []Scope // Changed from single Scope to slice of Scope
 }
 
 var Global = &Environment{
-	Scope: []map[string]interface{}{
-		make(map[string]interface{}),
-	},
+	Scopes: []Scope{{
+		Variables: make(map[string]interface{}),
+		HasReturn: false,
+	}},
 }
 
 func (e *Environment) PushScope() {
-	e.Scope = append(e.Scope, make(map[string]interface{}))
+	e.Scopes = append(e.Scopes, Scope{
+		Variables: make(map[string]interface{}),
+		HasReturn: false,
+	})
 }
 
 func (e *Environment) PopScope() {
-	if len(e.Scope) > 1 {
-		e.Scope = e.Scope[:len(e.Scope)-1]
+	if len(e.Scopes) > 1 {
+		e.Scopes = e.Scopes[:len(e.Scopes)-1]
 	}
 }
 
 func (e *Environment) Set(variableName string, value interface{}) {
-	e.Scope[len(e.Scope)-1][variableName] = value
+	currentScope := &e.Scopes[len(e.Scopes)-1]
+	currentScope.Variables[variableName] = value
 }
 
 func (e *Environment) Reset(variableName string, value interface{}) {
-	for i := len(e.Scope) - 1; i >= 0; i-- {
-		if _, ok := e.Scope[i][variableName]; ok {
-			e.Scope[i][variableName] = value
+	for i := len(e.Scopes) - 1; i >= 0; i-- {
+		if _, ok := e.Scopes[i].Variables[variableName]; ok {
+			e.Scopes[i].Variables[variableName] = value
 			return
 		}
 	}
-	e.Scope[len(e.Scope)-1][variableName] = value
+	e.Scopes[len(e.Scopes)-1].Variables[variableName] = value
 }
 
 func (e *Environment) Get(variableName string) (interface{}, bool) {
-	for i := len(e.Scope) - 1; i >= 0; i-- {
-		if val, ok := e.Scope[i][variableName]; ok {
+	for i := len(e.Scopes) - 1; i >= 0; i-- {
+		if val, ok := e.Scopes[i].Variables[variableName]; ok {
 			return val, true
 		}
-
 	}
 	return nil, false
+}
+
+func (e *Environment) SetReturn(value interface{}) {
+	currentScope := &e.Scopes[len(e.Scopes)-1]
+	currentScope.ReturnValue = value
+	currentScope.HasReturn = true
+}
+
+func (e *Environment) GetReturn() (interface{}, bool) {
+	currentScope := &e.Scopes[len(e.Scopes)-1]
+	if currentScope.HasReturn {
+		return currentScope.ReturnValue, currentScope.HasReturn
+	}
+	return nil, currentScope.HasReturn
 }
