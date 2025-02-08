@@ -13,17 +13,17 @@ func IsFunctionCallExpression(tokens []models.TokenInfo) bool {
 	return strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") && strings.HasPrefix(tokens[len(tokens)-1].Token, "RIGHT_PAREN")
 }
 
-func ExpressionHasFunctionCall(tokens []models.TokenInfo) bool {
+func ExpressionHasFunctionCall(tokens []models.TokenInfo) (int, int, bool) {
 	identifier := -1
 	for i, token := range tokens {
 		switch {
 		case strings.HasPrefix(token.Token, "IDENTIFIER"):
 			identifier = i
 		case strings.HasPrefix(token.Token, "RIGHT_PAREN") && identifier != -1:
-			return IsFunctionCallExpression(tokens[identifier : i+1])
+			return identifier, i, IsFunctionCallExpression(tokens[identifier : i+1])
 		}
 	}
-	return false
+	return -1, -1, false
 }
 
 func IsReassignmentCondition(tokens []models.TokenInfo) bool {
