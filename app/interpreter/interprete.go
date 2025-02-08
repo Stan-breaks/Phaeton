@@ -7,6 +7,7 @@ import (
 	"github.com/Stan-breaks/app/environment"
 	"github.com/Stan-breaks/app/models"
 	"github.com/Stan-breaks/app/parse"
+	"github.com/Stan-breaks/app/tokenize"
 	"github.com/Stan-breaks/app/utils"
 )
 
@@ -75,11 +76,74 @@ func Interprete(tokens []models.TokenInfo) error {
 				return err
 			}
 			currentPosition += tokensProcessed
+		case strings.HasPrefix(token.Token, "RETURN"):
+			tokensProcessed, err := handleReturn(tokens[currentPosition:])
+			if err != nil {
+				return err
+			}
+			currentPosition += tokensProcessed
 		default:
 			currentPosition++
 		}
 	}
 	return nil
+}
+
+func handleReturn(tokens []models.TokenInfo) (int, error) {
+	semicolon := utils.FindLastSemicolonInSameLine(tokens)
+	if semicolon == -1 {
+		return 0, fmt.Errorf("no semicolon in return statement")
+	}
+	result, err := parse.Parse(tokens[1:])
+	if len(err) != 0 {
+		return 0, fmt.Errorf("error with parsing return statement")
+	}
+	environment.Global.SetReturn(result.Evaluate())
+	return semicolon + 1, nil
+}
+
+func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
+	environment.Global.PushScope()
+	defer environment.Global.PopScope()
+	funName := strings.Split(tokens[0].Token, " ")[1]
+	value, bool := environment.Global.Get(funName)
+	if !bool {
+		return models.NilNode{}, 0, fmt.Errorf("function not defined")
+	}
+	switch v := value.(type) {
+	case models.Function:
+		switch a := v.Arguments.(type) {
+		case []models.TokenInfo:
+			argumentEnd := len(tokens) - 1
+			args := tokens[2:argumentEnd]
+			if len(a) != len(args) {
+				return models.NilNode{}, 0, fmt.Errorf("invalid no of function argument")
+			}
+			if len(a) > 0 {
+				for i := 0; i < len(a); i++ {
+					if !strings.HasPrefix(a[i].Token, "COMMA") {
+						valName := strings.Split(a[i].Token, " ")[1]
+						value, err := parse.Parse(args[i : i+1])
+
+						if err != nil {
+							return models.NilNode{}, 0, fmt.Errorf("invalid arguments")
+						}
+						environment.Global.Set(valName, value.Evaluate())
+					}
+				}
+
+			}
+		}
+		switch b := v.Body.(type) {
+		case []models.TokenInfo:
+			err := Interprete(b)
+			if err != nil {
+				return models.NilNode{}, 0, err
+			}
+		}
+
+	}
+	return models.NilNode{}, len(tokens), nil
 }
 
 func handleFunCall(tokens []models.TokenInfo) (int, error) {
@@ -447,9 +511,32 @@ func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 	if utils.IsReassignmentCondition(tokens) {
 		return handleReassignmentCondition(tokens)
 	}
-	if utils.ExpressionHasFunctionCall(tokens) {
-		fmt.Println(tokens)
-		return models.NilNode{}, nil
+	if start, end, bool := utils.ExpressionHasFunctionCall(tokens); bool {
+		result, _, err := handleExprFunCall(tokens[start : end+1])
+		fmt.Println(err)
+		if err != nil {
+			return models.NilNode{}, fmt.Errorf("invalid function call")
+		}
+		value := result.String()
+		funcTokens := tokenize.Tokenize(value, len(value))
+		if len(funcTokens.Errors) == 0 {
+			return models.NilNode{}, fmt.Errorf("error with tokenizing function call")
+		}
+		var newTokens []models.TokenInfo
+		for i, token := range tokens {
+			if i >= start && i <= end {
+				if i == end {
+					newTokens = append(newTokens, funcTokens.Success...)
+				}
+			} else {
+				newTokens = append(newTokens, token)
+			}
+		}
+		expression, parseErrors := parse.Parse(newTokens)
+		if parseErrors != nil {
+			return models.NilNode{}, fmt.Errorf("invalid expression: %v", parseErrors[0])
+		}
+		return expression, nil
 	}
 	expression, parseErrors := parse.Parse(tokens)
 	if parseErrors != nil {
