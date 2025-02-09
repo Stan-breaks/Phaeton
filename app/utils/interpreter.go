@@ -10,6 +10,11 @@ func FindNoOfArgs(tokens []models.TokenInfo) [][]models.TokenInfo {
 	var result [][]models.TokenInfo
 	var arr []models.TokenInfo
 	var empty []models.TokenInfo
+	if len(tokens) == 1 {
+		arr = append(arr, tokens...)
+		result = append(result, arr)
+		return result
+	}
 	for _, token := range tokens {
 		if strings.HasPrefix(token.Token, "COMMA") {
 			result = append(result, arr)
@@ -43,7 +48,6 @@ func ExpressionHasFunctionCall(tokens []models.TokenInfo) (int, int, bool) {
 	}
 	return -1, -1, false
 }
-
 func IsReassignmentCondition(tokens []models.TokenInfo) bool {
 	if len(tokens) < 2 {
 		return false
