@@ -80,6 +80,10 @@ func parseOperand(tokens []models.TokenInfo) (models.Node, int, []string) {
 	var arrErr []string
 	var err []string
 	tokensUsed := 0
+	if len(tokens) == 0 {
+		arrErr = append(arrErr, "no tokens in operand")
+		return models.NilNode{}, 0, arrErr
+	}
 	if utils.Isoperator(tokens[0]) {
 		if strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") {
 			parenEnd := utils.FindClosingParen(tokens)
