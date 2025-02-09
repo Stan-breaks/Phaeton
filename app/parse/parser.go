@@ -213,7 +213,7 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 		valname := splitToken[1]
 		value, exist := environment.Global.Get(valname)
 		if !exist {
-			err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
+			err := fmt.Sprintf("[Line %d] Undefined variable: %s", token.Line, splitToken[1])
 			var errors []string
 			errors = append(errors, err)
 			return models.NilNode{}, errors
@@ -230,7 +230,7 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 		case models.Function:
 			return models.StringNode{Value: "<fn " + valname + ">"}, nil
 		default:
-			err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
+			err := fmt.Sprintf("[Line %d] Invalid token: %s", token.Line, splitToken[1])
 			var errors []string
 			errors = append(errors, err)
 			return models.NilNode{}, errors
