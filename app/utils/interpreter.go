@@ -6,6 +6,22 @@ import (
 	"github.com/Stan-breaks/app/models"
 )
 
+func FindNoOfArgs(tokens []models.TokenInfo) [][]models.TokenInfo {
+	var result [][]models.TokenInfo
+	var arr []models.TokenInfo
+	var empty []models.TokenInfo
+	for _, token := range tokens {
+		if strings.HasPrefix(token.Token, "COMMA") {
+			result = append(result, arr)
+
+			arr = empty
+		} else {
+			arr = append(arr, token)
+		}
+	}
+	return result
+}
+
 func IsFunctionCall(tokens []models.TokenInfo) bool {
 	return strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") && strings.HasPrefix(tokens[len(tokens)-2].Token, "RIGHT_PAREN")
 }
