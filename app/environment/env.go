@@ -7,7 +7,7 @@ type Scope struct {
 }
 
 type Environment struct {
-	Scopes []Scope // Changed from single Scope to slice of Scope
+	Scopes []Scope
 }
 
 var Global = &Environment{
@@ -48,7 +48,7 @@ func (e *Environment) Reset(variableName string, value interface{}) {
 func (e *Environment) Get(variableName string) (interface{}, bool) {
 	for i := len(e.Scopes) - 1; i >= 0; i-- {
 		if val, ok := e.Scopes[i].Variables[variableName]; ok {
-			return val, true
+			return val, ok
 		}
 	}
 	return nil, false
