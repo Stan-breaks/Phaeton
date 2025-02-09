@@ -13,11 +13,13 @@ func FindNoOfArgs(tokens []models.TokenInfo) [][]models.TokenInfo {
 	for _, token := range tokens {
 		if strings.HasPrefix(token.Token, "COMMA") {
 			result = append(result, arr)
-
 			arr = empty
 		} else {
 			arr = append(arr, token)
 		}
+	}
+	if len(arr) != 0 {
+		result = append(result, arr)
 	}
 	return result
 }
