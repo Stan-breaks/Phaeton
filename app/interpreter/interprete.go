@@ -95,8 +95,6 @@ func handleReturn(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("no semicolon in return statement")
 	}
 	result, err := handleExpression(tokens[1:semicolon])
-
-	fmt.Println(tokens[1:semicolon])
 	if err != nil {
 		return 0, fmt.Errorf("error with parsing return statement: %v", err.Error())
 	}
@@ -114,6 +112,7 @@ func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 	}
 	switch v := value.(type) {
 	case models.Function:
+		fmt.Println(v)
 		switch a := v.Arguments.(type) {
 		case []models.TokenInfo:
 			argumentEnd := len(tokens) - 1
@@ -121,7 +120,7 @@ func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 			arrA := utils.FindNoOfArgs(a)
 			arrAgrs := utils.FindNoOfArgs(args)
 			if len(arrA) != len(arrAgrs) {
-				return models.NilNode{}, 0, fmt.Errorf("invalid no of function argument")
+				return models.NilNode{}, 0, fmt.Errorf("expected %d arguments, got %d", len(arrA), len(arrAgrs))
 			}
 			if len(arrAgrs) > 0 {
 				for i := 0; i < len(arrAgrs); i++ {
@@ -144,7 +143,7 @@ func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 
 	}
 	if val, ok := environment.Global.GetReturn(); ok {
-		fmt.Println(val)
+		return models.NumberNode{Value: val.(float64)}, len(tokens), nil
 	}
 	return models.NilNode{}, len(tokens), fmt.Errorf("no function return")
 }
@@ -170,7 +169,7 @@ func handleFunCall(tokens []models.TokenInfo) (int, error) {
 			arrA := utils.FindNoOfArgs(a)
 			arrAgrs := utils.FindNoOfArgs(args)
 			if len(arrA) != len(arrAgrs) {
-				return 0, fmt.Errorf("invalid no of function argument")
+				return 0, fmt.Errorf("expected %d arguments, got %d", len(arrA), len(arrAgrs))
 			}
 			if len(arrAgrs) > 0 {
 				for i := 0; i < len(arrAgrs); i++ {
@@ -515,7 +514,7 @@ func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 	if start, end, bool := utils.ExpressionHasFunctionCall(tokens); bool {
 		result, _, err := handleExprFunCall(tokens[start : end+1])
 		if err != nil {
-			return models.NilNode{}, fmt.Errorf("invalid function call")
+			return models.NilNode{}, fmt.Errorf("invalid function call:%v", err.Error())
 		}
 		value := result.String()
 		funcTokens := tokenize.Tokenize(value, len(value))
