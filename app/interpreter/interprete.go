@@ -94,9 +94,11 @@ func handleReturn(tokens []models.TokenInfo) (int, error) {
 	if semicolon == -1 {
 		return 0, fmt.Errorf("no semicolon in return statement")
 	}
-	result, err := parse.Parse(tokens[1:])
-	if len(err) != 0 {
-		return 0, fmt.Errorf("error with parsing return statement")
+	result, err := handleExpression(tokens[1:semicolon])
+
+	fmt.Println(tokens[1:semicolon])
+	if err != nil {
+		return 0, fmt.Errorf("error with parsing return statement: %v", err.Error())
 	}
 	environment.Global.SetReturn(result.Evaluate())
 	return semicolon + 1, nil
@@ -116,22 +118,20 @@ func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 		case []models.TokenInfo:
 			argumentEnd := len(tokens) - 1
 			args := tokens[2:argumentEnd]
-			if len(a) != len(args) {
+			arrA := utils.FindNoOfArgs(a)
+			arrAgrs := utils.FindNoOfArgs(args)
+			if len(arrA) != len(arrAgrs) {
 				return models.NilNode{}, 0, fmt.Errorf("invalid no of function argument")
 			}
-			if len(a) > 0 {
-				for i := 0; i < len(a); i++ {
-					if !strings.HasPrefix(a[i].Token, "COMMA") {
-						valName := strings.Split(a[i].Token, " ")[1]
-						value, err := parse.Parse(args[i : i+1])
-
-						if err != nil {
-							return models.NilNode{}, 0, fmt.Errorf("invalid arguments")
-						}
-						environment.Global.Set(valName, value.Evaluate())
+			if len(arrAgrs) > 0 {
+				for i := 0; i < len(arrAgrs); i++ {
+					valName := strings.Split(arrA[i][0].Token, " ")[1]
+					val, err := parse.Parse(arrAgrs[i])
+					if err != nil {
+						return models.NilNode{}, 0, fmt.Errorf("invalid function arguments")
 					}
+					environment.Global.Set(valName, val.Evaluate())
 				}
-
 			}
 		}
 		switch b := v.Body.(type) {
@@ -143,7 +143,10 @@ func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 		}
 
 	}
-	return models.NilNode{}, len(tokens), nil
+	if val, ok := environment.Global.GetReturn(); ok {
+		fmt.Println(val)
+	}
+	return models.NilNode{}, len(tokens), fmt.Errorf("no function return")
 }
 
 func handleFunCall(tokens []models.TokenInfo) (int, error) {
@@ -164,22 +167,20 @@ func handleFunCall(tokens []models.TokenInfo) (int, error) {
 		case []models.TokenInfo:
 			argumentEnd := utils.FindClosingParen(tokens)
 			args := tokens[2:argumentEnd]
-			if len(a) != len(args) {
+			arrA := utils.FindNoOfArgs(a)
+			arrAgrs := utils.FindNoOfArgs(args)
+			if len(arrA) != len(arrAgrs) {
 				return 0, fmt.Errorf("invalid no of function argument")
 			}
-			if len(a) > 0 {
-				for i := 0; i < len(a); i++ {
-					if !strings.HasPrefix(a[i].Token, "COMMA") {
-						valName := strings.Split(a[i].Token, " ")[1]
-						value, err := parse.Parse(args[i : i+1])
-
-						if err != nil {
-							return 0, fmt.Errorf("invalid arguments")
-						}
-						environment.Global.Set(valName, value.Evaluate())
+			if len(arrAgrs) > 0 {
+				for i := 0; i < len(arrAgrs); i++ {
+					valName := strings.Split(arrA[i][0].Token, " ")[1]
+					val, err := parse.Parse(arrAgrs[i])
+					if err != nil {
+						return 0, fmt.Errorf("invalid function arguments")
 					}
+					environment.Global.Set(valName, val.Evaluate())
 				}
-
 			}
 		}
 		switch b := v.Body.(type) {
@@ -513,13 +514,12 @@ func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 	}
 	if start, end, bool := utils.ExpressionHasFunctionCall(tokens); bool {
 		result, _, err := handleExprFunCall(tokens[start : end+1])
-		fmt.Println(err)
 		if err != nil {
 			return models.NilNode{}, fmt.Errorf("invalid function call")
 		}
 		value := result.String()
 		funcTokens := tokenize.Tokenize(value, len(value))
-		if len(funcTokens.Errors) == 0 {
+		if len(funcTokens.Errors) != 0 {
 			return models.NilNode{}, fmt.Errorf("error with tokenizing function call")
 		}
 		var newTokens []models.TokenInfo
@@ -532,11 +532,7 @@ func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 				newTokens = append(newTokens, token)
 			}
 		}
-		expression, parseErrors := parse.Parse(newTokens)
-		if parseErrors != nil {
-			return models.NilNode{}, fmt.Errorf("invalid expression: %v", parseErrors[0])
-		}
-		return expression, nil
+		return handleExpression(newTokens)
 	}
 	expression, parseErrors := parse.Parse(tokens)
 	if parseErrors != nil {
@@ -555,7 +551,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 	}
 	expression, err := handleExpression(tokens[1:semicolonPosition])
 	if err != nil {
-		return 0, fmt.Errorf("invalid print expression")
+		return 0, fmt.Errorf("invalid print expression: %v", err.Error())
 	}
 	result := expression.Evaluate()
 	fmt.Printf("%v\n", result)
