@@ -1,26 +1,24 @@
 package environment
 
 type Scope struct {
-	Variables   map[string]interface{}
-	ReturnValue interface{}
-	HasReturn   bool
+	Variables map[string]interface{}
 }
 
 type Environment struct {
-	Scopes []Scope
+	Scopes  []Scope
+	Returns []interface{}
 }
 
 var Global = &Environment{
 	Scopes: []Scope{{
 		Variables: make(map[string]interface{}),
-		HasReturn: false,
 	}},
+	Returns: []interface{}{},
 }
 
 func (e *Environment) PushScope() {
 	e.Scopes = append(e.Scopes, Scope{
 		Variables: make(map[string]interface{}),
-		HasReturn: false,
 	})
 }
 
@@ -55,15 +53,15 @@ func (e *Environment) Get(variableName string) (interface{}, bool) {
 }
 
 func (e *Environment) SetReturn(value interface{}) {
-	currentScope := &e.Scopes[len(e.Scopes)-1]
-	currentScope.ReturnValue = value
-	currentScope.HasReturn = true
+	e.Returns = append(e.Returns, value)
 }
 
 func (e *Environment) GetReturn() (interface{}, bool) {
-	currentScope := &e.Scopes[len(e.Scopes)-1]
-	if currentScope.HasReturn {
-		return currentScope.ReturnValue, currentScope.HasReturn
+	if len(e.Returns) > 0 {
+		returnVal := e.Returns[len(e.Returns)-1]
+		e.Returns = e.Returns[:len(e.Returns)-1]
+		return returnVal, true
 	}
-	return nil, currentScope.HasReturn
+
+	return nil, false
 }
