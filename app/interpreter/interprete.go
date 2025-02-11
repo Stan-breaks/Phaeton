@@ -11,7 +11,7 @@ import (
 	"github.com/Stan-breaks/app/utils"
 )
 
-func Interprete(tokens []models.TokenInfo) error {
+func Interprete(tokens []models.TokenInfo) (interface{}, error) {
 	currentPosition := 0
 	for currentPosition < len(tokens) {
 		if currentPosition >= len(tokens) {
@@ -20,34 +20,37 @@ func Interprete(tokens []models.TokenInfo) error {
 		token := tokens[currentPosition]
 		switch {
 		case strings.HasPrefix(token.Token, "IF"):
-			tokensProcessed, err := handleIf(tokens[currentPosition:])
+			tokensProcessed, ret, err := handleIf(tokens[currentPosition:])
 			if err != nil {
-				return err
+				return nil, err
+			}
+			if ret != nil {
+				return ret, nil
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "PRINT"):
 			tokensProcessed, err := handlePrint(tokens[currentPosition:])
 			if err != nil {
-				return err
+				return nil, err
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "VAR"):
 			tokensProcessed, err := handleAssignment(tokens[currentPosition:])
 			if err != nil {
-				return err
+				return nil, err
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "IDENTIFIER"):
 			if utils.IsFunctionCall(tokens[currentPosition:]) {
-				tokensProcessed, err := handleFunCall(tokens[currentPosition:])
+				_, tokensProcessed, err := handleFunCall(tokens[currentPosition:])
 				if err != nil {
-					return err
+					return nil, err
 				}
 				currentPosition += tokensProcessed
 			} else {
 				tokensProcessed, err := handleReassignment(tokens[currentPosition:])
 				if err != nil {
-					return err
+					return nil, err
 				}
 				currentPosition += tokensProcessed
 			}
@@ -55,59 +58,63 @@ func Interprete(tokens []models.TokenInfo) error {
 		case strings.HasPrefix(token.Token, "LEFT_PAREN"):
 			tokensProcessed, err := handleParenStatement(tokens[currentPosition:])
 			if err != nil {
-				return err
+				return nil, err
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "WHILE"):
-			tokensProcessed, err := handleWhile(tokens[currentPosition:])
+			tokensProcessed, ret, err := handleWhile(tokens[currentPosition:])
 			if err != nil {
-				return err
+				return nil, err
+			}
+			if ret != nil {
+				return ret, nil
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "FOR"):
-			tokensProcessed, err := handleFor(tokens[currentPosition:])
+			tokensProcessed, ret, err := handleFor(tokens[currentPosition:])
 			if err != nil {
-				return err
+				return nil, err
+			}
+			if ret != nil {
+				return ret, nil
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "FUN"):
 			tokensProcessed, err := handleFun(tokens[currentPosition:])
 			if err != nil {
-				return err
+				return nil, err
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "RETURN"):
-			_, err := handleReturn(tokens[currentPosition:])
+			_, ret, err := handleReturn(tokens[currentPosition:])
 			if err != nil {
-				return err
+				return nil, err
 			}
-			return nil
+			return ret, nil
 		default:
 			currentPosition++
 		}
 	}
-	return nil
+	return nil, nil
 }
 
-func handleReturn(tokens []models.TokenInfo) (int, error) {
-
+func handleReturn(tokens []models.TokenInfo) (int, interface{}, error) {
 	semicolon := utils.FindLastSemicolonInSameLine(tokens)
 	if semicolon == -1 {
-		return 0, fmt.Errorf("no semicolon in return statement")
+		return 0, nil, fmt.Errorf("no semicolon in return statement")
 	}
 	if len(tokens[1:semicolon]) == 0 {
-		environment.Global.SetReturn("nil")
-		return semicolon + 1, nil
+		return semicolon + 1, nil, nil
 	}
+
 	result, err := handleExpression(tokens[1:semicolon])
 	if err != nil {
-		return 0, fmt.Errorf("error with parsing return statement: %v", err.Error())
+		return 0, nil, fmt.Errorf("error with parsing return statement: %v", err.Error())
 	}
-	environment.Global.SetReturn(result.Evaluate())
-	return semicolon + 1, nil
+	return semicolon + 1, result.Evaluate(), nil
 }
 
-func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
+func handleFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 	environment.Global.PushScope()
 	defer environment.Global.PopScope()
 	funName := strings.Split(tokens[0].Token, " ")[1]
@@ -119,17 +126,22 @@ func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 	case models.Function:
 		switch a := v.Arguments.(type) {
 		case []models.TokenInfo:
-			argumentEnd := len(tokens) - 1
+			argumentEnd := utils.FindLastSemicolonInSameLine(tokens)
+			if argumentEnd == -1 {
+				argumentEnd = len(tokens) - 1
+			} else {
+				argumentEnd--
+			}
 			args := tokens[2:argumentEnd]
 			arrA := utils.FindNoOfArgs(a)
-			arrAgrs := utils.FindNoOfArgs(args)
-			if len(arrA) != len(arrAgrs) {
-				return models.NilNode{}, 0, fmt.Errorf("expected %d arguments, got %d", len(arrA), len(arrAgrs))
+			arrArgs := utils.FindNoOfArgs(args)
+			if len(arrA) != len(arrArgs) {
+				return models.NilNode{}, 0, fmt.Errorf("expected %d arguments, got %d", len(arrA), len(arrArgs))
 			}
-			if len(arrAgrs) > 0 {
-				for i := 0; i < len(arrAgrs); i++ {
+			if len(arrArgs) > 0 {
+				for i := 0; i < len(arrArgs); i++ {
 					valName := strings.Split(arrA[i][0].Token, " ")[1]
-					val, err := parse.Parse(arrAgrs[i])
+					val, err := parse.Parse(arrArgs[i])
 					if err != nil {
 						return models.NilNode{}, 0, fmt.Errorf("invalid function arguments")
 					}
@@ -139,70 +151,20 @@ func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 		}
 		switch b := v.Body.(type) {
 		case []models.TokenInfo:
-			err := Interprete(b)
+			ret, err := Interprete(b)
 			if err != nil {
 				return models.NilNode{}, 0, err
 			}
+			switch v := ret.(type) {
+			case float64:
+				return models.NumberNode{Value: v}, len(tokens), nil
+			case string:
+				return models.StringNode{Value: v}, len(tokens), nil
+			}
 		}
 
-	}
-	if val, ok := environment.Global.GetReturn(); ok {
-		switch v := val.(type) {
-		case float64:
-			return models.NumberNode{Value: v}, len(tokens), nil
-		case string:
-			return models.StringNode{Value: v}, len(tokens), nil
-		default:
-			return models.NilNode{}, len(tokens), fmt.Errorf("no function return")
-		}
 	}
 	return models.NilNode{}, len(tokens), nil
-}
-
-func handleFunCall(tokens []models.TokenInfo) (int, error) {
-	environment.Global.PushScope()
-	defer environment.Global.PopScope()
-	semicolon := utils.FindSemicolonPosition(tokens)
-	if semicolon == -1 {
-		return 0, fmt.Errorf("no semicolon found")
-	}
-	funName := strings.Split(tokens[0].Token, " ")[1]
-	value, bool := environment.Global.Get(funName)
-	if !bool {
-		return 0, fmt.Errorf("function not defined")
-	}
-	switch v := value.(type) {
-	case models.Function:
-		switch a := v.Arguments.(type) {
-		case []models.TokenInfo:
-			argumentEnd := utils.FindClosingParen(tokens)
-			args := tokens[2:argumentEnd]
-			arrA := utils.FindNoOfArgs(a)
-			arrAgrs := utils.FindNoOfArgs(args)
-			if len(arrA) != len(arrAgrs) {
-				return 0, fmt.Errorf("expected %d arguments, got %d", len(arrA), len(arrAgrs))
-			}
-			if len(arrAgrs) > 0 {
-				for i := 0; i < len(arrAgrs); i++ {
-					valName := strings.Split(arrA[i][0].Token, " ")[1]
-					val, err := parse.Parse(arrAgrs[i])
-					if err != nil {
-						return 0, fmt.Errorf("invalid function arguments")
-					}
-					environment.Global.Set(valName, val.Evaluate())
-				}
-			}
-		}
-		switch b := v.Body.(type) {
-		case []models.TokenInfo:
-			err := Interprete(b)
-			if err != nil {
-				return 0, err
-			}
-		}
-
-	}
-	return semicolon + 1, nil
 }
 
 func handleFun(tokens []models.TokenInfo) (int, error) {
@@ -254,13 +216,13 @@ func findFunPositions(tokens []models.TokenInfo) models.FunStatementPositions {
 	return positions
 }
 
-func handleFor(tokens []models.TokenInfo) (int, error) {
+func handleFor(tokens []models.TokenInfo) (int, interface{}, error) {
 	environment.Global.PushScope()
 	defer environment.Global.PopScope()
 
 	positions := findForPositions(tokens)
 	if !positions.IsValid() {
-		return positions.BodyEnd + 1, fmt.Errorf("invalid for statement")
+		return positions.BodyEnd + 1, nil, fmt.Errorf("invalid for statement")
 	}
 	declarationStart := positions.ConditionStart + 1
 	declarationEnd := utils.FindSemicolonPosition(tokens[positions.ConditionStart+1:positions.ConditionEnd]) + positions.ConditionStart + 1
@@ -269,31 +231,34 @@ func handleFor(tokens []models.TokenInfo) (int, error) {
 	expressionStart := conditionEnd + 1
 	expressionEnd := positions.ConditionEnd
 
-	err := Interprete(tokens[declarationStart : declarationEnd+1])
+	_, err := Interprete(tokens[declarationStart : declarationEnd+1])
 	if err != nil {
-		return positions.BodyEnd + 1, err
+		return positions.BodyEnd + 1, nil, err
 	}
 	condition, err := handleExpression(tokens[conditionStart:conditionEnd])
 	if err != nil {
-		return positions.BodyEnd + 1, err
+		return positions.BodyEnd + 1, nil, err
 	}
 	if condition.IsTruthy() {
 		if expressionStart != expressionEnd {
 			for {
 				environment.Global.PushScope()
-				err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
-				environment.Global.PopScope()
+				ret, err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
 				if err != nil {
-					return positions.BodyEnd + 1, err
+					return positions.BodyEnd + 1, nil, err
+				}
+				environment.Global.PopScope()
+				if ret != nil {
+					return positions.BodyEnd + 1, ret, err
 				}
 				_, err = handleExpression(tokens[expressionStart:expressionEnd])
 				if err != nil {
-					return positions.BodyEnd + 1, err
+					return positions.BodyEnd + 1, nil, err
 				}
 
 				condition, err = handleExpression(tokens[conditionStart:conditionEnd])
 				if err != nil {
-					return positions.BodyEnd + 1, err
+					return positions.BodyEnd + 1, nil, err
 				}
 				if !condition.IsTruthy() {
 					break
@@ -301,13 +266,16 @@ func handleFor(tokens []models.TokenInfo) (int, error) {
 			}
 		} else {
 			for {
-				err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
+				ret, err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
 				if err != nil {
-					return positions.BodyEnd + 1, err
+					return positions.BodyEnd + 1, nil, err
+				}
+				if ret != nil {
+					return positions.BodyEnd + 1, ret, err
 				}
 				condition, err = handleExpression(tokens[conditionStart:conditionEnd])
 				if err != nil {
-					return positions.BodyEnd + 1, err
+					return positions.BodyEnd + 1, nil, err
 				}
 				if !condition.IsTruthy() {
 					break
@@ -315,7 +283,7 @@ func handleFor(tokens []models.TokenInfo) (int, error) {
 			}
 		}
 	}
-	return positions.BodyEnd + 1, nil
+	return positions.BodyEnd + 1, nil, nil
 }
 
 func findForPositions(tokens []models.TokenInfo) models.ForStatementPositions {
@@ -358,26 +326,29 @@ exit:
 	return positions
 }
 
-func handleWhile(tokens []models.TokenInfo) (int, error) {
+func handleWhile(tokens []models.TokenInfo) (int, interface{}, error) {
 	environment.Global.PushScope()
 	defer environment.Global.PopScope()
 	positions := findWhilePositions(tokens)
 	if !positions.IsValid() {
-		return positions.BodyEnd + 1, fmt.Errorf("invalid while statement")
+		return positions.BodyEnd + 1, nil, fmt.Errorf("invalid while statement")
 	}
 	condition, err := handleExpression(tokens[positions.ConditionStart+1 : positions.ConditionEnd])
 	if err != nil {
-		return positions.BodyEnd + 1, fmt.Errorf("invalid while condition")
+		return positions.BodyEnd + 1, nil, fmt.Errorf("invalid while condition")
 	}
 	if condition.IsTruthy() {
 		for {
-			err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
+			ret, err := Interprete(tokens[positions.BodyStart : positions.BodyEnd+1])
 			if err != nil {
-				return positions.BodyEnd + 1, fmt.Errorf("invalid while body")
+				return positions.BodyEnd + 1, nil, fmt.Errorf("invalid while body")
+			}
+			if ret != nil {
+				return positions.BodyEnd + 1, ret, err
 			}
 			condition, err = handleExpression(tokens[positions.ConditionStart+1 : positions.ConditionEnd])
 			if err != nil {
-				return positions.BodyEnd + 1, fmt.Errorf("invalid while condition")
+				return positions.BodyEnd + 1, nil, fmt.Errorf("invalid while condition")
 			}
 			if !condition.IsTruthy() {
 				break
@@ -385,7 +356,7 @@ func handleWhile(tokens []models.TokenInfo) (int, error) {
 		}
 
 	}
-	return positions.BodyEnd + 1, nil
+	return positions.BodyEnd + 1, nil, nil
 }
 
 func findWhilePositions(tokens []models.TokenInfo) models.WhileStatementPositions {
@@ -523,7 +494,7 @@ func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 		return handleReassignmentCondition(tokens)
 	}
 	if start, end, bool := utils.ExpressionHasFunctionCall(tokens); bool {
-		result, _, err := handleExprFunCall(tokens[start : end+1])
+		result, _, err := handleFunCall(tokens[start : end+1])
 		if err != nil {
 			return models.NilNode{}, fmt.Errorf("invalid function call:%v", err.Error())
 		}
@@ -574,20 +545,23 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 	return semicolonPosition + 1, nil
 }
 
-func handleIf(tokens []models.TokenInfo) (int, error) {
+func handleIf(tokens []models.TokenInfo) (int, interface{}, error) {
 	positions := findIfStatementPositions(tokens)
 	if !positions.IsValid() {
-		return 0, fmt.Errorf("malformed if statement")
+		return 0, nil, fmt.Errorf("malformed if statement")
 	}
 	condition, err := handleExpression(tokens[positions.ConditionStart+1 : positions.ConditionEnd])
 	if err != nil {
-		return 0, fmt.Errorf("invalid if condition: %v", err.Error())
+		return 0, nil, fmt.Errorf("invalid if condition: %v", err.Error())
 	}
 
 	if condition.IsTruthy() {
-		err := Interprete(tokens[positions.IfBodyStart : positions.IfBodyEnd+1])
+		ret, err := Interprete(tokens[positions.IfBodyStart : positions.IfBodyEnd+1])
 		if err != nil {
-			return 0, fmt.Errorf("invalid if body: %v", err.Error())
+			return 0, nil, fmt.Errorf("invalid if body: %v", err.Error())
+		}
+		if ret != nil {
+			return positions.IfBodyEnd + 1, ret, err
 		}
 	} else {
 		conditionMet := false
@@ -596,13 +570,16 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 			if elseIfBlock.BodyEnd > 0 && elseIfBlock.ConditionEnd > 0 && elseIfBlock.BodyStart > 0 && elseIfBlock.ConditionStart > 0 {
 				elseIfCondition, err := handleExpression(tokens[elseIfBlock.ConditionStart+1 : elseIfBlock.ConditionEnd])
 				if err != nil {
-					return 0, fmt.Errorf("invalid else-if condition: %v", err.Error())
+					return 0, nil, fmt.Errorf("invalid else-if condition: %v", err.Error())
 				}
 				if elseIfCondition.IsTruthy() {
-					err := Interprete(tokens[elseIfBlock.BodyStart : elseIfBlock.BodyEnd+1])
+					ret, err := Interprete(tokens[elseIfBlock.BodyStart : elseIfBlock.BodyEnd+1])
 
 					if err != nil {
-						return 0, fmt.Errorf("invalid else-if body: %v", err.Error())
+						return 0, nil, fmt.Errorf("invalid else-if body: %v", err.Error())
+					}
+					if ret != nil {
+						return positions.IfBodyEnd + 1, ret, err
 					}
 					conditionMet = true
 					break
@@ -611,19 +588,22 @@ func handleIf(tokens []models.TokenInfo) (int, error) {
 		}
 
 		if !conditionMet && positions.HasElseBlock() {
-			err := Interprete(tokens[positions.ElseBodyStart : positions.ElseBodyEnd+1])
+			ret, err := Interprete(tokens[positions.ElseBodyStart : positions.ElseBodyEnd+1])
 			if err != nil {
-				return 0, fmt.Errorf("invalid else body: %v", err.Error())
+				return 0, nil, fmt.Errorf("invalid else body: %v", err.Error())
+			}
+			if ret != nil {
+				return positions.IfBodyEnd + 1, ret, err
 			}
 		}
 	}
 
 	if positions.HasElseBlock() {
-		return positions.ElseBodyEnd + 1, nil
+		return positions.ElseBodyEnd + 1, nil, nil
 	} else if len(positions.ElseIfBlocks) > 0 {
-		return positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd + 1, nil
+		return positions.ElseIfBlocks[len(positions.ElseIfBlocks)-1].BodyEnd + 1, nil, nil
 	}
-	return positions.IfBodyEnd + 1, nil
+	return positions.IfBodyEnd + 1, nil, nil
 }
 
 func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPositions {
