@@ -245,7 +245,7 @@ func TestIntegration(t *testing.T) {
 			Name:       "fucntion_return_01",
 			FilePath:   "tests/functionReturns/test1.phn",
 			Command:    "run",
-			WantOutput: "tests/NativeFunctions/expected_test1.txt",
+			WantOutput: "tests/functionReturns/expected_test1.txt",
 			WantExit:   0,
 		}, {
 			Name:       "function_return_02",
