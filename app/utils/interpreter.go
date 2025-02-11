@@ -40,7 +40,7 @@ func ExpressionHasFunctionCall(tokens []models.TokenInfo) (int, int, bool) {
 	identifier := -1
 	for i, token := range tokens {
 		switch {
-		case strings.HasPrefix(token.Token, "IDENTIFIER"):
+		case strings.HasPrefix(token.Token, "IDENTIFIER") && identifier == -1:
 			identifier = i
 		case strings.HasPrefix(token.Token, "RIGHT_PAREN") && identifier != -1:
 			return identifier, i, IsFunctionCallExpression(tokens[identifier : i+1])
