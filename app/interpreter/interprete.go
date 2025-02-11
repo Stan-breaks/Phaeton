@@ -77,11 +77,11 @@ func Interprete(tokens []models.TokenInfo) error {
 			}
 			currentPosition += tokensProcessed
 		case strings.HasPrefix(token.Token, "RETURN"):
-			tokensProcessed, err := handleReturn(tokens[currentPosition:])
+			_, err := handleReturn(tokens[currentPosition:])
 			if err != nil {
 				return err
 			}
-			currentPosition += tokensProcessed
+			return nil
 		default:
 			currentPosition++
 		}
@@ -90,9 +90,14 @@ func Interprete(tokens []models.TokenInfo) error {
 }
 
 func handleReturn(tokens []models.TokenInfo) (int, error) {
+
 	semicolon := utils.FindLastSemicolonInSameLine(tokens)
 	if semicolon == -1 {
 		return 0, fmt.Errorf("no semicolon in return statement")
+	}
+	if len(tokens[1:semicolon]) == 0 {
+		environment.Global.SetReturn("nil")
+		return semicolon + 1, nil
 	}
 	result, err := handleExpression(tokens[1:semicolon])
 	if err != nil {
@@ -112,7 +117,6 @@ func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 	}
 	switch v := value.(type) {
 	case models.Function:
-		fmt.Println(v)
 		switch a := v.Arguments.(type) {
 		case []models.TokenInfo:
 			argumentEnd := len(tokens) - 1
@@ -143,9 +147,16 @@ func handleExprFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 
 	}
 	if val, ok := environment.Global.GetReturn(); ok {
-		return models.NumberNode{Value: val.(float64)}, len(tokens), nil
+		switch v := val.(type) {
+		case float64:
+			return models.NumberNode{Value: v}, len(tokens), nil
+		case string:
+			return models.StringNode{Value: v}, len(tokens), nil
+		default:
+			return models.NilNode{}, len(tokens), fmt.Errorf("no function return")
+		}
 	}
-	return models.NilNode{}, len(tokens), fmt.Errorf("no function return")
+	return models.NilNode{}, len(tokens), nil
 }
 
 func handleFunCall(tokens []models.TokenInfo) (int, error) {
@@ -516,7 +527,13 @@ func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 		if err != nil {
 			return models.NilNode{}, fmt.Errorf("invalid function call:%v", err.Error())
 		}
-		value := result.String()
+		var value string
+		switch v := result.Evaluate().(type) {
+		case string:
+			value = "\"" + v + "\""
+		default:
+			value = result.String()
+		}
 		funcTokens := tokenize.Tokenize(value, len(value))
 		if len(funcTokens.Errors) != 0 {
 			return models.NilNode{}, fmt.Errorf("error with tokenizing function call")
