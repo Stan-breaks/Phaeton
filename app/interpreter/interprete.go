@@ -108,6 +108,7 @@ func handleReturn(tokens []models.TokenInfo) (int, interface{}, error) {
 	}
 	result, err := handleExpression(tokens[1:semicolon])
 	if err != nil {
+		fmt.Println(tokens)
 		return 0, nil, fmt.Errorf("error with parsing return statement: %v", err.Error())
 	}
 	return semicolon + 1, result.Evaluate(), nil
@@ -154,11 +155,13 @@ func handleFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 			if err != nil {
 				return models.NilNode{}, 0, err
 			}
-			switch v := ret.(type) {
-			case float64:
-				return models.NumberNode{Value: v}, len(tokens), nil
-			case string:
-				return models.StringNode{Value: v}, len(tokens), nil
+			if ret != nil {
+				switch v := ret.(type) {
+				case float64:
+					return models.NumberNode{Value: v}, len(tokens), nil
+				case string:
+					return models.StringNode{Value: v}, len(tokens), nil
+				}
 			}
 		}
 
