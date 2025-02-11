@@ -47,7 +47,7 @@ func main() {
 		result := value.String()
 		fmt.Printf("%s\n", result)
 	case "run":
-		err := interpreter.Interprete(tokens.Success)
+		_, err := interpreter.Interprete(tokens.Success)
 		if err != nil {
 			tokens.Errors = append(tokens.Errors, err.Error())
 		}
