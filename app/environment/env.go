@@ -5,15 +5,13 @@ type Scope struct {
 }
 
 type Environment struct {
-	Scopes  []Scope
-	Returns []interface{}
+	Scopes []Scope
 }
 
 var Global = &Environment{
 	Scopes: []Scope{{
 		Variables: make(map[string]interface{}),
 	}},
-	Returns: []interface{}{},
 }
 
 func (e *Environment) PushScope() {
@@ -49,19 +47,5 @@ func (e *Environment) Get(variableName string) (interface{}, bool) {
 			return val, ok
 		}
 	}
-	return nil, false
-}
-
-func (e *Environment) SetReturn(value interface{}) {
-	e.Returns = append(e.Returns, value)
-}
-
-func (e *Environment) GetReturn() (interface{}, bool) {
-	if len(e.Returns) > 0 {
-		returnVal := e.Returns[len(e.Returns)-1]
-		e.Returns = e.Returns[:len(e.Returns)-1]
-		return returnVal, true
-	}
-
 	return nil, false
 }
