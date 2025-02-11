@@ -106,7 +106,6 @@ func handleReturn(tokens []models.TokenInfo) (int, interface{}, error) {
 	if len(tokens[1:semicolon]) == 0 {
 		return semicolon + 1, nil, nil
 	}
-
 	result, err := handleExpression(tokens[1:semicolon])
 	if err != nil {
 		return 0, nil, fmt.Errorf("error with parsing return statement: %v", err.Error())
@@ -452,8 +451,8 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 		return 0, fmt.Errorf("no semicolon found")
 	}
 	expression, err := parse.Parse(tokens[3 : semicolonPosition+3])
-	if err != nil {
-		return 0, fmt.Errorf("invalid assignment expression")
+	if len(err) > 0 {
+		return 0, fmt.Errorf("invalid assignment expression: %v", err[0])
 	}
 	value := expression.Evaluate()
 	environment.Global.Set(variableName, value)
