@@ -1,0 +1,16 @@
+fun makeAdder(x) {
+  fun add(y) {
+    return x + y;
+  }
+  return add;
+}
+
+fun applyTwice(f, x) {
+  return f(f(x));
+}
+
+var addx = makeAdder(2);
+var addy = makeAdder(2);
+
+print applyTwice(addx, 2);
+print applyTwice(addy, 2);
