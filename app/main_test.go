@@ -265,6 +265,30 @@ func TestIntegration(t *testing.T) {
 			Command:    "run",
 			WantOutput: "tests/functionReturns/expected_test4.txt",
 			WantExit:   0,
+		}, {
+			Name:       "Higher_Order_Function_01",
+			FilePath:   "tests/higherOrderFunctions/test1.phn",
+			Command:    "run",
+			WantOutput: "tests/higherOrderFunctions/expected_test1.txt",
+			WantExit:   0,
+		}, {
+			Name:       "Higher_Order_Function_02",
+			FilePath:   "tests/higherOrderFunctions/test2.phn",
+			Command:    "run",
+			WantOutput: "tests/higherOrderFunctions/expected_test2.txt",
+			WantExit:   0,
+		}, {
+			Name:       "Higher_Order_Function_03",
+			FilePath:   "tests/higherOrderFunctions/test3.phn",
+			Command:    "run",
+			WantOutput: "tests/higherOrderFunctions/expected_test3.txt",
+			WantExit:   0,
+		}, {
+			Name:       "Higher_Order_Function_04",
+			FilePath:   "tests/higherOrderFunctions/test4.phn",
+			Command:    "run",
+			WantOutput: "tests/higherOrderFunctions/expected_test4.txt",
+			WantExit:   0,
 		},
 	}
 
