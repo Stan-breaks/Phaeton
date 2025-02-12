@@ -149,7 +149,14 @@ func (n BinaryNode) Evaluate() interface{} {
 	right := n.Right.Evaluate()
 	switch n.Op {
 	case string(runes.PLUS):
-		return left.(float64) + right.(float64)
+		switch v := left.(type) {
+		case float64:
+			return v + right.(float64)
+		case string:
+			return v + right.(string)
+		default:
+			panic("invalid types: " + n.Left.String())
+		}
 	case string(runes.MINUS):
 		return left.(float64) - right.(float64)
 	case string(runes.STAR):
