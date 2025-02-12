@@ -2,7 +2,7 @@
 
 _Phaeton is a minimalist, dynamically-typed interpreted language designed for modeling stage‐based logic and conditional workflows._
 
-> **Note:** The name “Phaeton” reflects its original intent to model life phases through conditional logic. Over time, it has evolved into a learning tool for building interpreters in Go.
+> **Note:** The name "Phaeton" is inspired by the Greek myth of Phaethon. In this project, the name serves as a tongue-in-cheek reference to its experimental nature—something a bit halfbaked and flawed. It’s a playful nod to the idea that even ambitious projects can have their rough edges.
 
 ---
 
