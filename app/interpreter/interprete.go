@@ -108,7 +108,6 @@ func handleReturn(tokens []models.TokenInfo) (int, interface{}, error) {
 	}
 	result, err := handleExpression(tokens[1:semicolon])
 	if err != nil {
-		fmt.Println(tokens)
 		return 0, nil, fmt.Errorf("error with parsing return statement: %v", err.Error())
 	}
 	return semicolon + 1, result.Evaluate(), nil
