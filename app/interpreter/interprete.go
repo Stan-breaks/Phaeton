@@ -108,6 +108,7 @@ func handleReturn(tokens []models.TokenInfo) (int, interface{}, error) {
 	}
 	result, err := handleExpression(tokens[1:semicolon])
 	if err != nil {
+		fmt.Println(tokens[1:semicolon])
 		return 0, nil, fmt.Errorf("error with parsing return statement: %v", err.Error())
 	}
 	return semicolon + 1, result.Evaluate(), nil
@@ -159,6 +160,14 @@ func handleFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 				case float64:
 					return models.NumberNode{Value: v}, len(tokens), nil
 				case string:
+					if strings.HasPrefix(v, "<fn") {
+						funcName := strings.Trim(strings.Split(v, " ")[1], ">")
+						value, bool := environment.Global.Get(funcName)
+						if bool {
+							outerScope := &environment.Global.Scopes[len(environment.Global.Scopes)-2]
+							outerScope.Variables[funcName] = value
+						}
+					}
 					return models.StringNode{Value: v}, len(tokens), nil
 				}
 			}
@@ -452,12 +461,27 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	if semicolonPosition == -1 {
 		return 0, fmt.Errorf("no semicolon found")
 	}
-	expression, err := parse.Parse(tokens[3 : semicolonPosition+3])
-	if len(err) > 0 {
-		return 0, fmt.Errorf("invalid assignment expression: %v", err[0])
+	if utils.IsFunctionCall(tokens[3 : semicolonPosition+4]) {
+		result, _, err := handleFunCall(tokens[3 : semicolonPosition+3])
+		if err != nil {
+			return semicolonPosition + 4, err
+		}
+		funcName := strings.Trim(strings.Split(result.String(), " ")[1], ">")
+		value, bool := environment.Global.Get(funcName)
+		if bool {
+			environment.Global.Set(variableName, value)
+			currentScope := &environment.Global.Scopes[len(environment.Global.Scopes)-1]
+			delete(currentScope.Variables, funcName)
+		}
+	} else {
+		expression, err := parse.Parse(tokens[3 : semicolonPosition+3])
+		if len(err) > 0 {
+			fmt.Println(tokens[3 : semicolonPosition+3])
+			return 0, fmt.Errorf("invalid assignment expression: %v", err[0])
+		}
+		value := expression.Evaluate()
+		environment.Global.Set(variableName, value)
 	}
-	value := expression.Evaluate()
-	environment.Global.Set(variableName, value)
 	return semicolonPosition + 4, nil
 }
 
