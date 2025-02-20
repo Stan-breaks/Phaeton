@@ -862,32 +862,30 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if err != nil {
 				fmt.Println("Error parsing float:", err)
 			}
-			if math.Mod(float, 1.0) == 0 {
-				token := models.TokenInfo{
-					Token: fmt.Sprintf("NUMBER %s %.1f", numberString, float),
-					Line:  line,
-				}
-				tokens.Success = append(tokens.Success, token)
-			} else {
-				token := models.TokenInfo{
-					Token: fmt.Sprintf("NUMBER %s %g", numberString, float),
-					Line:  line,
-				}
-				tokens.Success = append(tokens.Success, token)
+			token := models.Token{
+				Type:    models.NUMBER,
+				Lexem:   numberString,
+				Literal: float,
+				Line:    line,
 			}
+			tokens.Success = append(tokens.Success, token)
 		} else {
-			token := models.TokenInfo{
-				Token: fmt.Sprintf("NUMBER %s %d.0", numberString, number),
-				Line:  line,
+			token := models.Token{
+				Type:    models.NUMBER,
+				Lexem:   numberString,
+				Literal: number,
+				Line:    line,
 			}
 			tokens.Success = append(tokens.Success, token)
 		}
 	}
 	if errnum != 1 || stringCount != 1 {
 		if identifierCount == 1 {
-			token := models.TokenInfo{
-				Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
-				Line:  line,
+			token := models.Token{
+				Type:    models.IDENTIFIER,
+				Lexem:   identifier,
+				Literal: nil,
+				Line:    line,
 			}
 			tokens.Success = append(tokens.Success, token)
 		}
