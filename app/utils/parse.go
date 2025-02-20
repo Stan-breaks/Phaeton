@@ -101,22 +101,22 @@ func IsSingleBinary(tokens []models.Token) bool {
 	operandCount := 0
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i]
-		if strings.HasPrefix(token.Token, "NUMBER") ||
-			strings.HasPrefix(token.Token, "STRING") ||
-			strings.HasPrefix(token.Token, "IDENTIFIER") ||
-			strings.HasPrefix(token.Token, "FALSE") ||
-			strings.HasPrefix(token.Token, "TRUE") ||
-			strings.HasPrefix(token.Token, "FUNCTION") ||
-			strings.HasPrefix(token.Token, "NIL") {
+		if token.Type == models.NUMBER ||
+			token.Type == models.STRING ||
+			token.Type == models.IDENTIFIER ||
+			token.Type == models.FALSE ||
+			token.Type == models.TRUE ||
+			token.Type == models.FUN ||
+			token.Type == models.NIL {
 			operandCount++
 			continue
-		} else if strings.HasPrefix(token.Token, "LEFT_PAREN") {
+		} else if token.Type == models.LEFT_PAREN {
 			operandCount++
 			parenCount := 1
 			for j := i + 1; j < len(tokens); j++ {
-				if strings.HasPrefix(tokens[j].Token, "LEFT_PAREN") {
+				if token.Type == models.LEFT_PAREN {
 					parenCount++
-				} else if strings.HasPrefix(tokens[j].Token, "RIGHT_PAREN") {
+				} else if token.Type == models.RIGHT_PAREN {
 					parenCount--
 					if parenCount == 0 {
 						i = j
@@ -130,9 +130,9 @@ func IsSingleBinary(tokens []models.Token) bool {
 }
 
 func Isoperator(token models.Token) bool {
-	operators := []string{"OR", "AND", "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "BANG_EQUAL", "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL"}
+	operators := []models.TokenType{models.OR, models.AND, models.PLUS, models.MINUS, models.STAR, models.SLASH, models.EQUAL_EQUAL, models.BANG_EQUAL, models.LESS, models.GREATER, models.LESS_EQUAL, models.GREATER_EQUAL}
 	for _, op := range operators {
-		if strings.HasPrefix(token.Token, op) {
+		if token.Type == op {
 			return true
 		}
 	}
