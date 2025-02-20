@@ -1,22 +1,20 @@
 package utils
 
 import (
-	"strings"
-
 	"github.com/Stan-breaks/app/models"
 )
 
-func FindNoOfArgs(tokens []models.TokenInfo) [][]models.TokenInfo {
-	var result [][]models.TokenInfo
-	var arr []models.TokenInfo
-	var empty []models.TokenInfo
+func FindNoOfArgs(tokens []models.Token) [][]models.Token {
+	var result [][]models.Token
+	var arr []models.Token
+	var empty []models.Token
 	if len(tokens) == 1 {
 		arr = append(arr, tokens...)
 		result = append(result, arr)
 		return result
 	}
 	for _, token := range tokens {
-		if strings.HasPrefix(token.Token, "COMMA") {
+		if token.Type == models.COMMA {
 			result = append(result, arr)
 			arr = empty
 		} else {
@@ -29,46 +27,46 @@ func FindNoOfArgs(tokens []models.TokenInfo) [][]models.TokenInfo {
 	return result
 }
 
-func IsFunctionCall(tokens []models.TokenInfo) bool {
-	return strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") && strings.HasPrefix(tokens[len(tokens)-2].Token, "RIGHT_PAREN")
+func IsFunctionCall(tokens []models.Token) bool {
+	return tokens[1].Type == models.LEFT_PAREN && tokens[len(tokens)-2].Type == models.RIGHT_PAREN
 }
-func IsFunctionCallExpression(tokens []models.TokenInfo) bool {
-	return strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") && strings.HasPrefix(tokens[len(tokens)-1].Token, "RIGHT_PAREN")
+func IsFunctionCallExpression(tokens []models.Token) bool {
+	return tokens[1].Type == models.LEFT_PAREN && tokens[len(tokens)-1].Type == models.RIGHT_PAREN
 }
 
-func ExpressionHasFunctionCall(tokens []models.TokenInfo) (int, int, bool) {
+func ExpressionHasFunctionCall(tokens []models.Token) (int, int, bool) {
 	identifier := -1
 	for i, token := range tokens {
 		switch {
-		case strings.HasPrefix(token.Token, "IDENTIFIER") && identifier == -1:
+		case token.Type == models.IDENTIFIER && identifier == -1:
 			identifier = i
-		case strings.HasPrefix(token.Token, "RIGHT_PAREN") && identifier != -1:
+		case token.Type == models.RIGHT_PAREN && identifier != -1:
 			return identifier, i, IsFunctionCallExpression(tokens[identifier : i+1])
 		}
 	}
 	return -1, -1, false
 }
-func IsReassignmentCondition(tokens []models.TokenInfo) bool {
+func IsReassignmentCondition(tokens []models.Token) bool {
 	if len(tokens) < 2 {
 		return false
 	}
-	return strings.HasPrefix(tokens[0].Token, "IDENTIFIER") && strings.HasPrefix(tokens[1].Token, "EQUAL")
+	return tokens[0].Type == models.IDENTIFIER && tokens[1].Type == models.EQUAL
 }
 
-func FindSemicolonPosition(tokens []models.TokenInfo) int {
+func FindSemicolonPosition(tokens []models.Token) int {
 	parenCount := 0
 	braceCount := 0
 	for i, token := range tokens {
-		switch {
-		case strings.HasPrefix(token.Token, "LEFT_PAREN"):
+		switch token.Type {
+		case models.LEFT_PAREN:
 			parenCount++
-		case strings.HasPrefix(token.Token, "RIGHT_PAREN"):
+		case models.RIGHT_PAREN:
 			parenCount--
-		case strings.HasPrefix(token.Token, "LEFT_BRACE"):
+		case models.LEFT_BRACE:
 			braceCount++
-		case strings.HasPrefix(token.Token, "RIGHT_BRACE"):
+		case models.RIGHT_BRACE:
 			braceCount--
-		case strings.HasPrefix(token.Token, "SEMICOLON"):
+		case models.SEMICOLON:
 			if parenCount == 0 && braceCount == 0 {
 				return i
 			}
@@ -77,7 +75,7 @@ func FindSemicolonPosition(tokens []models.TokenInfo) int {
 	return -1
 }
 
-func FindLastSemicolonInSameLine(tokens []models.TokenInfo) int {
+func FindLastSemicolonInSameLine(tokens []models.Token) int {
 	parenCount := 0
 	braceCount := 0
 	val := -1
@@ -86,16 +84,16 @@ func FindLastSemicolonInSameLine(tokens []models.TokenInfo) int {
 		if token.Line != line {
 			goto exit
 		}
-		switch {
-		case strings.HasPrefix(token.Token, "LEFT_PAREN"):
+		switch token.Type {
+		case models.LEFT_PAREN:
 			parenCount++
-		case strings.HasPrefix(token.Token, "RIGHT_PAREN"):
+		case models.RIGHT_PAREN:
 			parenCount--
-		case strings.HasPrefix(token.Token, "LEFT_BRACE"):
+		case models.LEFT_BRACE:
 			braceCount++
-		case strings.HasPrefix(token.Token, "RIGHT_BRACE"):
+		case models.RIGHT_BRACE:
 			braceCount--
-		case strings.HasPrefix(token.Token, "SEMICOLON"):
+		case models.SEMICOLON:
 			if parenCount == 0 && braceCount == 0 {
 				val = i
 			}
@@ -105,13 +103,13 @@ exit:
 	return val
 }
 
-func FindClosingParen(tokens []models.TokenInfo) int {
+func FindClosingParen(tokens []models.Token) int {
 	parenCount := 0
 	for i, token := range tokens {
-		switch {
-		case strings.HasPrefix(token.Token, "LEFT_PAREN"):
+		switch token.Type {
+		case models.LEFT_PAREN:
 			parenCount++
-		case strings.HasPrefix(token.Token, "RIGHT_PAREN"):
+		case models.RIGHT_PAREN:
 			parenCount--
 			if parenCount == 0 {
 				return i
