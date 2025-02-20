@@ -181,9 +181,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				numberString += "."
 			} else {
 				if stringCount == 0 {
-					token := models.TokenInfo{
-						Token: "DOT . null",
-						Line:  line,
+					token := models.Token{
+						Type:    models.DOT,
+						Lexem:   ".",
+						Literal: nil,
+						Line:    line,
 					}
 					tokens.Success = append(tokens.Success, token)
 				} else {
