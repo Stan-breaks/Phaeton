@@ -186,11 +186,11 @@ func parseMultipleBinaryExpr(tokens []models.Token) (models.Node, []string) {
 	return left, nil
 }
 
-func parseOperator(splitToken []string) string {
-	switch splitToken[0] {
-	case "PLUS", "MINUS", "STAR", "SLASH", "BANG_EQUAL", "EQUAL_EQUAL",
-		"LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL", "AND", "OR":
-		return splitToken[1]
+func parseOperator(token models.Token) string {
+	switch token.Type {
+	case models.PLUS, models.MINUS, models.STAR, models.SLASH, models.BANG_EQUAL, models.EQUAL_EQUAL,
+		models.LESS, models.GREATER_EQUAL, models.LESS_EQUAL, models.GREATER, models.AND, models.OR:
+		return token.Lexem
 	default:
 		return ""
 	}
