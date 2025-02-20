@@ -270,17 +270,21 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if identifierCount == 1 {
-					token := models.TokenInfo{
-						Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
-						Line:  line,
+					token := models.Token{
+						Type:    models.IDENTIFIER,
+						Lexem:   identifier,
+						Literal: nil,
+						Line:    line,
 					}
 					tokens.Success = append(tokens.Success, token)
 					identifier = ""
 					identifierCount = 0
 				}
-				token := models.TokenInfo{
-					Token: "SEMICOLON ; null",
-					Line:  line,
+				token := models.Token{
+					Type:    models.SEMICOLON,
+					Lexem:   ";",
+					Literal: nil,
+					Line:    line,
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
