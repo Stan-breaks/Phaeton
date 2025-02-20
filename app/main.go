@@ -37,7 +37,7 @@ func main() {
 	switch command {
 	case "tokenize":
 		for _, token := range tokens.Success {
-			fmt.Println(token.Token)
+			fmt.Println(token)
 		}
 		fmt.Println("EOF  null")
 	case "parse":
