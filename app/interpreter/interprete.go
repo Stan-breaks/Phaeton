@@ -383,27 +383,29 @@ func findWhilePositions(tokens []models.Token) models.WhileStatementPositions {
 	for i := 1; i < len(tokens); i++ {
 		token := tokens[i]
 		switch token.Type {
-		case models.LEFT_BRACE:
+		case models.LEFT_PAREN:
 			parenCount++
-		case strings.HasPrefix(token, "RIGHT_PAREN"):
+		case models.RIGHT_PAREN:
 			parenCount--
 			if parenCount == 0 && positions.ConditionEnd == -1 {
 				positions.ConditionEnd = i
 				positions.BodyStart = i + 1
-				if !strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+				if tokens[i+1].Type != models.LEFT_BRACE {
 					positions.BodyEnd = utils.FindLastSemicolonInSameLine(tokens[i+1:]) + i + 1
 				}
 			}
-		case strings.HasPrefix(token, "LEFT_BRACE"):
+		case models.LEFT_BRACE:
 			braceCount++
-		case strings.HasPrefix(token, "RIGHT_BRACE"):
+		case models.RIGHT_BRACE:
 			braceCount--
 			if braceCount == 0 && positions.BodyEnd == -1 {
 				positions.BodyEnd = i
 				goto exit
 			}
-		case strings.HasPrefix(token, "SEMICOLON") && positions.BodyEnd == i && parenCount == 0 && braceCount == 0:
-			goto exit
+		case models.SEMICOLON:
+			if positions.BodyEnd == i && parenCount == 0 && braceCount == 0 {
+				goto exit
+			}
 		}
 
 	}
