@@ -85,12 +85,12 @@ func IsBinaryExpression(tokens []models.Token) bool {
 }
 
 func isInvalidToken(token models.Token) bool {
-	invalidPrefixes := []string{
-		"LEFT_BRACE",
-		"RIGHT_BRACE",
+	invalidPrefixes := []models.TokenType{
+		models.LEFT_BRACE,
+		models.RIGHT_BRACE,
 	}
 	for _, prefix := range invalidPrefixes {
-		if strings.HasPrefix(token.Token, prefix) {
+		if token.Type == prefix {
 			return true
 		}
 	}
