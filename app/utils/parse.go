@@ -6,23 +6,22 @@ import (
 	"github.com/Stan-breaks/app/models"
 )
 
-func IsParethesizedExpr(tokens []models.TokenInfo) bool {
+func IsParethesizedExpr(tokens []models.Token) bool {
 	lenght := len(tokens)
 	if lenght < 2 {
 		return false
 	}
-	firstToken := strings.Split(tokens[0].Token, " ")
-	lastToken := strings.Split(tokens[len(tokens)-1].Token, " ")
-	if firstToken[0] != "LEFT_PAREN" || lastToken[0] != "RIGHT_PAREN" {
+	firstToken := tokens[0]
+	lastToken := tokens[len(tokens)-1]
+	if firstToken.Type != models.LEFT_PAREN || lastToken.Type != models.RIGHT_PAREN {
 		return false
 	}
 	level := 1
 	for i := 1; i < lenght-1; i++ {
-		tokenType := strings.Split(tokens[i].Token, " ")[0]
-		switch tokenType {
-		case "LEFT_PAREN":
+		switch tokens[i].Type {
+		case models.LEFT_PAREN:
 			level++
-		case "RIGHT_PAREN":
+		case models.RIGHT_PAREN:
 			level--
 		}
 		if level == 0 {
@@ -33,29 +32,29 @@ func IsParethesizedExpr(tokens []models.TokenInfo) bool {
 	return level == 0
 }
 
-func IsUnaryExpr(tokens []models.TokenInfo) bool {
-	firstToken := strings.Split(tokens[0].Token, " ")
-	if firstToken[0] != "BANG" && firstToken[0] != "MINUS" && firstToken[0] != "PLUS" {
+func IsUnaryExpr(tokens []models.Token) bool {
+	firstToken := tokens[0]
+	if firstToken.Type != models.BANG && firstToken.Type != models.MINUS && firstToken.Type != models.PLUS {
 		return false
 	}
 	operandCount := 0
 	for i := 1; i < len(tokens); i++ {
 		token := tokens[i]
-		if strings.HasPrefix(token.Token, "NUMBER") ||
-			strings.HasPrefix(token.Token, "STRING") ||
-			strings.HasPrefix(token.Token, "TRUE") ||
-			strings.HasPrefix(token.Token, "FALSE") ||
-			strings.HasPrefix(token.Token, "IDENTIFIER") {
+		if token.Type == models.NUMBER ||
+			token.Type == models.STRING ||
+			token.Type == models.TRUE ||
+			token.Type == models.FALSE ||
+			token.Type == models.IDENTIFIER {
 			operandCount++
 			continue
 		}
-		if strings.HasPrefix(token.Token, "LEFT_PAREN") {
+		if token.Type == models.LEFT_PAREN {
 			operandCount++
 			parenCount := 1
 			for j := i + 1; j < len(tokens); j++ {
-				if strings.HasPrefix(tokens[j].Token, "LEFT_PAREN") {
+				if token.Type == models.LEFT_PAREN {
 					parenCount++
-				} else if strings.HasPrefix(tokens[j].Token, "RIGHT_PAREN") {
+				} else if token.Type == models.RIGHT_PAREN {
 					parenCount--
 					if parenCount == 0 {
 						i = j
@@ -68,7 +67,7 @@ func IsUnaryExpr(tokens []models.TokenInfo) bool {
 	return operandCount == 1
 }
 
-func IsBinaryExpression(tokens []models.TokenInfo) bool {
+func IsBinaryExpression(tokens []models.Token) bool {
 	lenght := len(tokens)
 	if lenght < 3 {
 		return false
@@ -85,7 +84,7 @@ func IsBinaryExpression(tokens []models.TokenInfo) bool {
 	return operator != -1
 }
 
-func isInvalidToken(token models.TokenInfo) bool {
+func isInvalidToken(token models.Token) bool {
 	invalidPrefixes := []string{
 		"LEFT_BRACE",
 		"RIGHT_BRACE",
@@ -98,7 +97,7 @@ func isInvalidToken(token models.TokenInfo) bool {
 	return false
 }
 
-func IsSingleBinary(tokens []models.TokenInfo) bool {
+func IsSingleBinary(tokens []models.Token) bool {
 	operandCount := 0
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i]
@@ -130,7 +129,7 @@ func IsSingleBinary(tokens []models.TokenInfo) bool {
 	return operandCount == 2
 }
 
-func Isoperator(token models.TokenInfo) bool {
+func Isoperator(token models.Token) bool {
 	operators := []string{"OR", "AND", "PLUS", "MINUS", "STAR", "SLASH", "EQUAL_EQUAL", "BANG_EQUAL", "LESS", "GREATER", "LESS_EQUAL", "GREATER_EQUAL"}
 	for _, op := range operators {
 		if strings.HasPrefix(token.Token, op) {
