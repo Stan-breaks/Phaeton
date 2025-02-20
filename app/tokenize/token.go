@@ -793,9 +793,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 										continue
 									}
 									if i+3 <= fileLenght && fileContents[i:i+4] == "this" {
-										token := models.TokenInfo{
-											Token: "THIS this null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.THIS,
+											Lexem:   "this",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-2 == i {
