@@ -11,7 +11,7 @@ import (
 	"github.com/Stan-breaks/app/utils"
 )
 
-func Parse(tokens []models.TokenInfo) (models.Node, []string) {
+func Parse(tokens []models.Token) (models.Node, []string) {
 	if len(tokens) == 0 {
 		return models.StringNode{Value: ""}, nil
 	}
@@ -28,13 +28,12 @@ func Parse(tokens []models.TokenInfo) (models.Node, []string) {
 		return parseBinaryExpr(tokens)
 	}
 	var arrErr []string
-	splitToken := strings.Split(tokens[0].Token, " ")
-	errstr := fmt.Sprintf("[line %d] Error at %s", tokens[0].Line, splitToken[1])
+	errstr := fmt.Sprintf("[line %d] Error at %s", tokens[0].Line, tokens[0].Lexem)
 	arrErr = append(arrErr, errstr)
 	return models.StringNode{Value: ""}, arrErr
 }
 
-func parseBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
+func parseBinaryExpr(tokens []models.Token) (models.Node, []string) {
 	if utils.IsSingleBinary(tokens) {
 		return parseSingleBinaryExpr(tokens)
 	}
@@ -42,7 +41,7 @@ func parseBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
 
 }
 
-func parseSingleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
+func parseSingleBinaryExpr(tokens []models.Token) (models.Node, []string) {
 	currentPosition := 0
 	var arrErr []string
 	var err []string
@@ -75,7 +74,7 @@ func parseSingleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
 	}
 }
 
-func parseOperand(tokens []models.TokenInfo) (models.Node, int, []string) {
+func parseOperand(tokens []models.Token) (models.Node, int, []string) {
 	var node models.Node
 	var arrErr []string
 	var err []string
@@ -119,7 +118,7 @@ func parseOperand(tokens []models.TokenInfo) (models.Node, int, []string) {
 	return node, tokensUsed, arrErr
 }
 
-func parseMultipleBinaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
+func parseMultipleBinaryExpr(tokens []models.Token) (models.Node, []string) {
 	precedence := map[string]int{
 		"*":  4,
 		"/":  4,
@@ -197,7 +196,7 @@ func parseOperator(splitToken []string) string {
 	}
 }
 
-func parsevalue(token models.TokenInfo) (models.Node, []string) {
+func parsevalue(token models.Token) (models.Node, []string) {
 	splitToken := strings.Split(token.Token, " ")
 	switch splitToken[0] {
 	case "NUMBER":
@@ -254,7 +253,7 @@ func parsevalue(token models.TokenInfo) (models.Node, []string) {
 	}
 }
 
-func parseParrenthesisExpr(tokens []models.TokenInfo) (models.Node, []string) {
+func parseParrenthesisExpr(tokens []models.Token) (models.Node, []string) {
 	innerTokens := tokens[1 : len(tokens)-1]
 	var innerNode models.Node
 	var arrErr []string
@@ -291,7 +290,7 @@ func parseParrenthesisExpr(tokens []models.TokenInfo) (models.Node, []string) {
 	}, arrErr
 }
 
-func parseUnaryExpr(tokens []models.TokenInfo) (models.Node, []string) {
+func parseUnaryExpr(tokens []models.Token) (models.Node, []string) {
 	splitToken := strings.Split(tokens[0].Token, " ")
 	operator := splitToken[1]
 	var operand models.Node
