@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 type Tokens struct {
 	Success []Token
 	Errors  []string
@@ -62,4 +64,8 @@ type Token struct {
 	Lexem   string
 	Literal any
 	Line    int
+}
+
+func (t Token) String() string {
+	return fmt.Sprintf("%s %s %v", t.Type, t.Lexem, t.Literal)
 }
