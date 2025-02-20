@@ -2,7 +2,6 @@ package tokenize
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"unicode"
 
