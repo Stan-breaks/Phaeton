@@ -11,15 +11,15 @@ import (
 	"github.com/Stan-breaks/app/utils"
 )
 
-func Interprete(tokens []models.TokenInfo) (interface{}, error) {
+func Interprete(tokens []models.Token) (interface{}, error) {
 	currentPosition := 0
 	for currentPosition < len(tokens) {
 		if currentPosition >= len(tokens) {
 			break
 		}
 		token := tokens[currentPosition]
-		switch {
-		case strings.HasPrefix(token.Token, "IF"):
+		switch token.Type {
+		case models.IF:
 			tokensProcessed, ret, err := handleIf(tokens[currentPosition:])
 			if err != nil {
 				return nil, err
@@ -28,19 +28,19 @@ func Interprete(tokens []models.TokenInfo) (interface{}, error) {
 				return ret, nil
 			}
 			currentPosition += tokensProcessed
-		case strings.HasPrefix(token.Token, "PRINT"):
+		case models.PRINT:
 			tokensProcessed, err := handlePrint(tokens[currentPosition:])
 			if err != nil {
 				return nil, err
 			}
 			currentPosition += tokensProcessed
-		case strings.HasPrefix(token.Token, "VAR"):
+		case models.VAR:
 			tokensProcessed, err := handleAssignment(tokens[currentPosition:])
 			if err != nil {
 				return nil, err
 			}
 			currentPosition += tokensProcessed
-		case strings.HasPrefix(token.Token, "IDENTIFIER"):
+		case models.IDENTIFIER:
 			if utils.IsFunctionCall(tokens[currentPosition:]) {
 				_, tokensProcessed, err := handleFunCall(tokens[currentPosition:])
 				if err != nil {
@@ -55,13 +55,13 @@ func Interprete(tokens []models.TokenInfo) (interface{}, error) {
 				currentPosition += tokensProcessed
 			}
 
-		case strings.HasPrefix(token.Token, "LEFT_PAREN"):
+		case models.LEFT_PAREN:
 			tokensProcessed, err := handleParenStatement(tokens[currentPosition:])
 			if err != nil {
 				return nil, err
 			}
 			currentPosition += tokensProcessed
-		case strings.HasPrefix(token.Token, "WHILE"):
+		case models.WHILE:
 			tokensProcessed, ret, err := handleWhile(tokens[currentPosition:])
 			if err != nil {
 				return nil, err
@@ -70,7 +70,7 @@ func Interprete(tokens []models.TokenInfo) (interface{}, error) {
 				return ret, nil
 			}
 			currentPosition += tokensProcessed
-		case strings.HasPrefix(token.Token, "FOR"):
+		case models.FOR:
 			tokensProcessed, ret, err := handleFor(tokens[currentPosition:])
 			if err != nil {
 				return nil, err
@@ -79,13 +79,13 @@ func Interprete(tokens []models.TokenInfo) (interface{}, error) {
 				return ret, nil
 			}
 			currentPosition += tokensProcessed
-		case strings.HasPrefix(token.Token, "FUN"):
+		case models.FUN:
 			tokensProcessed, err := handleFun(tokens[currentPosition:])
 			if err != nil {
 				return nil, err
 			}
 			currentPosition += tokensProcessed
-		case strings.HasPrefix(token.Token, "RETURN"):
+		case models.RETURN:
 			_, ret, err := handleReturn(tokens[currentPosition:])
 			if err != nil {
 				return nil, err
@@ -98,7 +98,7 @@ func Interprete(tokens []models.TokenInfo) (interface{}, error) {
 	return nil, nil
 }
 
-func handleReturn(tokens []models.TokenInfo) (int, interface{}, error) {
+func handleReturn(tokens []models.Token) (int, interface{}, error) {
 	semicolon := utils.FindLastSemicolonInSameLine(tokens)
 	if semicolon == -1 {
 		return 0, nil, fmt.Errorf("no semicolon in return statement")
@@ -108,16 +108,15 @@ func handleReturn(tokens []models.TokenInfo) (int, interface{}, error) {
 	}
 	result, err := handleExpression(tokens[1:semicolon])
 	if err != nil {
-		fmt.Println(tokens[1:semicolon])
 		return 0, nil, fmt.Errorf("error with parsing return statement: %v", err.Error())
 	}
 	return semicolon + 1, result.Evaluate(), nil
 }
 
-func handleFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
+func handleFunCall(tokens []models.Token) (models.Node, int, error) {
 	environment.Global.PushScope()
 	defer environment.Global.PopScope()
-	funName := strings.Split(tokens[0].Token, " ")[1]
+	funName := tokens[0].Lexem
 	value, bool := environment.Global.Get(funName)
 	if !bool {
 		return models.NilNode{}, 0, fmt.Errorf("function not defined")
@@ -125,7 +124,7 @@ func handleFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 	switch v := value.(type) {
 	case models.Function:
 		switch a := v.Arguments.(type) {
-		case []models.TokenInfo:
+		case []models.Token:
 			argumentEnd := utils.FindLastSemicolonInSameLine(tokens)
 			if argumentEnd == -1 {
 				argumentEnd = len(tokens) - 1
@@ -140,7 +139,7 @@ func handleFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 			}
 			if len(arrArgs) > 0 {
 				for i := 0; i < len(arrArgs); i++ {
-					valName := strings.Split(arrA[i][0].Token, " ")[1]
+					valName := arrA[i][0].Lexem
 					val, err := parse.Parse(arrArgs[i])
 					if err != nil {
 						return models.NilNode{}, 0, fmt.Errorf("invalid function arguments")
@@ -150,7 +149,7 @@ func handleFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 			}
 		}
 		switch b := v.Body.(type) {
-		case []models.TokenInfo:
+		case []models.Token:
 			ret, err := Interprete(b)
 			if err != nil {
 				return models.NilNode{}, 0, err
@@ -177,12 +176,12 @@ func handleFunCall(tokens []models.TokenInfo) (models.Node, int, error) {
 	return models.NilNode{}, len(tokens), nil
 }
 
-func handleFun(tokens []models.TokenInfo) (int, error) {
+func handleFun(tokens []models.Token) (int, error) {
 	positions := findFunPositions(tokens)
 	if !positions.IsValid() {
 		return positions.BodyEnd + 1, fmt.Errorf("invalid function")
 	}
-	funName := strings.Split(tokens[1].Token, " ")[1]
+	funName := tokens[1].Lexem
 	function := models.Function{
 		Arguments: tokens[positions.ArgumentStart+1 : positions.ArgumentEnd],
 		Body:      tokens[positions.BodyStart : positions.BodyEnd+1],
@@ -191,7 +190,7 @@ func handleFun(tokens []models.TokenInfo) (int, error) {
 	return positions.BodyEnd + 1, nil
 }
 
-func findFunPositions(tokens []models.TokenInfo) models.FunStatementPositions {
+func findFunPositions(tokens []models.Token) models.FunStatementPositions {
 	positions := models.FunStatementPositions{
 		ArgumentStart: -1,
 		ArgumentEnd:   -1,
@@ -201,8 +200,9 @@ func findFunPositions(tokens []models.TokenInfo) models.FunStatementPositions {
 	parenCount := 0
 	braceCount := 0
 	for i := 0; i < len(tokens); i++ {
-		switch {
-		case strings.HasPrefix(tokens[i].Token, "LEFT_PAREN"):
+		token := tokens[i]
+		switch token.Type {
+		case models.LEFT_PAREN:
 			if parenCount == 0 && positions.ArgumentStart == -1 {
 				positions.ArgumentStart = i
 			}
@@ -226,7 +226,7 @@ func findFunPositions(tokens []models.TokenInfo) models.FunStatementPositions {
 	return positions
 }
 
-func handleFor(tokens []models.TokenInfo) (int, interface{}, error) {
+func handleFor(tokens []models.Token) (int, interface{}, error) {
 	environment.Global.PushScope()
 	defer environment.Global.PopScope()
 
@@ -296,7 +296,7 @@ func handleFor(tokens []models.TokenInfo) (int, interface{}, error) {
 	return positions.BodyEnd + 1, nil, nil
 }
 
-func findForPositions(tokens []models.TokenInfo) models.ForStatementPositions {
+func findForPositions(tokens []models.Token) models.ForStatementPositions {
 	positions := models.ForStatementPositions{
 		ConditionStart: 1,
 		ConditionEnd:   -1,
@@ -336,7 +336,7 @@ exit:
 	return positions
 }
 
-func handleWhile(tokens []models.TokenInfo) (int, interface{}, error) {
+func handleWhile(tokens []models.Token) (int, interface{}, error) {
 	environment.Global.PushScope()
 	defer environment.Global.PopScope()
 	positions := findWhilePositions(tokens)
@@ -369,7 +369,7 @@ func handleWhile(tokens []models.TokenInfo) (int, interface{}, error) {
 	return positions.BodyEnd + 1, nil, nil
 }
 
-func findWhilePositions(tokens []models.TokenInfo) models.WhileStatementPositions {
+func findWhilePositions(tokens []models.Token) models.WhileStatementPositions {
 	positions := models.WhileStatementPositions{
 		ConditionStart: 1,
 		ConditionEnd:   -1,
@@ -409,7 +409,7 @@ exit:
 	return positions
 }
 
-func handleParenStatement(tokens []models.TokenInfo) (int, error) {
+func handleParenStatement(tokens []models.Token) (int, error) {
 	end := utils.FindSemicolonPosition(tokens)
 	if end == 0 {
 		return 0, fmt.Errorf("no semicolon found")
@@ -433,7 +433,7 @@ func handleParenStatement(tokens []models.TokenInfo) (int, error) {
 	return end, nil
 }
 
-func handleCondition(tokens []models.TokenInfo) (bool, error) {
+func handleCondition(tokens []models.Token) (bool, error) {
 	node, err := handleReassignmentCondition(tokens)
 	if err != nil {
 		return false, err
@@ -445,7 +445,7 @@ func handleCondition(tokens []models.TokenInfo) (bool, error) {
 	}
 }
 
-func handleAssignment(tokens []models.TokenInfo) (int, error) {
+func handleAssignment(tokens []models.Token) (int, error) {
 	if len(tokens) < 4 {
 		return 0, fmt.Errorf("incomplete variable declaration")
 	}
@@ -476,7 +476,6 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	} else {
 		expression, err := parse.Parse(tokens[3 : semicolonPosition+3])
 		if len(err) > 0 {
-			fmt.Println(tokens[3 : semicolonPosition+3])
 			return 0, fmt.Errorf("invalid assignment expression: %v", err[0])
 		}
 		value := expression.Evaluate()
@@ -485,7 +484,7 @@ func handleAssignment(tokens []models.TokenInfo) (int, error) {
 	return semicolonPosition + 4, nil
 }
 
-func handleReassignment(tokens []models.TokenInfo) (int, error) {
+func handleReassignment(tokens []models.Token) (int, error) {
 	if !strings.HasPrefix(tokens[1].Token, "EQUAL") {
 		return 0, fmt.Errorf("no equal found in reassignment")
 	}
@@ -503,7 +502,7 @@ func handleReassignment(tokens []models.TokenInfo) (int, error) {
 	return semicolonPosition + 3, nil
 }
 
-func handleReassignmentCondition(tokens []models.TokenInfo) (models.Node, error) {
+func handleReassignmentCondition(tokens []models.Token) (models.Node, error) {
 	variableName := strings.Split(tokens[0].Token, " ")[1]
 	expression, err := parse.Parse(tokens[2:])
 	if err != nil {
@@ -514,7 +513,7 @@ func handleReassignmentCondition(tokens []models.TokenInfo) (models.Node, error)
 	return expression, nil
 }
 
-func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
+func handleExpression(tokens []models.Token) (models.Node, error) {
 	if utils.IsReassignmentCondition(tokens) {
 		return handleReassignmentCondition(tokens)
 	}
@@ -534,7 +533,7 @@ func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 		if len(funcTokens.Errors) != 0 {
 			return models.NilNode{}, fmt.Errorf("error with tokenizing function call")
 		}
-		var newTokens []models.TokenInfo
+		var newTokens []models.Token
 		for i, token := range tokens {
 			if i >= start && i <= end {
 				if i == end {
@@ -553,7 +552,7 @@ func handleExpression(tokens []models.TokenInfo) (models.Node, error) {
 	return expression, nil
 }
 
-func handlePrint(tokens []models.TokenInfo) (int, error) {
+func handlePrint(tokens []models.Token) (int, error) {
 	if len(tokens) < 2 {
 		return 0, fmt.Errorf("incomplete print statement")
 	}
@@ -570,7 +569,7 @@ func handlePrint(tokens []models.TokenInfo) (int, error) {
 	return semicolonPosition + 1, nil
 }
 
-func handleIf(tokens []models.TokenInfo) (int, interface{}, error) {
+func handleIf(tokens []models.Token) (int, interface{}, error) {
 	positions := findIfStatementPositions(tokens)
 	if !positions.IsValid() {
 		return 0, nil, fmt.Errorf("malformed if statement")
@@ -631,7 +630,7 @@ func handleIf(tokens []models.TokenInfo) (int, interface{}, error) {
 	return positions.IfBodyEnd + 1, nil, nil
 }
 
-func findIfStatementPositions(tokens []models.TokenInfo) models.IfStatementPositions {
+func findIfStatementPositions(tokens []models.Token) models.IfStatementPositions {
 	positions := models.IfStatementPositions{
 		ConditionStart: -1,
 		ConditionEnd:   -1,
