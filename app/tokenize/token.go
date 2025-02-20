@@ -827,9 +827,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 'w':
 								if fileLenght-3 > i {
 									if i+4 <= fileLenght && fileContents[i:i+5] == "while" {
-										token := models.TokenInfo{
-											Token: "WHILE while null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.WHILE,
+											Lexem:   "while",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-3 == i {
