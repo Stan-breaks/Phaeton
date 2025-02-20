@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"strings"
-
 	"github.com/Stan-breaks/app/models"
 )
 
@@ -40,15 +38,11 @@ func IsUnaryExpr(tokens []models.Token) bool {
 	operandCount := 0
 	for i := 1; i < len(tokens); i++ {
 		token := tokens[i]
-		if token.Type == models.NUMBER ||
-			token.Type == models.STRING ||
-			token.Type == models.TRUE ||
-			token.Type == models.FALSE ||
-			token.Type == models.IDENTIFIER {
+		switch token.Type {
+		case models.NUMBER, models.STRING, models.TRUE, models.FALSE, models.IDENTIFIER:
 			operandCount++
 			continue
-		}
-		if token.Type == models.LEFT_PAREN {
+		case models.LEFT_PAREN:
 			operandCount++
 			parenCount := 1
 			for j := i + 1; j < len(tokens); j++ {
@@ -101,16 +95,11 @@ func IsSingleBinary(tokens []models.Token) bool {
 	operandCount := 0
 	for i := 0; i < len(tokens); i++ {
 		token := tokens[i]
-		if token.Type == models.NUMBER ||
-			token.Type == models.STRING ||
-			token.Type == models.IDENTIFIER ||
-			token.Type == models.FALSE ||
-			token.Type == models.TRUE ||
-			token.Type == models.FUN ||
-			token.Type == models.NIL {
+		switch token.Type {
+		case models.NUMBER, models.STRING, models.IDENTIFIER, models.FALSE, models.TRUE, models.FUN, models.NIL:
 			operandCount++
 			continue
-		} else if token.Type == models.LEFT_PAREN {
+		case models.LEFT_PAREN:
 			operandCount++
 			parenCount := 1
 			for j := i + 1; j < len(tokens); j++ {
