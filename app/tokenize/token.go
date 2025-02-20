@@ -577,9 +577,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 'a':
 								if fileLenght-1 > i {
 									if i+2 <= fileLenght && fileContents[i:i+3] == "and" {
-										token := models.TokenInfo{
-											Token: "AND and null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.AND,
+											Lexem:   "and",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-1 == i {
@@ -592,9 +594,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 'c':
 								if fileLenght-3 > i {
 									if i+4 <= fileLenght && fileContents[i:i+5] == "class" {
-										token := models.TokenInfo{
-											Token: "CLASS class null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.CLASS,
+											Lexem:   "class",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-3 == i {
@@ -605,26 +609,14 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 
 									}
 								}
-								if fileLenght-5 > i {
-									if i+6 <= fileLenght && fileContents[i:i+7] == "clock()" {
-										token := models.TokenInfo{
-											Token: "FUNCTION clock null",
-											Line:  line,
-										}
-										tokens.Success = append(tokens.Success, token)
-										if fileLenght-5 == i {
-											break
-										}
-										i += 6
-										continue
-									}
-								}
 							case 'e':
 								if fileLenght-2 > i {
 									if i+3 <= fileLenght && fileContents[i:i+4] == "else" {
-										token := models.TokenInfo{
-											Token: "ELSE else null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.ELSE,
+											Lexem:   "else",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-2 == i {
@@ -637,9 +629,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 'f':
 								if fileLenght-1 > i {
 									if i+2 <= fileLenght && fileContents[i:i+3] == "for" {
-										token := models.TokenInfo{
-											Token: "FOR for null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.FOR,
+											Lexem:   "for",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-1 == i {
@@ -649,9 +643,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 										continue
 									}
 									if i+2 <= fileLenght && fileContents[i:i+3] == "fun" {
-										token := models.TokenInfo{
-											Token: "FUN fun null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.FUN,
+											Lexem:   "fun",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-1 == i {
@@ -664,9 +660,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 
 								if fileLenght-3 > i {
 									if i+4 <= fileLenght && fileContents[i:i+5] == "false" {
-										token := models.TokenInfo{
-											Token: "FALSE false null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.FALSE,
+											Lexem:   "false",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-3 == i {
@@ -679,9 +677,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 'i':
 								if fileLenght > i {
 									if i+1 <= fileLenght && fileContents[i:i+2] == "if" {
-										token := models.TokenInfo{
-											Token: "IF if null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.IF,
+											Lexem:   "if",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght == i {
@@ -694,9 +694,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 'n':
 								if fileLenght-1 > i {
 									if i+2 <= fileLenght && fileContents[i:i+3] == "nil" {
-										token := models.TokenInfo{
-											Token: "NIL nil null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.NIL,
+											Lexem:   "nil",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-1 == i {
@@ -709,9 +711,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 'o':
 								if fileLenght > i {
 									if i+1 <= fileLenght && fileContents[i:i+2] == "or" {
-										token := models.TokenInfo{
-											Token: "OR or null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.OR,
+											Lexem:   "or",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght == i {
@@ -724,9 +728,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 'p':
 								if fileLenght-3 > i {
 									if i+4 <= fileLenght && fileContents[i:i+5] == "print" {
-										token := models.TokenInfo{
-											Token: "PRINT print null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.PRINT,
+											Lexem:   "print",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-3 == i {
@@ -739,9 +745,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 'r':
 								if fileLenght-4 > i {
 									if i+5 <= fileLenght && fileContents[i:i+6] == "return" {
-										token := models.TokenInfo{
-											Token: "RETURN return null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.RETURN,
+											Lexem:   "return",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-4 == i {
@@ -754,9 +762,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 's':
 								if fileLenght-3 > i {
 									if i+4 <= fileLenght && fileContents[i:i+5] == "super" {
-										token := models.TokenInfo{
-											Token: "SUPER super null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.SUPER,
+											Lexem:   "super",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-3 == i {
