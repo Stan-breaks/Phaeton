@@ -120,9 +120,22 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				token := models.TokenInfo{
-					Token: "LEFT_BRACE { null",
-					Line:  line,
+				if identifierCount == 1 {
+					token := models.Token{
+						Type:    models.IDENTIFIER,
+						Lexem:   identifier,
+						Literal: nil,
+						Line:    line,
+					}
+					tokens.Success = append(tokens.Success, token)
+					identifier = ""
+					identifierCount = 0
+				}
+				token := models.Token{
+					Type:    models.LEFT_BRACE,
+					Lexem:   "{",
+					Literal: nil,
+					Line:    line,
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
@@ -132,17 +145,21 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if identifierCount == 1 {
-					token := models.TokenInfo{
-						Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
-						Line:  line,
+					token := models.Token{
+						Type:    models.IDENTIFIER,
+						Lexem:   identifier,
+						Literal: nil,
+						Line:    line,
 					}
 					tokens.Success = append(tokens.Success, token)
 					identifier = ""
 					identifierCount = 0
 				}
-				token := models.TokenInfo{
-					Token: "RIGHT_BRACE } null",
-					Line:  line,
+				token := models.Token{
+					Type:    models.RIGHT_BRACE,
+					Lexem:   "}",
+					Literal: nil,
+					Line:    line,
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
