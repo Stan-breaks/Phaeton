@@ -488,9 +488,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			line += 1
 			comment = 0
 			if identifierCount == 1 {
-				token := models.TokenInfo{
-					Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
-					Line:  line,
+				token := models.Token{
+					Type:    models.IDENTIFIER,
+					Lexem:   identifier,
+					Literal: nil,
+					Line:    line,
 				}
 				tokens.Success = append(tokens.Success, token)
 				identifier = ""
@@ -502,9 +504,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
 				if identifierCount == 1 {
-					token := models.TokenInfo{
-						Token: fmt.Sprintf("IDENTIFIER %s null", identifier),
-						Line:  line,
+					token := models.Token{
+						Type:    models.IDENTIFIER,
+						Lexem:   identifier,
+						Literal: nil,
+						Line:    line,
 					}
 					tokens.Success = append(tokens.Success, token)
 					identifier = ""
@@ -520,10 +524,13 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			numberCount = 0
 			if stringCount == 1 {
 				stringCount = 0
-				token := models.TokenInfo{
-					Token: "STRING \"" + stringVariable + "\" " + stringVariable,
-					Line:  line,
+				token := models.Token{
+					Type:    models.STRING,
+					Lexem:   "\"" + stringVariable + "\"",
+					Literal: stringVariable,
+					Line:    line,
 				}
+
 				tokens.Success = append(tokens.Success, token)
 			} else {
 				stringCount = 1
