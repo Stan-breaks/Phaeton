@@ -52,8 +52,7 @@ func parseSingleBinaryExpr(tokens []models.Token) (models.Node, []string) {
 	}
 	currentPosition += tokensUsed
 
-	splitOperator := strings.Split(tokens[currentPosition].Token, " ")
-	op := parseOperator(splitOperator)
+	op := parseOperator(tokens[currentPosition])
 	currentPosition++
 
 	right, _, err := parseOperand(tokens[currentPosition:])
@@ -84,7 +83,7 @@ func parseOperand(tokens []models.Token) (models.Node, int, []string) {
 		return models.NilNode{}, 0, arrErr
 	}
 	if utils.Isoperator(tokens[0]) {
-		if strings.HasPrefix(tokens[1].Token, "LEFT_PAREN") {
+		if tokens[1].Type == models.LEFT_PAREN {
 			parenEnd := utils.FindClosingParen(tokens)
 			tokensUsed = parenEnd + 1
 		} else {
