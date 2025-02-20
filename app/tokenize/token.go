@@ -377,24 +377,30 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						token := models.TokenInfo{
-							Token: "BANG ! null",
-							Line:  line,
+						token := models.Token{
+							Type:    models.BANG,
+							Lexem:   "!",
+							Literal: nil,
+							Line:    line,
 						}
 						tokens.Success = append(tokens.Success, token)
 					} else {
 						switch fileContents[i+1] {
 						case byte(runes.EQUAL):
-							token := models.TokenInfo{
-								Token: "BANG_EQUAL != null",
-								Line:  line,
+							token := models.Token{
+								Type:    models.BANG_EQUAL,
+								Lexem:   "!=",
+								Literal: nil,
+								Line:    line,
 							}
 							tokens.Success = append(tokens.Success, token)
 							skipCount = 1
 						default:
-							token := models.TokenInfo{
-								Token: "BANG ! null",
-								Line:  line,
+							token := models.Token{
+								Type:    models.BANG,
+								Lexem:   "!",
+								Literal: nil,
+								Line:    line,
 							}
 							tokens.Success = append(tokens.Success, token)
 						}
