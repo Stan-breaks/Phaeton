@@ -35,24 +35,30 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 						fmt.Println("Error parsing float:", err)
 					}
 					if math.Mod(float, 1.0) == 0 {
-						token := models.TokenInfo{
-							Token: fmt.Sprintf("NUMBER %s %.1f", numberString, float),
-							Line:  line,
+						token := models.Token{
+							Type:    models.NUMBER,
+							Lexem:   numberString,
+							Literal: float,
+							Line:    line,
 						}
 						tokens.Success = append(tokens.Success, token)
 						numberCount = 0
 					} else {
-						token := models.TokenInfo{
-							Token: fmt.Sprintf("NUMBER %s %g", numberString, float),
-							Line:  line,
+						token := models.Token{
+							Type:    models.NUMBER,
+							Lexem:   numberString,
+							Literal: float,
+							Line:    line,
 						}
 						tokens.Success = append(tokens.Success, token)
 						numberCount = 0
 					}
 				} else {
-					token := models.TokenInfo{
-						Token: fmt.Sprintf("NUMBER %s %d.0", numberString, number),
-						Line:  line,
+					token := models.Token{
+						Type:    models.NUMBER,
+						Lexem:   numberString,
+						Literal: number,
+						Line:    line,
 					}
 					tokens.Success = append(tokens.Success, token)
 					numberCount = 0
