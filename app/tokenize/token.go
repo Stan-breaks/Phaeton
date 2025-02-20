@@ -168,9 +168,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 			if stringCount == 1 {
 				stringVariable += string(rune(fileContents[i]))
 			} else {
-				token := models.TokenInfo{
-					Token: "STAR * null",
-					Line:  line,
+				token := models.Token{
+					Type:    models.STAR,
+					Lexem:   "*",
+					Literal: nil,
+					Line:    line,
 				}
 				tokens.Success = append(tokens.Success, token)
 			}
