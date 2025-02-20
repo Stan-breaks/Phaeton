@@ -810,9 +810,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 'v':
 								if fileLenght-1 > i {
 									if i+2 <= fileLenght && fileContents[i:i+3] == "var" {
-										token := models.TokenInfo{
-											Token: "VAR var null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.VAR,
+											Lexem:   "var",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-1 == i {
