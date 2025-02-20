@@ -779,9 +779,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 							case 't':
 								if fileLenght-2 > i {
 									if i+3 <= fileLenght && fileContents[i:i+4] == "true" {
-										token := models.TokenInfo{
-											Token: "TRUE true null",
-											Line:  line,
+										token := models.Token{
+											Type:    models.TRUE,
+											Lexem:   "true",
+											Literal: nil,
+											Line:    line,
 										}
 										tokens.Success = append(tokens.Success, token)
 										if fileLenght-2 == i {
