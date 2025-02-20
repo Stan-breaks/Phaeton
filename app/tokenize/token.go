@@ -457,9 +457,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 					skipCount = 0
 				} else {
 					if i == fileLenght {
-						token := models.TokenInfo{
-							Token: "SLASH / null",
-							Line:  line,
+						token := models.Token{
+							Type:    models.SLASH,
+							Lexem:   "/",
+							Literal: nil,
+							Line:    line,
 						}
 						tokens.Success = append(tokens.Success, token)
 					} else {
@@ -469,9 +471,11 @@ func Tokenize(fileContents string, fileLenght int) models.Tokens {
 								comment = 1
 							}
 						default:
-							token := models.TokenInfo{
-								Token: "SLASH / null",
-								Line:  line,
+							token := models.Token{
+								Type:    models.SLASH,
+								Lexem:   "/",
+								Literal: nil,
+								Line:    line,
 							}
 							tokens.Success = append(tokens.Success, token)
 						}
