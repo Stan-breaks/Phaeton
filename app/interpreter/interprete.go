@@ -207,16 +207,16 @@ func findFunPositions(tokens []models.Token) models.FunStatementPositions {
 				positions.ArgumentStart = i
 			}
 			parenCount++
-		case strings.HasPrefix(tokens[i].Token, "RIGHT_PAREN"):
+		case models.RIGHT_PAREN:
 			parenCount--
 			if parenCount == 0 && positions.ArgumentEnd == -1 {
 				positions.ArgumentEnd = i
 				positions.BodyStart = i + 1
 
 			}
-		case strings.HasPrefix(tokens[i].Token, "LEFT_BRACE"):
+		case models.LEFT_BRACE:
 			braceCount++
-		case strings.HasPrefix(tokens[i].Token, "RIGHT_BRACE"):
+		case models.RIGHT_BRACE:
 			braceCount--
 			if braceCount == 0 && positions.BodyEnd == -1 {
 				positions.BodyEnd = i
@@ -306,29 +306,31 @@ func findForPositions(tokens []models.Token) models.ForStatementPositions {
 	parenCount := 0
 	braceCount := 0
 	for i := 1; i < len(tokens); i++ {
-		token := tokens[i].Token
-		switch {
-		case strings.HasPrefix(token, "LEFT_PAREN"):
+		token := tokens[i]
+		switch token.Type {
+		case models.LEFT_PAREN:
 			parenCount++
-		case strings.HasPrefix(token, "RIGHT_PAREN"):
+		case models.RIGHT_PAREN:
 			parenCount--
 			if parenCount == 0 && positions.ConditionEnd == -1 {
 				positions.ConditionEnd = i
 				positions.BodyStart = i + 1
-				if !strings.HasPrefix(tokens[i+1].Token, "LEFT_BRACE") {
+				if tokens[i+1].Type != models.LEFT_BRACE {
 					positions.BodyEnd = utils.FindLastSemicolonInSameLine(tokens[i+1:]) + i + 1
 				}
 			}
-		case strings.HasPrefix(token, "LEFT_BRACE"):
+		case models.LEFT_BRACE:
 			braceCount++
-		case strings.HasPrefix(token, "RIGHT_BRACE"):
+		case models.RIGHT_BRACE:
 			braceCount--
 			if braceCount == 0 && positions.BodyEnd == -1 {
 				positions.BodyEnd = i
 				goto exit
 			}
-		case strings.HasPrefix(token, "SEMICOLON") && positions.BodyEnd == i && parenCount == 0 && braceCount == 0:
-			goto exit
+		case models.SEMICOLON:
+			if positions.BodyEnd == i && parenCount == 0 && braceCount == 0 {
+				goto exit
+			}
 		}
 
 	}
@@ -379,9 +381,9 @@ func findWhilePositions(tokens []models.Token) models.WhileStatementPositions {
 	parenCount := 0
 	braceCount := 0
 	for i := 1; i < len(tokens); i++ {
-		token := tokens[i].Token
-		switch {
-		case strings.HasPrefix(token, "LEFT_PAREN"):
+		token := tokens[i]
+		switch token.Type {
+		case models.LEFT_BRACE:
 			parenCount++
 		case strings.HasPrefix(token, "RIGHT_PAREN"):
 			parenCount--
