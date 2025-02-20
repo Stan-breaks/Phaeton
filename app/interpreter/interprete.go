@@ -426,9 +426,9 @@ func handleParenStatement(tokens []models.Token) (int, error) {
 			return 0, err
 		}
 		op := endParen + 1
-		if truthy && strings.HasPrefix(tokens[op].Token, "OR") {
+		if truthy && tokens[op].Type == models.OR {
 			break
-		} else if !truthy && strings.HasPrefix(tokens[op].Token, "AND") {
+		} else if !truthy && tokens[op].Type == models.AND {
 			break
 		}
 		startParen = endParen + 2
