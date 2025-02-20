@@ -454,11 +454,11 @@ func handleAssignment(tokens []models.Token) (int, error) {
 		return 0, fmt.Errorf("incomplete variable declaration")
 	}
 	nameToken := tokens[1]
-	if !strings.HasPrefix(nameToken.Token, "IDENTIFIER") {
+	if nameToken.Type != models.IDENTIFIER {
 		return 0, fmt.Errorf("no identifier found")
 	}
-	variableName := strings.Split(nameToken.Token, " ")[1]
-	if !strings.HasPrefix(tokens[2].Token, "EQUAL") {
+	variableName := nameToken.Lexem
+	if tokens[2].Type != models.EQUAL {
 		return 0, fmt.Errorf("equal not found")
 	}
 	semicolonPosition := utils.FindSemicolonPosition(tokens[3:])
@@ -489,10 +489,10 @@ func handleAssignment(tokens []models.Token) (int, error) {
 }
 
 func handleReassignment(tokens []models.Token) (int, error) {
-	if !strings.HasPrefix(tokens[1].Token, "EQUAL") {
+	if tokens[1].Type != models.EQUAL {
 		return 0, fmt.Errorf("no equal found in reassignment")
 	}
-	variableName := strings.Split(tokens[0].Token, " ")[1]
+	variableName := tokens[0].Lexem
 	semicolonPosition := utils.FindSemicolonPosition(tokens[2:])
 	if semicolonPosition == -1 {
 		return 0, fmt.Errorf("no semicolon found in reassignment")
@@ -507,7 +507,7 @@ func handleReassignment(tokens []models.Token) (int, error) {
 }
 
 func handleReassignmentCondition(tokens []models.Token) (models.Node, error) {
-	variableName := strings.Split(tokens[0].Token, " ")[1]
+	variableName := tokens[0].Lexem
 	expression, err := parse.Parse(tokens[2:])
 	if err != nil {
 		return models.NilNode{}, fmt.Errorf("invalid reassignment expression")
@@ -649,9 +649,9 @@ func findIfStatementPositions(tokens []models.Token) models.IfStatementPositions
 	braceCount := 0
 	currentBlock := "if"
 	for i := 0; i < len(tokens); i++ {
-		token := tokens[i].Token
-		switch {
-		case strings.HasPrefix(token, "LEFT_PAREN"):
+		token := tokens[i]
+		switch token.Type {
+		case models.LEFT_PAREN:
 			if currentBlock == "if" && positions.ConditionStart == -1 && parenCount == 0 && braceCount == 0 {
 				positions.ConditionStart = i
 			} else if currentBlock == "elif" && parenCount == 0 && braceCount == 0 {
