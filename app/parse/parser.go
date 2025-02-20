@@ -2,8 +2,6 @@ package parse
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/Stan-breaks/app/environment"
 	"github.com/Stan-breaks/app/models"
@@ -94,11 +92,10 @@ func parseOperand(tokens []models.Token) (models.Node, int, []string) {
 			arrErr = append(arrErr, err...)
 		}
 
-	} else if strings.HasPrefix(tokens[0].Token, "LEFT_PAREN") {
+	} else if tokens[0].Type == models.LEFT_PAREN {
 		parenEnd := utils.FindClosingParen(tokens)
 		if parenEnd == 0 {
-			splitToken := strings.Split(tokens[tokensUsed].Token, " ")
-			errstr := fmt.Sprintf("[line %d] Error at %s", tokens[tokensUsed].Line, splitToken[1])
+			errstr := fmt.Sprintf("[line %d] Error at %s", tokens[tokensUsed].Line, tokens[tokensUsed].Lexem)
 			arrErr = append(arrErr, errstr)
 			return models.StringNode{Value: ""}, tokensUsed, arrErr
 		}
@@ -138,8 +135,7 @@ func parseMultipleBinaryExpr(tokens []models.Token) (models.Node, []string) {
 	currentPosition += tokensUsed
 
 	for currentPosition < len(tokens) {
-		splitOperator := strings.Split(tokens[currentPosition].Token, " ")
-		currentOp := parseOperator(splitOperator)
+		currentOp := parseOperator(tokens[currentPosition])
 		currentPosition++
 
 		right, tokensUsed, err := parseOperand(tokens[currentPosition:])
@@ -196,26 +192,31 @@ func parseOperator(token models.Token) string {
 }
 
 func parsevalue(token models.Token) (models.Node, []string) {
-	splitToken := strings.Split(token.Token, " ")
-	switch splitToken[0] {
-	case "NUMBER":
-		num, _ := strconv.ParseFloat(splitToken[1], 32)
-		floatnum := float64(num)
-		return models.NumberNode{Value: floatnum}, nil
-	case "TRUE":
+	switch token.Type {
+	case models.NUMBER:
+		var value float64
+		switch v := token.Literal.(type) {
+		case int:
+			value = float64(v)
+		case float64:
+			value = v
+		case float32:
+			value = float64(v)
+		}
+		return models.NumberNode{Value: value}, nil
+	case models.TRUE:
 		return models.BooleanNode{Value: true}, nil
-	case "FALSE":
+	case models.FALSE:
 		return models.BooleanNode{Value: false}, nil
-	case "NIL":
+	case models.NIL:
 		return models.NilNode{}, nil
-	case "STRING":
-		joinedString := strings.Join(splitToken, " ")
-		return models.StringNode{Value: strings.Split(joinedString, "\"")[1]}, nil
-	case "IDENTIFIER":
-		valname := splitToken[1]
+	case models.STRING:
+		return models.StringNode{Value: token.Literal.(string)}, nil
+	case models.IDENTIFIER:
+		valname := token.Lexem
 		value, exist := environment.Global.Get(valname)
 		if !exist {
-			err := fmt.Sprintf("[Line %d] Undefined variable: %s", token.Line, splitToken[1])
+			err := fmt.Sprintf("[Line %d] Undefined variable: %s", token.Line, valname)
 			var errors []string
 			errors = append(errors, err)
 			return models.NilNode{}, errors
@@ -232,20 +233,20 @@ func parsevalue(token models.Token) (models.Node, []string) {
 		case models.Function:
 			return models.StringNode{Value: "<fn " + valname + ">"}, nil
 		default:
-			err := fmt.Sprintf("[Line %d] Invalid token: %s", token.Line, splitToken[1])
+			err := fmt.Sprintf("[Line %d] Invalid token: %s", token.Line, valname)
 			var errors []string
 			errors = append(errors, err)
 			return models.NilNode{}, errors
 		}
 	case "FUNCTION":
 		var errors []string
-		funcName := splitToken[1]
+		funcName := token.Lexem
 		val := nativeFunctions.GlobalFunctions[funcName]
 		fn := val.(func() float64)
 		value := fn()
 		return models.NumberNode{Value: value}, errors
 	default:
-		err := fmt.Sprintf("[Line %d] Error at %s", token.Line, splitToken[1])
+		err := fmt.Sprintf("[Line %d] Error at %s", token.Line, token.Lexem)
 		var errors []string
 		errors = append(errors, err)
 		return models.StringNode{Value: ""}, errors
@@ -278,8 +279,7 @@ func parseParrenthesisExpr(tokens []models.Token) (models.Node, []string) {
 			arrErr = append(arrErr, err...)
 		}
 	} else {
-		splitToken := strings.Split(tokens[len(tokens)-1].Token, " ")
-		err := fmt.Sprintf("[Line %d] Error at '%s': Expect expression.", innerTokens[0].Line, splitToken[1])
+		err := fmt.Sprintf("[Line %d] Error at '%s': Expect expression.", innerTokens[0].Line, innerTokens[0].Lexem)
 		var errors []string
 		arrErr = append(errors, err)
 		return models.StringNode{Value: ""}, arrErr
@@ -290,8 +290,7 @@ func parseParrenthesisExpr(tokens []models.Token) (models.Node, []string) {
 }
 
 func parseUnaryExpr(tokens []models.Token) (models.Node, []string) {
-	splitToken := strings.Split(tokens[0].Token, " ")
-	operator := splitToken[1]
+	operator := tokens[0].Lexem
 	var operand models.Node
 	var arrErr []string
 	var err []string
@@ -313,15 +312,13 @@ func parseUnaryExpr(tokens []models.Token) (models.Node, []string) {
 				arrErr = append(arrErr, err...)
 			}
 		} else {
-			splitToken = strings.Split(tokens[1].Token, " ")
-			errstr := fmt.Sprintf("[line %d] Error at %s", tokens[1].Line, splitToken[1])
+			errstr := fmt.Sprintf("[line %d] Error at %s", tokens[1].Line, tokens[1].Lexem)
 			arrErr = append(arrErr, errstr)
 			return models.StringNode{Value: ""}, arrErr
 		}
 	}
 	if operand.Evaluate() == nil || operand.String() == "<nil>" {
-		splitToken = strings.Split(tokens[1].Token, " ")
-		errstr := fmt.Sprintf("[line %d] Error at %s", tokens[1].Line, splitToken[1])
+		errstr := fmt.Sprintf("[line %d] Error at %s", tokens[1].Line, tokens[1].Lexem)
 		arrErr = append(arrErr, errstr)
 		return models.StringNode{Value: ""}, arrErr
 	}
