@@ -12,5 +12,5 @@ fun applyTwice(f, x) {
 var addx = makeAdder(2);
 var addy = makeAdder(2);
 
-print applyTwice(addx, 2);
-print applyTwice(addy, 2);
+print addx(2);
+print addy(3);
