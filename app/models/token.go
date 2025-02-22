@@ -1,6 +1,10 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/Stan-breaks/app/utils/format"
+)
 
 type Tokens struct {
 	Success []Token
@@ -69,6 +73,17 @@ type Token struct {
 func (t Token) String() string {
 	if t.Literal == nil {
 		return fmt.Sprintf("%s %s null", t.Type, t.Lexem)
+	}
+	if t.Type == NUMBER {
+		var val string
+		switch v := t.Literal.(type) {
+		case int:
+			val = format.FormatFloat(float64(v))
+		case float64:
+			val = format.FormatFloat(v)
+		}
+		return fmt.Sprintf("%s %s %s", t.Type, t.Lexem, val)
+
 	}
 	return fmt.Sprintf("%s %s %v", t.Type, t.Lexem, t.Literal)
 }
