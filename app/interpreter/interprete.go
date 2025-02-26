@@ -533,7 +533,7 @@ func handleExpression(tokens []models.Token) (models.Node, error) {
 		default:
 			value = result.String()
 		}
-		funcTokens := tokenize.Tokenize(value, len(value))
+		funcTokens := tokenize.Tokenize(value)
 		if len(funcTokens.Errors) != 0 {
 			return models.NilNode{}, fmt.Errorf("error with tokenizing function call")
 		}
