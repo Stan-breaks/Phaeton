@@ -9,7 +9,7 @@ import (
 
 type Node interface {
 	String() string
-	Evaluate() interface{}
+	Evaluate() any
 	IsTruthy() bool
 }
 
@@ -21,7 +21,7 @@ func (n NumberNode) String() string {
 	return format.FormatFloat(n.Value)
 }
 
-func (n NumberNode) Evaluate() interface{} {
+func (n NumberNode) Evaluate() any {
 	return n.Value
 }
 
